@@ -1,14 +1,7 @@
 import type React from "react"
 import type { Metadata } from "next"
-
+import { Inter, Instrument_Serif } from "next/font/google"
 import "./globals.css"
-import { Inter, Instrument_Serif, Geist as V0_Font_Geist, Geist_Mono as V0_Font_Geist_Mono, Source_Serif_4 as V0_Font_Source_Serif_4 } from 'next/font/google'
-
-// Initialize fonts
-const _geist = V0_Font_Geist({ subsets: ['latin'], weight: ["100","200","300","400","500","600","700","800","900"], variable: '--v0-font-geist' })
-const _geistMono = V0_Font_Geist_Mono({ subsets: ['latin'], weight: ["100","200","300","400","500","600","700","800","900"], variable: '--v0-font-geist-mono' })
-const _sourceSerif_4 = V0_Font_Source_Serif_4({ subsets: ['latin'], weight: ["200","300","400","500","600","700","800","900"], variable: '--v0-font-source-serif-4' })
-const _v0_fontVariables = `${_geist.variable} ${_geistMono.variable} ${_sourceSerif_4.variable}`
 
 const inter = Inter({
   subsets: ["latin"],
@@ -26,10 +19,9 @@ const instrumentSerif = Instrument_Serif({
 })
 
 export const metadata: Metadata = {
-  title: "Data Center College Of The Philippines - Baguio City",
+  title: "Brillance - Effortless Custom Contract Billing",
   description:
-    "Excellence in Education. Data Center College Of The Philippines offers innovative programs in technology, business, and professional development in Baguio City.",
-    generator: 'v0.app'
+    "Streamline your billing process with seamless automation for every custom contract, tailored by Brillance.",
 }
 
 export default function RootLayout({
@@ -48,7 +40,7 @@ export default function RootLayout({
         />
         <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Instrument+Serif:wght@400&display=swap" />
       </head>
-      <body className={`font-sans antialiased ${_v0_fontVariables}`}>{children}</body>
+      <body className="font-sans antialiased">{children}</body>
     </html>
   )
 }
