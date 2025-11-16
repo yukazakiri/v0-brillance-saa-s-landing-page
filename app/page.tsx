@@ -1,8 +1,8 @@
-import type React from "react";
 import Link from "next/link";
+import type React from "react";
 
-import { fetchLatestPosts } from "@/lib/sanity/queries";
-import type { Article } from "@/lib/sanity/types";
+import { fetchLatestPosts, fetchSettings } from "@/lib/sanity/queries";
+import type { Article, Settings } from "@/lib/sanity/types";
 
 // College-specific components
 import AboutSection from "../components/about-section";
@@ -28,11 +28,27 @@ function Badge({ icon, text }: { icon: React.ReactNode; text: string }) {
 }
 
 export default async function LandingPage() {
-    const newsArticles = await fetchLatestPosts(4);
+    const [newsArticles, settings] = await Promise.all([
+        fetchLatestPosts(4),
+        fetchSettings()
+    ]);
+
+    // Provide default values if settings are not available
+    const siteSettings: Settings = settings ?? {
+        _id: "default",
+        _type: "settings",
+        siteTitle: "Data Center College of The Philippines of Baguio City, Inc.",
+        shortTitle: "Data Center College",
+        tagline: "Empowering the next generation of IT professionals, business leaders, and innovators",
+    };
+
     return (
         <div className="w-full min-h-screen relative bg-[#F7F5F3] overflow-x-hidden flex flex-col justify-start items-center">
             <div className="relative flex flex-col justify-start items-center w-full">
+                {/* horizontal line */}
+                <div className="w-full absolute left-0 top-6 sm:top-7 md:top-8 lg:top-[42px] border-t border-border shadow-[0px_2px_0px_white]"></div>
                 {/* Main container with proper margins */}
+
                 <div className="w-full max-w-none px-4 sm:px-6 md:px-8 lg:px-0 lg:max-w-[1060px] lg:w-[1060px] relative flex flex-col justify-start items-start min-h-screen">
                     {/* Left vertical line */}
                     <div className="w-[1px] h-full absolute left-4 sm:left-6 md:left-8 lg:left-0 top-0 bg-[rgba(55,50,47,0.12)] shadow-[1px_0px_0px_white] z-0"></div>
@@ -42,15 +58,15 @@ export default async function LandingPage() {
 
                     <div className="self-stretch pt-[9px] overflow-hidden border-b border-[rgba(55,50,47,0.06)] flex flex-col justify-center items-center gap-4 sm:gap-6 md:gap-8 lg:gap-[66px] relative z-10">
                         {/* Navigation - College Header */}
-                        <CollegeHeader />
+                        <CollegeHeader settings={siteSettings} />
 
                         {/* Hero Section - College Hero */}
-                        <CollegeHero />
+                        <CollegeHero settings={siteSettings} />
                         {/* News & Announcements Section */}
                         <NewsAnnouncementsSection articles={newsArticles} />
 
                         {/* About Section */}
-                        <AboutSection />
+                        <AboutSection settings={siteSettings} />
 
                         {/* Academic Programs Section */}
                         <CoursesAndProgramsSection />
@@ -65,10 +81,10 @@ export default async function LandingPage() {
                         <FAQSection />
 
                         {/* CTA Section */}
-                        <CTASection />
+                        <CTASection settings={siteSettings} />
 
                         {/* Footer Section */}
-                        <FooterSection />
+                        <FooterSection settings={siteSettings} />
                     </div>
                 </div>
             </div>
@@ -95,8 +111,23 @@ function NewsAnnouncementsSection({ articles }: { articles: Article[] }) {
                 <div className="text-center">
                     <Badge
                         icon={
-                            <svg width="12" height="12" viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                <rect x="2" y="2" width="8" height="8" rx="1" stroke="#37322F" strokeWidth="1" fill="none" />
+                            <svg
+                                width="12"
+                                height="12"
+                                viewBox="0 0 12 12"
+                                fill="none"
+                                xmlns="http://www.w3.org/2000/svg"
+                            >
+                                <rect
+                                    x="2"
+                                    y="2"
+                                    width="8"
+                                    height="8"
+                                    rx="1"
+                                    stroke="#37322F"
+                                    strokeWidth="1"
+                                    fill="none"
+                                />
                                 <path d="M2 4h8M4 2v2M8 2v2" stroke="#37322F" strokeWidth="1" />
                             </svg>
                         }
@@ -111,8 +142,7 @@ function NewsAnnouncementsSection({ articles }: { articles: Article[] }) {
     }
 
     const featuredArticles = articles.filter(article => article.featured);
-    const fallbackFeatured =
-        featuredArticles.length === 0 && articles.length > 0 ? [articles[0]] : featuredArticles;
+    const fallbackFeatured = featuredArticles.length === 0 && articles.length > 0 ? [articles[0]] : featuredArticles;
     const featuredIds = new Set(fallbackFeatured.map(article => article.id));
     const regularArticles = articles.filter(article => !featuredIds.has(article.id));
 
@@ -188,7 +218,9 @@ function NewsAnnouncementsSection({ articles }: { articles: Article[] }) {
                                         />
                                         <div className="absolute top-4 left-4">
                                             <span
-                                                className={`px-3 py-1.5 text-xs font-semibold rounded-full border ${getCategoryColor(article.category)}`}
+                                                className={`px-3 py-1.5 text-xs font-semibold rounded-full border ${getCategoryColor(
+                                                    article.category
+                                                )}`}
                                             >
                                                 Featured
                                             </span>
@@ -198,7 +230,9 @@ function NewsAnnouncementsSection({ articles }: { articles: Article[] }) {
                                     {/* Content */}
                                     <div className="p-6 sm:p-8 md:p-10 flex flex-col justify-center">
                                         <div
-                                            className={`inline-flex px-3 py-1.5 text-xs font-semibold rounded-full border w-fit mb-4 ${getCategoryColor(article.category)}`}
+                                            className={`inline-flex px-3 py-1.5 text-xs font-semibold rounded-full border w-fit mb-4 ${getCategoryColor(
+                                                article.category
+                                            )}`}
                                         >
                                             {article.category}
                                         </div>
@@ -217,8 +251,20 @@ function NewsAnnouncementsSection({ articles }: { articles: Article[] }) {
                                                     fill="none"
                                                     xmlns="http://www.w3.org/2000/svg"
                                                 >
-                                                    <circle cx="7" cy="7" r="6" stroke="currentColor" strokeWidth="1" fill="none" />
-                                                    <path d="M7 3v4l3 2" stroke="currentColor" strokeWidth="1" strokeLinecap="round" />
+                                                    <circle
+                                                        cx="7"
+                                                        cy="7"
+                                                        r="6"
+                                                        stroke="currentColor"
+                                                        strokeWidth="1"
+                                                        fill="none"
+                                                    />
+                                                    <path
+                                                        d="M7 3v4l3 2"
+                                                        stroke="currentColor"
+                                                        strokeWidth="1"
+                                                        strokeLinecap="round"
+                                                    />
                                                 </svg>
                                                 {article.date}
                                             </span>
@@ -230,7 +276,14 @@ function NewsAnnouncementsSection({ articles }: { articles: Article[] }) {
                                                     fill="none"
                                                     xmlns="http://www.w3.org/2000/svg"
                                                 >
-                                                    <circle cx="7" cy="5" r="2.5" stroke="currentColor" strokeWidth="1" fill="none" />
+                                                    <circle
+                                                        cx="7"
+                                                        cy="5"
+                                                        r="2.5"
+                                                        stroke="currentColor"
+                                                        strokeWidth="1"
+                                                        fill="none"
+                                                    />
                                                     <path
                                                         d="M2 12c0-2.5 2-4 5-4s5 1.5 5 4"
                                                         stroke="currentColor"
@@ -283,7 +336,9 @@ function NewsAnnouncementsSection({ articles }: { articles: Article[] }) {
                                     />
                                     <div className="absolute top-3 left-3">
                                         <span
-                                            className={`px-2.5 py-1 text-xs font-semibold rounded-full border ${getCategoryColor(article.category)}`}
+                                            className={`px-2.5 py-1 text-xs font-semibold rounded-full border ${getCategoryColor(
+                                                article.category
+                                            )}`}
                                         >
                                             {article.category}
                                         </span>
@@ -307,8 +362,20 @@ function NewsAnnouncementsSection({ articles }: { articles: Article[] }) {
                                                 fill="none"
                                                 xmlns="http://www.w3.org/2000/svg"
                                             >
-                                                <circle cx="6" cy="6" r="5" stroke="currentColor" strokeWidth="1" fill="none" />
-                                                <path d="M6 2v4l2 1" stroke="currentColor" strokeWidth="1" strokeLinecap="round" />
+                                                <circle
+                                                    cx="6"
+                                                    cy="6"
+                                                    r="5"
+                                                    stroke="currentColor"
+                                                    strokeWidth="1"
+                                                    fill="none"
+                                                />
+                                                <path
+                                                    d="M6 2v4l2 1"
+                                                    stroke="currentColor"
+                                                    strokeWidth="1"
+                                                    strokeLinecap="round"
+                                                />
                                             </svg>
                                             {article.date}
                                         </span>

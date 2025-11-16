@@ -2,8 +2,9 @@
 
 import type React from "react"
 import Link from "next/link"
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import FooterSection from "../../components/footer-section"
+import type { Settings } from "@/lib/sanity/types"
 
 function Badge({ icon, text }: { icon: React.ReactNode; text: string }) {
   return (
@@ -18,6 +19,21 @@ function Badge({ icon, text }: { icon: React.ReactNode; text: string }) {
 
 export default function ProgramsPage() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
+  const [settings, setSettings] = useState<Settings | null>(null)
+
+  useEffect(() => {
+    // Fetch settings on mount
+    fetch('/api/settings')
+      .then(res => res.json())
+      .then(data => setSettings(data))
+      .catch(() => setSettings({
+        _id: "default",
+        _type: "settings",
+        siteTitle: "Data Center College of The Philippines of Baguio City, Inc.",
+        shortTitle: "Data Center College",
+        tagline: "Empowering the next generation",
+      }))
+  }, [])
 
   const programData = {
     undergraduate: [
@@ -602,7 +618,7 @@ export default function ProgramsPage() {
             </div>
 
             {/* Footer */}
-            <FooterSection />
+            {settings && <FooterSection settings={settings} />}
           </div>
         </div>
       </div>

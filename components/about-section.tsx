@@ -1,6 +1,12 @@
 "use client"
 
-export default function AboutSection() {
+import type { Settings } from "@/lib/sanity/types"
+
+interface AboutSectionProps {
+  settings: Settings
+}
+
+export default function AboutSection({ settings }: AboutSectionProps) {
   return (
     <div className="w-full border-b border-[rgba(26,58,82,0.12)] flex flex-col justify-center items-center">
       <div className="self-stretch px-4 sm:px-6 md:px-8 lg:px-0 lg:max-w-[1060px] lg:w-[1060px] py-8 sm:py-12 md:py-16 border-b border-[rgba(26,58,82,0.12)] flex justify-center items-center gap-6">
@@ -20,7 +26,7 @@ export default function AboutSection() {
             Empowering Students for Tomorrow
           </div>
           <div className="self-stretch text-center text-[#605A57] text-sm sm:text-base font-normal leading-6 sm:leading-7 font-sans">
-            Data Center College Of The Philippines is committed to providing quality education that prepares students
+            {settings.siteTitle || "Data Center College Of The Philippines"} is committed to providing quality education that prepares students
             for success in an increasingly digital world. Located in the heart of Baguio City, we foster innovation,
             critical thinking, and professional excellence.
           </div>

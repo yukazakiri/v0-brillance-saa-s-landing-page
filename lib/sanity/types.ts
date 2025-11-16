@@ -1,37 +1,66 @@
-import { defineType, defineField } from "sanity";
+// Sanity Asset types
+export interface SanityImageAsset {
+  _id: string;
+  url: string;
+  metadata?: {
+    dimensions?: {
+      width: number;
+      height: number;
+      aspectRatio: number;
+    };
+    lqip?: string;
+  };
+}
+
+export interface SanityImage {
+  asset?: SanityImageAsset;
+  alt?: string;
+  caption?: string;
+  credit?: string;
+  externalUrl?: string;
+}
 
 // Sanity document types
 export interface SanityPost {
   _id: string;
   _type: "post";
+  _createdAt: string;
   _updatedAt: string;
   title: string;
   slug: string;
   excerpt?: string;
-  content: any[]; // Portable text blocks
-  category?: string;
+  content?: any[]; // Portable text blocks with resolved image assets
+  postKind?: "news" | "story" | "announcement" | "alert";
+  contentFocus?: "news" | "research" | "student-life" | "athletics" | "press";
+  priority?: "normal" | "high" | "critical";
+  category?: string; // Legacy field
   tags?: string[];
   publishedAt: string;
-  author?: string;
-  featuredImage?: {
-    asset: {
-      _ref: string;
-      _type: "reference";
-    };
-    alt?: string;
-  };
+  updatedAt?: string;
+  author?: string; // Legacy field
+  authors?: Array<{ _id: string; name: string }>; // Author profiles
+  featuredImage?: SanityImage;
   featured?: boolean;
-  status: "draft" | "published" | "archived";
+  status: "draft" | "scheduled" | "published" | "archived";
+  primaryCategory?: {
+    _id: string;
+    title: string;
+  };
+  audiences?: string[];
+  channels?: string[];
+  activationWindow?: {
+    start?: string;
+    end?: string;
+  };
+  cta?: {
+    label?: string;
+    url?: string;
+  };
   seo?: {
     metaTitle?: string;
     metaDescription?: string;
-    metaImage?: {
-      asset: {
-        _ref: string;
-        _type: "reference";
-      };
-      alt?: string;
-    };
+    metaImage?: SanityImage;
+    canonicalUrl?: string;
   };
 }
 
@@ -82,122 +111,84 @@ export interface NewsListingPage {
   };
 }
 
-// Sanity schema definitions (for future reference/schema setup)
-export const newsArticleSchema = defineType({
-  title: "News Article",
-  name: "newsArticle",
-  type: "document",
-  fields: [
-    defineField({
-      name: "title",
-      title: "Title",
-      type: "string",
-      validation: (Rule) => Rule.required(),
-    }),
-    defineField({
-      name: "slug",
-      title: "Slug",
-      type: "slug",
-      options: {
-        source: "title",
-        maxLength: 96,
-      },
-      validation: (Rule) => Rule.required(),
-    }),
-    defineField({
-      name: "excerpt",
-      title: "Excerpt",
-      type: "text",
-      rows: 3,
-      validation: (Rule) => Rule.required(),
-    }),
-    defineField({
-      name: "content",
-      title: "Content",
-      type: "array",
-      of: [{ type: "block" }],
-      validation: (Rule) => Rule.required(),
-    }),
-    defineField({
-      name: "category",
-      title: "Category",
-      type: "string",
-      options: {
-        list: [
-          { title: "Announcement", value: "announcement" },
-          { title: "Events", value: "events" },
-          { title: "Achievement", value: "achievement" },
-          { title: "News", value: "news" },
-        ],
-      },
-      validation: (Rule) => Rule.required(),
-    }),
-    defineField({
-      name: "publishDate",
-      title: "Publish Date",
-      type: "datetime",
-      initialValue: () => new Date().toISOString(),
-      validation: (Rule) => Rule.required(),
-    }),
-    defineField({
-      name: "author",
-      title: "Author",
-      type: "string",
-      validation: (Rule) => Rule.required(),
-    }),
-    defineField({
-      name: "featuredImage",
-      title: "Featured Image",
-      type: "image",
-      options: {
-        hotspot: true,
-      },
-      fields: [
-        {
-          name: "alt",
-          title: "Alt Text",
-          type: "string",
-        },
-      ],
-    }),
-    defineField({
-      name: "featured",
-      title: "Featured Article",
-      type: "boolean",
-      initialValue: false,
-    }),
-    {
-      name: "seoTitle",
-      title: "SEO Title",
-      type: "string",
-    },
-    {
-      name: "seoDescription",
-      title: "SEO Description",
-      type: "text",
-      rows: 2,
-    },
-    {
-      name: "keywords",
-      title: "Keywords",
-      type: "array",
-      of: [{ type: "string" }],
-    },
-  ],
-  preview: {
-    select: {
-      title: "title",
-      author: "author",
-      media: "featuredImage",
-      category: "category",
-    },
-    prepare(selection) {
-      const { title, author, media, category } = selection;
-      return {
-        title,
-        subtitle: `${author} • ${category}`,
-        media,
-      };
-    },
-  },
-});
+// Global Settings types
+export interface ContactDirectory {
+  label?: string;
+  email?: string;
+  phone?: string;
+  hours?: string;
+  url?: string;
+}
+
+export interface Address {
+  label?: string;
+  address?: string;
+  phone?: string;
+}
+
+export interface SocialLink {
+  platform: string;
+  handle?: string;
+  url: string;
+}
+
+export interface Logos {
+  primary?: SanityImage;
+  horizontal?: SanityImage;
+  icon?: SanityImage;
+}
+
+export interface ThemeColors {
+  primary?: string;
+  secondary?: string;
+  accent?: string;
+}
+
+export interface DefaultSeo {
+  metaTitle?: string;
+  metaDescription?: string;
+  keywords?: string[];
+  shareImage?: SanityImage;
+}
+
+export interface EmergencyAlert {
+  isActive?: boolean;
+  severity?: "info" | "reminder" | "urgent" | "emergency";
+  message?: string;
+  audiences?: string[];
+  linkLabel?: string;
+  linkUrl?: string;
+  startTime?: string;
+  endTime?: string;
+}
+
+export interface Governance {
+  contentOwner?: string;
+  lastReviewed?: string;
+  reviewCadence?: string;
+}
+
+export interface Analytics {
+  googleAnalyticsId?: string;
+  googleTagManagerId?: string;
+  matomoSiteId?: string;
+  metaPixelId?: string;
+}
+
+export interface Settings {
+  _id: string;
+  _type: "settings";
+  siteTitle?: string;
+  shortTitle?: string;
+  tagline?: string;
+  logos?: Logos;
+  themeColors?: ThemeColors;
+  contactDirectory?: ContactDirectory[];
+  addresses?: Address[];
+  campusLocations?: any[]; // Reference to campusLocation documents
+  socialLinks?: SocialLink[];
+  defaultSeo?: DefaultSeo;
+  emergencyAlert?: EmergencyAlert;
+  governance?: Governance;
+  analytics?: Analytics;
+}

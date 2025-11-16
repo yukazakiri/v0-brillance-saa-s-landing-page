@@ -1,5 +1,3 @@
-import imageUrlBuilder from "@sanity/image-url";
-import type { SanityImageSource } from "@sanity/image-url/lib/types/types";
 import { ArrowLeft, Calendar, Hash, Tag as TagIcon, User } from "lucide-react";
 import type { Metadata } from "next";
 import { PortableText, type PortableTextComponents } from "next-sanity";
@@ -11,11 +9,9 @@ import { Button } from "@/components/ui/button";
 
 import CollegeHeader from "@/components/college-header";
 import FooterSection from "@/components/footer-section";
-import { client } from "@/lib/sanity/client";
-import { fetchPostBySlug, fetchPostSlugs } from "@/lib/sanity/queries";
-import type { SanityPost } from "@/lib/sanity/types";
-
-const builder = imageUrlBuilder(client);
+import { buildImageUrl } from "@/lib/sanity/image";
+import { fetchPostBySlug, fetchPostSlugs, fetchSettings } from "@/lib/sanity/queries";
+import type { SanityPost, Settings } from "@/lib/sanity/types";
 const dateFormatter = new Intl.DateTimeFormat("en-US", {
     month: "long",
     day: "numeric",
@@ -35,16 +31,6 @@ const portableTextComponents: PortableTextComponents = {
         },
     },
 };
-
-function buildImageUrl(source?: SanityImageSource, width = 1400, height = 900) {
-    if (!source) return null;
-    try {
-        return builder.image(source).width(width).height(height).fit("crop").url();
-    } catch (error) {
-        console.error("Failed to build Sanity image URL", error);
-        return null;
-    }
-}
 
 function formatCategoryLabel(category?: string | null) {
     if (!category) return "News";
@@ -98,11 +84,22 @@ export async function generateMetadata({ params }: { params: { slug: string } })
 }
 
 export default async function NewsArticlePage({ params }: { params: { slug: string } }) {
-    const post = await getPost(params.slug);
+    const [post, settings] = await Promise.all([
+        getPost(params.slug),
+        fetchSettings()
+    ]);
 
     if (!post) {
         notFound();
     }
+
+    const siteSettings: Settings = settings ?? {
+        _id: "default",
+        _type: "settings",
+        siteTitle: "Data Center College of The Philippines of Baguio City, Inc.",
+        shortTitle: "Data Center College",
+        tagline: "Empowering the next generation of IT professionals, business leaders, and innovators",
+    };
 
     const heroImage = buildImageUrl(post.featuredImage);
     const heroMedia = heroImage ?? "/hero-images/maincampus.png";
@@ -140,7 +137,7 @@ export default async function NewsArticlePage({ params }: { params: { slug: stri
                     <div className="w-[1px] h-full absolute right-4 sm:right-6 md:right-8 lg:right-0 top-0 bg-[rgba(55,50,47,0.12)] shadow-[1px_0px_0px_white] z-0"></div>
 
                     <div className="self-stretch pt-[9px] overflow-visible border-b border-border flex flex-col justify-center items-center gap-4 sm:gap-6 md:gap-8 lg:gap-[66px] relative z-10">
-                        <CollegeHeader />
+                        <CollegeHeader settings={siteSettings} />
 
                         <div className="w-full mt-10 px-2 sm:px-4 md:px-8 lg:px-12 pt-10 pb-6">
                             <div className="w-full max-w-[1000px] mx-auto flex flex-col gap-10">
@@ -248,7 +245,7 @@ export default async function NewsArticlePage({ params }: { params: { slug: stri
                             </div>
                         </div>
 
-                        <FooterSection />
+                        <FooterSection settings={siteSettings} />
                     </div>
                 </div>
             </div>
