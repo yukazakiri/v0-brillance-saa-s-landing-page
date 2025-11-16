@@ -1,7 +1,7 @@
 import Link from "next/link";
 import type React from "react";
 
-import { fetchLatestPosts, fetchSettings } from "@/lib/sanity/queries";
+import { fetchCourses, fetchLatestPosts, fetchSettings } from "@/lib/sanity/queries";
 import type { Article, Settings } from "@/lib/sanity/types";
 
 // College-specific components
@@ -28,10 +28,7 @@ function Badge({ icon, text }: { icon: React.ReactNode; text: string }) {
 }
 
 export default async function LandingPage() {
-    const [newsArticles, settings] = await Promise.all([
-        fetchLatestPosts(4),
-        fetchSettings()
-    ]);
+    const [newsArticles, settings, courses] = await Promise.all([fetchLatestPosts(4), fetchSettings(), fetchCourses()]);
 
     // Provide default values if settings are not available
     const siteSettings: Settings = settings ?? {
@@ -43,52 +40,18 @@ export default async function LandingPage() {
     };
 
     return (
-        <div className="w-full min-h-screen relative bg-[#F7F5F3] overflow-x-hidden flex flex-col justify-start items-center">
-            <div className="relative flex flex-col justify-start items-center w-full">
-                {/* horizontal line */}
-                <div className="w-full absolute left-0 top-6 sm:top-7 md:top-8 lg:top-[42px] border-t border-border shadow-[0px_2px_0px_white]"></div>
-                {/* Main container with proper margins */}
-
-                <div className="w-full max-w-none px-4 sm:px-6 md:px-8 lg:px-0 lg:max-w-[1060px] lg:w-[1060px] relative flex flex-col justify-start items-start min-h-screen">
-                    {/* Left vertical line */}
-                    <div className="w-[1px] h-full absolute left-4 sm:left-6 md:left-8 lg:left-0 top-0 bg-[rgba(55,50,47,0.12)] shadow-[1px_0px_0px_white] z-0"></div>
-
-                    {/* Right vertical line */}
-                    <div className="w-[1px] h-full absolute right-4 sm:right-6 md:right-8 lg:right-0 top-0 bg-[rgba(55,50,47,0.12)] shadow-[1px_0px_0px_white] z-0"></div>
-
-                    <div className="self-stretch pt-[9px] overflow-hidden border-b border-[rgba(55,50,47,0.06)] flex flex-col justify-center items-center gap-4 sm:gap-6 md:gap-8 lg:gap-[66px] relative z-10">
-                        {/* Navigation - College Header */}
-                        <CollegeHeader settings={siteSettings} />
-
-                        {/* Hero Section - College Hero */}
-                        <CollegeHero settings={siteSettings} />
-                        {/* News & Announcements Section */}
-                        <NewsAnnouncementsSection articles={newsArticles} />
-
-                        {/* About Section */}
-                        <AboutSection settings={siteSettings} />
-
-                        {/* Academic Programs Section */}
-                        <CoursesAndProgramsSection />
-
-                        {/* Campus Facilities Section */}
-                        <CampusFacilitiesSection />
-
-                        {/* Testimonials Section */}
-                        <TestimonialsSection />
-
-                        {/* FAQ Section */}
-                        <FAQSection />
-
-                        {/* CTA Section */}
-                        <CTASection settings={siteSettings} />
-
-                        {/* Footer Section */}
-                        <FooterSection settings={siteSettings} />
-                    </div>
-                </div>
-            </div>
-        </div>
+        <>
+            <CollegeHeader settings={siteSettings} />
+            <CollegeHero settings={siteSettings} />
+            <NewsAnnouncementsSection articles={newsArticles} />
+            <AboutSection settings={siteSettings} />
+            <CoursesAndProgramsSection courses={courses} />
+            <CampusFacilitiesSection />
+            <TestimonialsSection />
+            <FAQSection />
+            <CTASection settings={siteSettings} />
+            <FooterSection settings={siteSettings} />
+        </>
     );
 }
 

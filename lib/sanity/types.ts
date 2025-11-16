@@ -192,3 +192,106 @@ export interface Settings {
   governance?: Governance;
   analytics?: Analytics;
 }
+
+// Course types - Full schema from Sanity
+export interface SanityCourse {
+  _id: string;
+  _type: "course";
+  _createdAt: string;
+  _updatedAt: string;
+  title: string;
+  slug: {
+    _type: "slug";
+    current: string;
+  };
+  heroImage?: SanityImage;
+  offeringCategory: "ched" | "tesda" | "short";
+  degreeType?: "bachelor" | "master" | "doctorate" | "certificate";
+  credential?: string;
+  majors?: string[];
+  tesdaQualification?: string;
+  tesdaCompetencyLevel?: string;
+  trainingHours?: string;
+  department?: {
+    _id: string;
+    title: string;
+  };
+  deliveryMode?: "on-campus" | "hybrid" | "online" | "modular";
+  duration?: string;
+  level?: "undergrad" | "graduate" | "tvet";
+  summary?: string;
+  overview?: any[]; // Portable text
+  highlights?: string[];
+  learningOutcomes?: string[];
+  curriculumStructure?: Array<{
+    term?: string;
+    description?: string;
+  }>;
+  relatedOfferings?: Array<{
+    _id: string;
+    title: string;
+    slug: {
+      current: string;
+    };
+  }>;
+  code?: string;
+  creditHours?: number;
+  semesterAvailability?: string[];
+  prerequisites?: Array<{
+    _id: string;
+    title: string;
+    slug: {
+      current: string;
+    };
+  }>;
+  prerequisiteNotes?: string[];
+  corequisites?: Array<{
+    _id: string;
+    title: string;
+    slug: {
+      current: string;
+    };
+  }>;
+  instructors?: Array<{
+    _id: string;
+    name: string;
+  }>;
+  syllabus?: {
+    asset: {
+      _id: string;
+      url: string;
+    };
+  };
+  admissionsRequirements?: string[];
+  applicationDeadlines?: string[];
+  tuition?: string;
+  financialAidHighlight?: string;
+  admissionsContact?: {
+    name?: string;
+    email?: string;
+    phone?: string;
+  };
+  cta?: {
+    label?: string;
+    url?: string;
+  };
+  outcomes?: string[];
+  seo?: {
+    metaTitle?: string;
+    metaDescription?: string;
+    shareImage?: SanityImage;
+  };
+  status?: "active" | "inactive" | "archived";
+}
+
+export interface Course {
+  id: string;
+  slug: string;
+  title: string;
+  category: "ched" | "tesda" | "short";
+  description?: string;
+  duration: string;
+  highlights: string[];
+  credential?: string;
+  scholarshipsAvailable?: boolean;
+}

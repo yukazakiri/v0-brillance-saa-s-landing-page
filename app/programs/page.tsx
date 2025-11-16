@@ -22,7 +22,6 @@ export default function ProgramsPage() {
   const [settings, setSettings] = useState<Settings | null>(null)
 
   useEffect(() => {
-    // Fetch settings on mount
     fetch('/api/settings')
       .then(res => res.json())
       .then(data => setSettings(data))
@@ -139,7 +138,7 @@ export default function ProgramsPage() {
   }
 
   return (
-    <div className="w-full min-h-screen relative bg-background overflow-x-hidden flex flex-col justify-start items-center">
+    <>
       {mobileMenuOpen && (
         <div
           className="fixed inset-0 bg-black/50 backdrop-blur-md z-40 md:hidden"
@@ -226,15 +225,8 @@ export default function ProgramsPage() {
         </div>
       </div>
 
-      <div className="relative flex flex-col justify-start items-center w-full">
-        <div className="w-full max-w-none px-4 sm:px-6 md:px-8 lg:px-0 lg:max-w-[900px] lg:w-[900px] relative flex flex-col justify-start items-start min-h-screen">
-          {/* Left vertical line */}
-          <div className="w-[1px] h-full absolute left-4 sm:left-6 md:left-8 lg:left-0 top-0 bg-border/50 shadow-[1px_0px_0px_hsl(var(--background))] z-0"></div>
-
-          {/* Right vertical line */}
-          <div className="w-[1px] h-full absolute right-4 sm:right-6 md:right-8 lg:right-0 top-0 bg-border/50 shadow-[1px_0px_0px_hsl(var(--background))] z-0"></div>
-
-          <div className="self-stretch pt-[9px] overflow-visible border-b border-border flex flex-col justify-center items-center gap-4 sm:gap-6 md:gap-8 lg:gap-[66px] relative z-10">
+      <div className="w-full max-w-none px-4 sm:px-6 md:px-8 lg:px-0 lg:max-w-[900px] lg:w-[900px] flex flex-col justify-start items-start min-h-screen">
+        <div className="w-full flex flex-col justify-center items-center gap-4 sm:gap-6 md:gap-8 lg:gap-[66px] relative z-10">
             <div className="w-full flex flex-col justify-center items-center sticky top-0 z-50 bg-background px-4 sm:px-6 md:px-8 lg:px-0 py-3 sm:py-4 md:py-4">
               <div className="w-full max-w-[calc(100%-32px)] sm:max-w-[calc(100%-48px)] md:max-w-[calc(100%-64px)] lg:max-w-[700px] lg:w-[700px] py-2 sm:py-3 md:py-3 px-3 sm:px-5 md:px-5 bg-card shadow-[0px_2px_8px_rgba(55,50,47,0.08)] overflow-visible rounded-full flex justify-between items-center relative z-30 transition-all duration-300 ease-out border border-border">
                 <Link
@@ -621,7 +613,6 @@ export default function ProgramsPage() {
             {settings && <FooterSection settings={settings} />}
           </div>
         </div>
-      </div>
-    </div>
+    </>
   )
 }
