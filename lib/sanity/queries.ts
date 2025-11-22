@@ -176,8 +176,13 @@ export async function fetchPostBySlug(slug: string): Promise<SanityPost | null> 
 }
 
 export async function fetchPostSlugs(): Promise<string[]> {
-  const results = await client.fetch<{ slug: string }[]>(POST_SLUGS_QUERY)
-  return (results || []).map((result) => result.slug)
+  try {
+    const results = await client.fetch<{ slug: string }[]>(POST_SLUGS_QUERY)
+    return (results || []).map((result) => result.slug)
+  } catch (error) {
+    console.error("Error fetching post slugs:", error)
+    return [] // Return empty array to allow build to proceed
+  }
 }
 
 // Global Settings Query
@@ -358,19 +363,67 @@ export async function fetchCoursesByCategory(category: "ched" | "tesda" | "shs")
         _updatedAt,
         title,
         slug,
+        heroImage {
+          asset->{
+            _id,
+            url,
+            metadata {
+              dimensions,
+              lqip
+            }
+          },
+          alt,
+          externalUrl
+        },
         offeringCategory,
-        description,
-        careerPaths,
-        status,
+        degreeType,
         credential,
-        durationYears,
-        tuitionRange,
-        scholarshipsAvailable,
-        enrollmentCap,
-        programType,
-        qualificationLevel,
-        tesdaRegistrationNumber,
-        competencies
+        majors,
+        tesdaQualification,
+        tesdaCompetencyLevel,
+        trainingHours,
+        "department": department->{ _id, title },
+        deliveryMode,
+        duration,
+        level,
+        summary,
+        overview,
+        highlights,
+        learningOutcomes,
+        curriculumStructure,
+        "relatedOfferings": relatedOfferings[]->{ _id, title, slug },
+        code,
+        creditHours,
+        semesterAvailability,
+        "prerequisites": prerequisites[]->{ _id, title, slug },
+        prerequisiteNotes,
+        "corequisites": corequisites[]->{ _id, title, slug },
+        "instructors": instructors[]->{ _id, name },
+        syllabus,
+        admissionsRequirements,
+        applicationDeadlines,
+        tuition,
+        financialAidHighlight,
+        admissionsContact,
+        cta,
+        outcomes,
+        seo {
+          metaTitle,
+          metaDescription,
+          shareImage {
+            asset->{
+              _id,
+              url,
+              metadata {
+                dimensions,
+                lqip
+              }
+            },
+            alt,
+            externalUrl
+          }
+        },
+        status
       }
     `
     const courses = await client.fetch<SanityCourse[]>(query, { category })
@@ -476,7 +529,7 @@ export async function fetchCourseSlugs(): Promise<string[]> {
     return (results || []).map((result) => result.slug)
   } catch (error) {
     console.error("Error fetching course slugs:", error)
-    return []
+    return [] // Return empty array to allow build to proceed
   }
 }
 
