@@ -2,7 +2,7 @@ import { groq } from "next-sanity";
 
 import { client } from "./client";
 import { getImageUrl } from "./image";
-import type { Article, Course, SanityCourse, SanityPost, Settings } from "./types";
+import type { Article, Course, SanityCourse, SanityFAQ, SanityPost, Settings } from "./types";
 
 const dateFormatter = new Intl.DateTimeFormat("en-US", {
     month: "long",
@@ -476,6 +476,28 @@ export async function fetchCourseSlugs(): Promise<string[]> {
         return results.map(result => result.slug);
     } catch (error) {
         console.error("Error fetching course slugs:", error);
+        return [];
+    }
+}
+
+// FAQ Query
+const FAQS_QUERY = groq`
+  *[_type == "faq"]
+  | order(order asc, _createdAt desc)
+  {
+    _id,
+    _type,
+    question,
+    answer,
+    order
+  }
+`;
+
+export async function fetchFAQs(): Promise<SanityFAQ[]> {
+    try {
+        return await client.fetch<SanityFAQ[]>(FAQS_QUERY);
+    } catch (error) {
+        console.error("Error fetching FAQs:", error);
         return [];
     }
 }

@@ -64,6 +64,14 @@ export interface SanityPost {
     };
 }
 
+export interface SanityFAQ {
+    _id: string;
+    _type: "faq";
+    question: string;
+    answer: any;
+    order?: number;
+}
+
 // Local article interface (with processed image URLs)
 export interface Article {
     id: string;

@@ -2,12 +2,12 @@ import { fetchCourses, fetchLatestPosts, fetchSettings } from "@/lib/sanity/quer
 import type { Settings } from "@/lib/sanity/types";
 
 // College-specific components
+import CTASection from "@/components/cta-section";
+import FacultyStaffSection from "@/components/faculty-staff-section";
 import AboutSection from "../components/about-section";
-import CampusFacilitiesSection from "../components/campus-facilities-section";
 import CollegeHeader from "../components/college-header";
 import CollegeHero from "../components/college-hero";
 import CoursesAndProgramsSection from "../components/courses-programs-section";
-import CTASection from "../components/cta-section";
 import FAQSection from "../components/faq-section";
 import FooterSection from "../components/footer-section";
 import NewsAnnouncementsSection from "../components/news-announcements-section";
@@ -32,7 +32,7 @@ export default async function LandingPage() {
             <NewsAnnouncementsSection articles={newsArticles} />
             <AboutSection settings={siteSettings} />
             <CoursesAndProgramsSection courses={courses} />
-            <CampusFacilitiesSection />
+            <FacultyStaffSection />
             <TestimonialsSection />
             <FAQSection />
             <CTASection settings={siteSettings} />
