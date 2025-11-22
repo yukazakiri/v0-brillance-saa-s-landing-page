@@ -1,20 +1,21 @@
 "use client";
 
-import Link from "next/link";
-import type { Settings } from "@/lib/sanity/types";
 import { getImageUrl } from "@/lib/sanity/image";
-
+import type { Settings } from "@/lib/sanity/types";
+import Image from "next/image";
+import Link from "next/link";
 interface CollegeHeaderProps {
     settings: Settings;
 }
 
 export default function CollegeHeader({ settings }: CollegeHeaderProps) {
-    // Extract logo URL, fallback to default
-    const logoUrl = settings.logos?.icon
-        ? getImageUrl(settings.logos.icon, 192, 192)
-        : "/android-chrome-192x192.png";
+    // Extract primary logo URL from Sanity asset (uploaded image), fallback to external URL, then default
+    const logoUrl =
+        getImageUrl(settings.logos?.primary, 192, 192) ||
+        settings.logos?.primary?.externalUrl ||
+        "/android-chrome-192x192.png";
 
-    const logoAlt = settings.logos?.icon?.alt || `${settings.shortTitle || settings.siteTitle} Logo`;
+    const logoAlt = settings.logos?.primary?.alt || `${settings.shortTitle || settings.siteTitle} Logo`;
 
     return (
         <div className="w-full h-12 sm:h-14 md:h-16 lg:h-[84px] absolute left-0 top-0 flex justify-center items-center z-20 px-6 sm:px-8 md:px-12 lg:px-0">
@@ -24,10 +25,12 @@ export default function CollegeHeader({ settings }: CollegeHeaderProps) {
                         href="/"
                         className="flex items-center gap-2 sm:gap-3 group hover:opacity-90 transition-opacity"
                     >
-                        <img
+                        <Image
                             src={logoUrl || "/android-chrome-192x192.png"}
                             className="h-8 w-8 sm:h-9 sm:w-9 md:h-10 md:w-10 drop-shadow-lg rounded-full bg-card border border-primary"
                             alt={logoAlt}
+                            width={192}
+                            height={192}
                         />
                         <div className="flex flex-col leading-tight">
                             <span className="font-extrabold text-sm sm:text-base md:text-lg lg:text-xl tracking-tight text-primary drop-shadow-[1px_1px_0px_oklch(0.5_0_0/0.15)]">
