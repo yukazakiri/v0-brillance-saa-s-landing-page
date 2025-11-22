@@ -22,6 +22,7 @@ export const metadata: Metadata = {
   title: "Brillance - Effortless Custom Contract Billing",
   description:
     "Streamline your billing process with seamless automation for every custom contract, tailored by Brillance.",
+    generator: 'v0.app'
 }
 
 export default function RootLayout({
