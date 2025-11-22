@@ -48,54 +48,77 @@ export default function FooterSection({ settings }: FooterSectionProps) {
     const primaryContact = settings.contactDirectory?.[0];
 
     return (
-        <footer className="w-full ">
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 lg:py-16">
+        <footer className="w-full relative overflow-hidden bg-gradient-to-b from-background to-secondary/20">
+            {/* Decorative Pattern Overlay - Scaled down for footer */}
+            <div className="absolute bottom-0 left-1/2 transform -translate-x-1/2 z-0 pointer-events-none opacity-[0.03]">
+                <img
+                    src="/mask-group-pattern.svg"
+                    alt=""
+                    className="w-[1000px] h-auto mix-blend-multiply"
+                    style={{
+                        filter: "hue-rotate(15deg) saturate(0.7) brightness(1.2)",
+                    }}
+                />
+            </div>
+
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 lg:py-16 relative z-10">
                 <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-8">
                     {/* Brand Section - Takes up 4 columns on large screens */}
                     <div className="lg:col-span-4 space-y-6">
-                        <Link href="/" className="flex items-center gap-3 group w-fit">
+                        <Link href="/" className="flex items-start gap-3 group w-fit">
                             <Image
                                 src={logoUrl}
-                                className="h-10 w-10 rounded-full bg-white border border-stone-200 shadow-sm"
+                                className="h-12 w-12 rounded-full bg-white border border-stone-200 shadow-sm mt-1"
                                 alt={logoAlt}
-                                width={40}
-                                height={40}
+                                width={48}
+                                height={48}
                             />
                             <div className="flex flex-col">
-                                <span className="font-bold text-[#49423D] text-lg leading-tight">
-                                    {settings.shortTitle || "Data Center College"}
+                                {/* Main Title */}
+                                <span className="text-primary text-xl font-bold leading-tight font-serif tracking-tight">
+                                    Data Center College
                                 </span>
-                                <span className="text-xs text-stone-500 font-medium">
-                                    {settings.tagline || "Excellence in Education"}
+
+                                {/* Subtitle Lines */}
+                                <span
+                                    className="text-foreground/80 text-lg font-semibold leading-none italic -mt-1"
+                                    style={{
+                                        fontFamily: "'Brush Script MT', cursive",
+                                    }}
+                                >
+                                    of The Philippines
+                                </span>
+                                <span className="text-muted-foreground text-[10px] font-medium leading-tight tracking-wide uppercase mt-0.5">
+                                    of Baguio City, Inc.
                                 </span>
                             </div>
                         </Link>
 
-                        <div className="space-y-4">
+                        <div className="space-y-4 pl-1">
                             {primaryAddress && (
-                                <div className="flex items-start gap-3 text-sm text-stone-500">
-                                    <MapPin className="w-4 h-4 shrink-0 mt-0.5" />
+                                <div className="flex items-start gap-3 text-sm text-muted-foreground">
+                                    <MapPin className="w-4 h-4 shrink-0 mt-0.5 text-primary/70" />
                                     <span className="leading-relaxed max-w-xs">{primaryAddress.address}</span>
                                 </div>
                             )}
                             <div className="flex flex-col gap-2">
                                 {primaryContact?.phone && (
-                                    <div className="flex items-center gap-3 text-sm text-stone-500">
-                                        <Phone className="w-4 h-4 shrink-0" />
+                                    <div className="flex items-center gap-3 text-sm text-muted-foreground">
+                                        <Phone className="w-4 h-4 shrink-0 text-primary/70" />
                                         <a
                                             href={`tel:${primaryContact.phone}`}
-                                            className="hover:text-[#49423D] transition-colors"
+                                            className="hover:text-primary transition-colors"
                                         >
                                             {primaryContact.phone}
                                         </a>
                                     </div>
                                 )}
                                 {primaryContact?.email && (
-                                    <div className="flex items-center gap-3 text-sm text-stone-500">
-                                        <Mail className="w-4 h-4 shrink-0" />
+                                    <div className="flex items-center gap-3 text-sm text-muted-foreground">
+                                        <Mail className="w-4 h-4 shrink-0 text-primary/70" />
                                         <a
                                             href={`mailto:${primaryContact.email}`}
-                                            className="hover:text-[#49423D] transition-colors"
+                                            className="hover:text-primary transition-colors"
                                         >
                                             {primaryContact.email}
                                         </a>
@@ -109,13 +132,15 @@ export default function FooterSection({ settings }: FooterSectionProps) {
                     <div className="lg:col-span-8 grid grid-cols-2 md:grid-cols-3 gap-8">
                         {/* Programs */}
                         <div>
-                            <h4 className="text-sm font-semibold text-[#49423D] mb-4">Programs</h4>
+                            <h4 className="text-sm font-semibold text-foreground mb-4 uppercase tracking-wider">
+                                Programs
+                            </h4>
                             <ul className="space-y-2.5">
                                 {settings.institutionProfile?.chedPrograms?.slice(0, 5).map((program, idx) => (
                                     <li key={idx}>
                                         <Link
                                             href="/courses"
-                                            className="text-sm text-stone-500 hover:text-[#49423D] transition-colors line-clamp-1"
+                                            className="text-sm text-muted-foreground hover:text-primary transition-colors line-clamp-1"
                                         >
                                             {program.name}
                                         </Link>
@@ -127,7 +152,7 @@ export default function FooterSection({ settings }: FooterSectionProps) {
                                         <li>
                                             <Link
                                                 href="/courses"
-                                                className="text-sm text-stone-500 hover:text-[#49423D]"
+                                                className="text-sm text-muted-foreground hover:text-primary transition-colors"
                                             >
                                                 College Courses
                                             </Link>
@@ -135,7 +160,7 @@ export default function FooterSection({ settings }: FooterSectionProps) {
                                         <li>
                                             <Link
                                                 href="/courses"
-                                                className="text-sm text-stone-500 hover:text-[#49423D]"
+                                                className="text-sm text-muted-foreground hover:text-primary transition-colors"
                                             >
                                                 Senior High School
                                             </Link>
@@ -143,7 +168,7 @@ export default function FooterSection({ settings }: FooterSectionProps) {
                                         <li>
                                             <Link
                                                 href="/courses"
-                                                className="text-sm text-stone-500 hover:text-[#49423D]"
+                                                className="text-sm text-muted-foreground hover:text-primary transition-colors"
                                             >
                                                 TVET Programs
                                             </Link>
@@ -155,12 +180,14 @@ export default function FooterSection({ settings }: FooterSectionProps) {
 
                         {/* Quick Links */}
                         <div>
-                            <h4 className="text-sm font-semibold text-[#49423D] mb-4">Quick Links</h4>
+                            <h4 className="text-sm font-semibold text-foreground mb-4 uppercase tracking-wider">
+                                Quick Links
+                            </h4>
                             <ul className="space-y-2.5">
                                 <li>
                                     <Link
                                         href="/about"
-                                        className="text-sm text-stone-500 hover:text-[#49423D] transition-colors"
+                                        className="text-sm text-muted-foreground hover:text-primary transition-colors"
                                     >
                                         About Us
                                     </Link>
@@ -168,7 +195,7 @@ export default function FooterSection({ settings }: FooterSectionProps) {
                                 <li>
                                     <Link
                                         href="/news"
-                                        className="text-sm text-stone-500 hover:text-[#49423D] transition-colors"
+                                        className="text-sm text-muted-foreground hover:text-primary transition-colors"
                                     >
                                         News & Updates
                                     </Link>
@@ -176,7 +203,7 @@ export default function FooterSection({ settings }: FooterSectionProps) {
                                 <li>
                                     <Link
                                         href="/admissions"
-                                        className="text-sm text-stone-500 hover:text-[#49423D] transition-colors"
+                                        className="text-sm text-muted-foreground hover:text-primary transition-colors"
                                     >
                                         Admissions
                                     </Link>
@@ -184,7 +211,7 @@ export default function FooterSection({ settings }: FooterSectionProps) {
                                 <li>
                                     <Link
                                         href="/portal"
-                                        className="text-sm text-stone-500 hover:text-[#49423D] transition-colors"
+                                        className="text-sm text-muted-foreground hover:text-primary transition-colors"
                                     >
                                         Student Portal
                                     </Link>
@@ -192,7 +219,7 @@ export default function FooterSection({ settings }: FooterSectionProps) {
                                 <li>
                                     <Link
                                         href="/careers"
-                                        className="text-sm text-stone-500 hover:text-[#49423D] transition-colors"
+                                        className="text-sm text-muted-foreground hover:text-primary transition-colors"
                                     >
                                         Careers
                                     </Link>
@@ -202,12 +229,14 @@ export default function FooterSection({ settings }: FooterSectionProps) {
 
                         {/* Legal / Resources */}
                         <div>
-                            <h4 className="text-sm font-semibold text-[#49423D] mb-4">Resources</h4>
+                            <h4 className="text-sm font-semibold text-foreground mb-4 uppercase tracking-wider">
+                                Resources
+                            </h4>
                             <ul className="space-y-2.5">
                                 <li>
                                     <Link
                                         href="/privacy"
-                                        className="text-sm text-stone-500 hover:text-[#49423D] transition-colors"
+                                        className="text-sm text-muted-foreground hover:text-primary transition-colors"
                                     >
                                         Privacy Policy
                                     </Link>
@@ -215,7 +244,7 @@ export default function FooterSection({ settings }: FooterSectionProps) {
                                 <li>
                                     <Link
                                         href="/terms"
-                                        className="text-sm text-stone-500 hover:text-[#49423D] transition-colors"
+                                        className="text-sm text-muted-foreground hover:text-primary transition-colors"
                                     >
                                         Terms of Service
                                     </Link>
@@ -223,7 +252,7 @@ export default function FooterSection({ settings }: FooterSectionProps) {
                                 <li>
                                     <Link
                                         href="/contact"
-                                        className="text-sm text-stone-500 hover:text-[#49423D] transition-colors"
+                                        className="text-sm text-muted-foreground hover:text-primary transition-colors"
                                     >
                                         Contact Support
                                     </Link>
@@ -234,8 +263,8 @@ export default function FooterSection({ settings }: FooterSectionProps) {
                 </div>
 
                 {/* Bottom Bar */}
-                <div className="mt-12 pt-8 border-t border-stone-200 flex flex-col md:flex-row justify-between items-center gap-4">
-                    <p className="text-sm text-stone-400">
+                <div className="mt-12 pt-8 border-t border-border/50 flex flex-col md:flex-row justify-between items-center gap-4">
+                    <p className="text-sm text-muted-foreground">
                         &copy; {currentYear} {settings.siteTitle || "Data Center College"}. All rights reserved.
                     </p>
 
@@ -247,7 +276,7 @@ export default function FooterSection({ settings }: FooterSectionProps) {
                                 href={link.url}
                                 target="_blank"
                                 rel="noopener noreferrer"
-                                className="text-stone-400 hover:text-[#49423D] hover:bg-stone-100 p-2 rounded-full transition-all"
+                                className="text-muted-foreground hover:text-primary hover:bg-primary/10 p-2 rounded-full transition-all"
                                 aria-label={`Visit our ${link.platform}`}
                             >
                                 {getSocialIcon(link.platform)}
