@@ -4,77 +4,123 @@
 @custom-variant dark (&:is(.dark *));
 
 :root {
-  --background: oklch(1 0 0);
-  --foreground: oklch(0.145 0 0);
-  --card: oklch(1 0 0);
-  --card-foreground: oklch(0.145 0 0);
-  --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.145 0 0);
-  --primary: oklch(32.822% 0.08154 251.832);
-  --primary-foreground: oklch(0.985 0 0);
-  --secondary: oklch(0.97 0 0);
-  --secondary-foreground: oklch(0.205 0 0);
-  --muted: oklch(0.97 0 0);
-  --muted-foreground: oklch(49.694% 0.04428 260.575);
-  --accent: oklch(0.97 0 0);
-  --accent-foreground: oklch(0.205 0 0);
-  --destructive: oklch(0.577 0.245 27.325);
-  --destructive-foreground: oklch(0.577 0.245 27.325);
-  --border: oklch(0.922 0 0);
-  --input: oklch(0.922 0 0);
-  --ring: oklch(0.708 0 0);
-  --chart-1: oklch(0.646 0.222 41.116);
-  --chart-2: oklch(0.6 0.118 184.704);
-  --chart-3: oklch(0.398 0.07 227.392);
-  --chart-4: oklch(0.828 0.189 84.429);
-  --chart-5: oklch(0.769 0.188 70.08);
+  /* New coffee-navy-gold design system */
+  /* Backgrounds - Warm cream and light coffee tones */
+  --background: oklch(0.97 0.01 65);
+  --foreground: oklch(0.25 0.02 45);
+
+  /* Cards - Slightly warmer white with coffee undertones */
+  --card: oklch(0.99 0.005 55);
+  --card-foreground: oklch(0.25 0.02 45);
+
+  /* Popovers */
+  --popover: oklch(0.99 0.005 55);
+  --popover-foreground: oklch(0.25 0.02 45);
+
+  /* Primary - Rich navy blue */
+  --primary: oklch(0.35 0.08 250);
+  --primary-foreground: oklch(0.98 0.01 65);
+
+  /* Secondary - Medium coffee brown */
+  --secondary: oklch(0.55 0.04 45);
+  --secondary-foreground: oklch(0.98 0.01 65);
+
+  /* Muted - Light coffee/beige */
+  --muted: oklch(0.92 0.015 50);
+  --muted-foreground: oklch(0.48 0.025 45);
+
+  /* Accent - Warm gold */
+  --accent: oklch(0.75 0.12 75);
+  --accent-foreground: oklch(0.25 0.02 45);
+
+  /* Destructive - Coffee-toned red */
+  --destructive: oklch(0.55 0.2 25);
+  --destructive-foreground: oklch(0.98 0.01 65);
+
+  /* Borders - Light coffee tone */
+  --border: oklch(0.88 0.02 50);
+  --input: oklch(0.88 0.02 50);
+  --ring: oklch(0.35 0.08 250);
+
+  /* Charts - Coffee, navy, and gold variations */
+  --chart-1: oklch(0.35 0.08 250); /* Navy blue */
+  --chart-2: oklch(0.75 0.12 75); /* Gold */
+  --chart-3: oklch(0.45 0.06 40); /* Deep coffee */
+  --chart-4: oklch(0.65 0.08 55); /* Medium coffee */
+  --chart-5: oklch(0.55 0.1 250); /* Light navy */
+
   --radius: 0.625rem;
-  --sidebar: oklch(0.985 0 0);
-  --sidebar-foreground: oklch(0.145 0 0);
-  --sidebar-primary: oklch(0.205 0 0);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.97 0 0);
-  --sidebar-accent-foreground: oklch(0.205 0 0);
-  --sidebar-border: oklch(0.922 0 0);
-  --sidebar-ring: oklch(0.708 0 0);
-  /* Updated font variables with explicit fallbacks for deployment */
+
+  /* Sidebar - Navy with gold accents */
+  --sidebar: oklch(0.35 0.08 250);
+  --sidebar-foreground: oklch(0.98 0.01 65);
+  --sidebar-primary: oklch(0.75 0.12 75);
+  --sidebar-primary-foreground: oklch(0.25 0.02 45);
+  --sidebar-accent: oklch(0.45 0.08 250);
+  --sidebar-accent-foreground: oklch(0.98 0.01 65);
+  --sidebar-border: oklch(0.45 0.08 250);
+  --sidebar-ring: oklch(0.75 0.12 75);
+
+  /* Font variables remain unchanged */
   --font-inter: "Inter", ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
   --font-instrument-serif: "Instrument Serif", ui-serif, serif;
 }
 
 .dark {
-  --background: oklch(0.145 0 0);
-  --foreground: oklch(0.985 0 0);
-  --card: oklch(0.145 0 0);
-  --card-foreground: oklch(0.985 0 0);
-  --popover: oklch(0.145 0 0);
-  --popover-foreground: oklch(0.985 0 0);
-  --primary: oklch(0.985 0 0);
-  --primary-foreground: oklch(0.205 0 0);
-  --secondary: oklch(0.269 0 0);
-  --secondary-foreground: oklch(0.985 0 0);
-  --muted: oklch(0.269 0 0);
-  --muted-foreground: oklch(0.708 0 0);
-  --accent: oklch(0.269 0 0);
-  --accent-foreground: oklch(0.985 0 0);
-  --destructive: oklch(0.396 0.141 25.723);
-  --destructive-foreground: oklch(0.637 0.237 25.331);
-  --border: oklch(0.269 0 0);
-  --input: oklch(0.269 0 0);
-  --ring: oklch(0.439 0 0);
-  --chart-1: oklch(0.488 0.243 264.376);
-  --chart-2: oklch(0.696 0.17 162.48);
-  --chart-3: oklch(0.769 0.188 70.08);
-  --chart-4: oklch(0.627 0.265 303.9);
-  --chart-5: oklch(0.645 0.246 16.439);
-  --sidebar: oklch(0.205 0 0);
-  --sidebar-foreground: oklch(0.985 0 0);
-  --sidebar-primary: oklch(0.488 0.243 264.376);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.269 0 0);
-  --sidebar-accent-foreground: oklch(0.985 0 0);
-  --sidebar-border: oklch(0.269 0 0);
-  --sidebar-ring: oklch(0.439 0 0);
+  /* Dark mode with deep coffee and navy tones */
+  /* Backgrounds - Deep espresso/coffee */
+  --background: oklch(0.2 0.015 40);
+  --foreground: oklch(0.95 0.01 60);
+
+  /* Cards - Slightly lighter espresso */
+  --card: oklch(0.25 0.02 40);
+  --card-foreground: oklch(0.95 0.01 60);
+
+  /* Popovers */
+  --popover: oklch(0.25 0.02 40);
+  --popover-foreground: oklch(0.95 0.01 60);
+
+  /* Primary - Lighter navy with more saturation */
+  --primary: oklch(0.65 0.12 250);
+  --primary-foreground: oklch(0.2 0.015 40);
+
+  /* Secondary - Lighter coffee brown */
+  --secondary: oklch(0.45 0.05 45);
+  --secondary-foreground: oklch(0.95 0.01 60);
+
+  /* Muted - Dark coffee */
+  --muted: oklch(0.3 0.02 45);
+  --muted-foreground: oklch(0.7 0.02 55);
+
+  /* Accent - Vibrant gold */
+  --accent: oklch(0.8 0.15 75);
+  --accent-foreground: oklch(0.2 0.015 40);
+
+  /* Destructive */
+  --destructive: oklch(0.6 0.22 25);
+  --destructive-foreground: oklch(0.95 0.01 60);
+
+  /* Borders - Medium coffee */
+  --border: oklch(0.35 0.025 45);
+  --input: oklch(0.35 0.025 45);
+  --ring: oklch(0.75 0.12 75);
+
+  /* Charts - Adjusted for dark mode */
+  --chart-1: oklch(0.65 0.12 250); /* Light navy */
+  --chart-2: oklch(0.8 0.15 75); /* Bright gold */
+  --chart-3: oklch(0.6 0.08 40); /* Light coffee */
+  --chart-4: oklch(0.7 0.1 55); /* Warm coffee */
+  --chart-5: oklch(0.55 0.12 250); /* Medium navy */
+
+  /* Sidebar - Deep navy with gold accents */
+  --sidebar: oklch(0.25 0.06 250);
+  --sidebar-foreground: oklch(0.95 0.01 60);
+  --sidebar-primary: oklch(0.8 0.15 75);
+  --sidebar-primary-foreground: oklch(0.2 0.015 40);
+  --sidebar-accent: oklch(0.35 0.08 250);
+  --sidebar-accent-foreground: oklch(0.95 0.01 60);
+  --sidebar-border: oklch(0.35 0.06 250);
+  --sidebar-ring: oklch(0.8 0.15 75);
 }
 
 @theme inline {
