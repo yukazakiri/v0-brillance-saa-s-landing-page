@@ -44,3 +44,5 @@ export function FeatureCards() {
     </section>
   )
 }
+
+export default FeatureCards

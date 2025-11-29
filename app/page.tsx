@@ -4,19 +4,19 @@ import type { Settings } from "@/lib/sanity/types"
 // College-specific components
 import CTASection from "@/components/cta-section"
 import FacultyStaffSection from "@/components/faculty-staff-section"
-import AboutSection from "../components/about-section"
-import CollegeHeader from "../components/college-header"
-import CollegeHero from "../components/college-hero"
-import CoursesAndProgramsSection from "../components/courses-programs-section"
-import FAQSection from "../components/faq-section"
-import FooterSection from "../components/footer-section"
-import NewsAnnouncementsSection from "../components/news-announcements-section"
-import TestimonialsSection from "../components/testimonials-section"
+import AboutSection from "@/components/about-section"
+import CollegeHeader from "@/components/college-header"
+import CollegeHero from "@/components/college-hero"
+import CoursesAndProgramsSection from "@/components/courses-programs-section"
+import FAQSection from "@/components/faq-section"
+import FooterSection from "@/components/footer-section"
+import NewsAnnouncementsSection from "@/components/news-announcements-section"
+import TestimonialsSection from "@/components/testimonials-section"
 
 export default async function LandingPage() {
-  let newsArticles = []
-  let settings = null
-  let courses = []
+  let newsArticles: Awaited<ReturnType<typeof fetchLatestPosts>> = []
+  let settings: Settings | null = null
+  let courses: Awaited<ReturnType<typeof fetchCourses>> = []
 
   try {
     ;[newsArticles, settings, courses] = await Promise.all([fetchLatestPosts(4), fetchSettings(), fetchCourses()])

@@ -22,7 +22,7 @@
   --primary-foreground: oklch(0.98 0.01 65);
 
   /* Secondary - Medium coffee brown */
-  --secondary: oklch(0.55 0.04 45);
+  --secondary: rgb(199, 146, 68);
   --secondary-foreground: oklch(0.98 0.01 65);
 
   /* Muted - Light coffee/beige */
@@ -30,7 +30,7 @@
   --muted-foreground: oklch(0.48 0.025 45);
 
   /* Accent - Warm gold */
-  --accent: oklch(0.75 0.12 75);
+  --accent: rgb(184, 151, 104);
   --accent-foreground: oklch(0.25 0.02 45);
 
   /* Destructive - Coffee-toned red */

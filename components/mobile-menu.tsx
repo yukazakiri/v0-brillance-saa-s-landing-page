@@ -1,6 +1,7 @@
 "use client"
 
 import Link from "next/link"
+import { useEffect } from "react"
 
 interface MobileMenuProps {
   isOpen: boolean
@@ -8,97 +9,96 @@ interface MobileMenuProps {
 }
 
 export default function MobileMenu({ isOpen, onClose }: MobileMenuProps) {
+  useEffect(() => {
+    if (isOpen) {
+      document.body.style.overflow = "hidden"
+    } else {
+      document.body.style.overflow = ""
+    }
+    return () => {
+      document.body.style.overflow = ""
+    }
+  }, [isOpen])
+
+  const navLinks = [
+    { href: "/", label: "Home" },
+    { href: "/about", label: "About" },
+    { href: "/#programs", label: "Programs" },
+    { href: "/#admissions", label: "Admissions" },
+    { href: "/news", label: "News" },
+    { href: "/#campus-life", label: "Campus" },
+    { href: "/#contact", label: "Contact" },
+  ]
+
   return (
-    <>
-      {/* Mobile Menu Backdrop - only blur the background */}
-      {isOpen && (
-        <div
-          className="fixed inset-0 bg-black/50 backdrop-blur-md z-40 md:hidden"
+    <div
+      className={`fixed inset-0 z-50 md:hidden flex flex-col bg-background transition-all duration-500 ease-out ${
+        isOpen ? "opacity-100 pointer-events-auto translate-x-0" : "opacity-0 pointer-events-none translate-x-full"
+      }`}
+    >
+      {/* Header with close button */}
+      <div className="flex items-center justify-between px-6 py-5 border-b border-border">
+        <div className="flex items-center gap-3">
+          <span className="text-primary text-xl font-bold tracking-tight font-sans">DCCPH</span>
+        </div>
+        <button
           onClick={onClose}
-          aria-hidden="true"
-        />
-      )}
-
-      {/* Mobile Menu Drawer - clean, sharp, no blur */}
-      <div
-        className={`fixed top-0 right-0 h-full w-[280px] sm:w-[320px] bg-card z-50 md:hidden transform transition-transform duration-300 ease-out shadow-2xl ${
-          isOpen ? "translate-x-0" : "translate-x-full"
-        }`}
-      >
-        {/* Drawer Header */}
-        <div className="flex items-center justify-between px-6 py-5 border-b border-border bg-muted/30">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-full bg-gradient-to-br from-primary to-primary/80 flex items-center justify-center shadow-md">
-              <span className="text-primary-foreground text-sm font-bold">DC</span>
-            </div>
-            <div className="flex flex-col">
-              <div className="text-foreground text-base font-bold font-sans">DCCPH</div>
-              <div className="text-muted-foreground text-xs font-sans">Baguio City</div>
-            </div>
-          </div>
-          <button
-            onClick={onClose}
-            className="p-2 hover:bg-muted rounded-lg transition-colors duration-200"
-            aria-label="Close menu"
-          >
-            <svg className="w-5 h-5 text-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M6 18L18 6M6 6l12 12" />
-            </svg>
-          </button>
-        </div>
-
-        {/* Navigation Links */}
-        <nav className="flex-1 px-4 py-6 space-y-1 overflow-y-auto">
-          <Link
-            href="/programs"
-            className="block px-4 py-3.5 text-base font-semibold text-foreground hover:bg-muted rounded-lg transition-all duration-200"
-            onClick={onClose}
-          >
-            Programs
-          </Link>
-          <Link
-            href="/about"
-            className="block px-4 py-3.5 text-base font-semibold text-foreground hover:bg-muted rounded-lg transition-all duration-200"
-            onClick={onClose}
-          >
-            About Us
-          </Link>
-          <Link
-            href="/news"
-            className="block px-4 py-3.5 text-base font-semibold text-foreground hover:bg-muted rounded-lg transition-all duration-200"
-            onClick={onClose}
-          >
-            News
-          </Link>
-          <a
-            href="#faculty"
-            className="block px-4 py-3.5 text-base font-semibold text-foreground hover:bg-muted rounded-lg transition-all duration-200"
-            onClick={onClose}
-          >
-            Faculty & Staff
-          </a>
-          <a
-            href="#contact"
-            className="block px-4 py-3.5 text-base font-semibold text-foreground hover:bg-muted rounded-lg transition-all duration-200"
-            onClick={onClose}
-          >
-            Contact
-          </a>
-        </nav>
-
-        {/* Apply Now CTA - Fixed at bottom */}
-        <div className="border-t border-border px-6 py-5 bg-muted/30">
-          <button
-            onClick={onClose}
-            className="w-full px-5 py-3.5 bg-gradient-to-r from-primary to-primary/90 text-primary-foreground text-base font-semibold rounded-lg shadow-md hover:shadow-lg active:scale-95 transition-all duration-200"
-          >
-            Apply Now
-          </button>
-          <p className="text-center text-xs text-muted-foreground mt-3 font-medium">
-            Start your journey with us today
-          </p>
-        </div>
+          className="w-12 h-12 flex items-center justify-center rounded-full border border-border hover:bg-muted active:scale-95 transition-all duration-300"
+          aria-label="Close menu"
+        >
+          <svg className="w-5 h-5 text-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </button>
       </div>
-    </>
+
+      {/* Navigation Links */}
+      <nav className="flex-1 flex flex-col justify-center px-6 -mt-8">
+        {navLinks.map((link, index) => (
+          <Link
+            key={link.href}
+            href={link.href}
+            onClick={onClose}
+            className={`group py-3 border-b border-border/50 transition-all duration-500 ease-out ${
+              isOpen ? "opacity-100 translate-x-0" : "opacity-0 translate-x-8"
+            }`}
+            style={{
+              transitionDelay: isOpen ? `${index * 50 + 100}ms` : "0ms",
+            }}
+          >
+            <div className="flex items-baseline justify-between">
+              <span className="text-4xl sm:text-5xl font-serif font-medium text-foreground group-hover:text-primary group-active:text-primary transition-colors duration-300">
+                {link.label}
+              </span>
+              <span className="text-xs font-mono text-muted-foreground group-hover:text-primary transition-colors duration-300">
+                0{index + 1}
+              </span>
+            </div>
+          </Link>
+        ))}
+      </nav>
+
+      {/* Bottom CTA */}
+      <div className="px-6 pb-8">
+        <Link
+          href="/#contact"
+          onClick={onClose}
+          className={`block w-full py-4 bg-primary text-primary-foreground text-center text-base font-semibold rounded-full transition-all duration-500 ease-out hover:bg-primary/90 active:scale-[0.98] ${
+            isOpen ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"
+          }`}
+          style={{ transitionDelay: isOpen ? "500ms" : "0ms" }}
+        >
+          Apply Now
+        </Link>
+        <p
+          className={`text-center text-xs text-muted-foreground mt-4 tracking-wide transition-all duration-500 ${
+            isOpen ? "opacity-100" : "opacity-0"
+          }`}
+          style={{ transitionDelay: isOpen ? "600ms" : "0ms" }}
+        >
+          Start your journey today
+        </p>
+      </div>
+    </div>
   )
 }

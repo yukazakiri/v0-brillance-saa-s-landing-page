@@ -4,7 +4,7 @@ import { getImageUrl } from "@/lib/sanity/image"
 import type { Settings } from "@/lib/sanity/types"
 import Image from "next/image"
 import Link from "next/link"
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import MobileMenu from "./mobile-menu"
 
 interface CollegeHeaderProps {
@@ -13,8 +13,16 @@ interface CollegeHeaderProps {
 
 export default function CollegeHeader({ settings }: CollegeHeaderProps) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
+  const [scrolled, setScrolled] = useState(false)
 
-  // Extract primary logo URL from Sanity asset (uploaded image), fallback to external URL, then default
+  useEffect(() => {
+    const handleScroll = () => {
+      setScrolled(window.scrollY > 20)
+    }
+    window.addEventListener("scroll", handleScroll, { passive: true })
+    return () => window.removeEventListener("scroll", handleScroll)
+  }, [])
+
   const logoUrl =
     getImageUrl(settings.logos?.primary, 192, 192) ||
     settings.logos?.primary?.externalUrl ||
@@ -26,103 +34,89 @@ export default function CollegeHeader({ settings }: CollegeHeaderProps) {
     <>
       <MobileMenu isOpen={mobileMenuOpen} onClose={() => setMobileMenuOpen(false)} />
 
-      <div className="w-full h-12 sm:h-14 md:h-16 lg:h-[84px] absolute left-0 top-0 flex justify-center items-center z-20 px-6 sm:px-8 md:px-12 lg:px-0">
-        <div className="w-full max-w-[calc(100%-32px)] sm:max-w-[calc(100%-48px)] md:max-w-[calc(100%-64px)] lg:max-w-[900px] lg:w-[900px] h-10 sm:h-11 md:h-12 py-1.5 sm:py-2 px-3 sm:px-4 md:px-4 pr-2 sm:pr-3 bg-card backdrop-blur-sm shadow-[0px_0px_0px_2px_white] overflow-hidden rounded-[50px] flex justify-between items-center relative z-30">
-          <div className="flex justify-center items-center">
-            <Link href="/" className="flex items-center gap-2 sm:gap-3 group hover:opacity-90 transition-opacity">
+      <header className="fixed top-0 left-0 right-0 z-30 px-4 sm:px-6 lg:px-8 pt-3 sm:pt-4">
+        <div
+          className={`max-w-6xl mx-auto rounded-full border transition-all duration-500 ease-out ${
+            scrolled
+              ? "bg-background/95 backdrop-blur-md border-border shadow-sm"
+              : "bg-background/80 backdrop-blur-sm border-border/50"
+          }`}
+        >
+          <div className="flex items-center justify-between h-14 sm:h-16 px-4 sm:px-6">
+            {/* Logo */}
+            <Link href="/" className="flex items-center gap-2 sm:gap-2.5 group">
               <Image
                 src={logoUrl || "/android-chrome-192x192.png"}
-                className="h-8 w-8 sm:h-9 sm:w-9 md:h-10 md:w-10 drop-shadow-lg rounded-full bg-card border border-primary"
+                className="h-8 w-8 sm:h-9 sm:w-9 rounded-full border border-border shadow-sm"
                 alt={logoAlt}
                 width={192}
                 height={192}
               />
-              <div className="flex flex-col leading-tight">
-                <span className="font-extrabold text-sm sm:text-base md:text-lg lg:text-xl tracking-tight text-primary drop-shadow-[1px_1px_0px_oklch(0.5_0_0/0.15)]">
-                  {settings.shortTitle || "Data Center College"}
+              <div className="flex flex-col leading-none">
+                <span className="font-bold text-sm sm:text-base tracking-tight text-primary">
+                  {settings.shortTitle || "DCCPH"}
                 </span>
-                <span
-                  className="hidden sm:block italic text-[10px] sm:text-xs md:text-sm font-semibold text-foreground -mt-1"
-                  style={{
-                    fontFamily: "'Brush Script MT', cursive",
-                    textShadow: "0.5px 0.5px 0 oklch(0.5 0 0 / 0.1)",
-                  }}
-                >
-                  of the Philippines
-                  <span
-                    className="text-[8px] sm:text-[9px] md:text-[10px] text-muted-foreground font-bold ml-0.5"
-                    style={{
-                      textShadow: "0.5px 0.5px 0 #fff, 0.5px 0.5px 1px oklch(0.5 0 0 / 0.15)",
-                    }}
-                  >
-                    of Baguio City, Inc.
-                  </span>
+                <span className="hidden sm:block text-[10px] text-muted-foreground font-medium -mt-0.5">
+                  Baguio City
                 </span>
-              </div>
-            </Link>
-            <div className="pl-3 sm:pl-4 md:pl-5 lg:pl-5 flex justify-start items-start hidden sm:flex flex-row gap-2 sm:gap-3 md:gap-4 lg:gap-4">
-              <Link href="/about" className="flex justify-start items-center hover:text-primary transition-colors">
-                <div className="flex flex-col justify-center text-muted-foreground text-xs md:text-[13px] font-medium leading-[14px] font-sans">
-                  About
-                </div>
-              </Link>
-              <Link href="/#programs" className="flex justify-start items-center hover:text-primary transition-colors">
-                <div className="flex flex-col justify-center text-muted-foreground text-xs md:text-[13px] font-medium leading-[14px] font-sans">
-                  Programs
-                </div>
-              </Link>
-              <Link
-                href="/#admissions"
-                className="flex justify-start items-center hover:text-primary transition-colors"
-              >
-                <div className="flex flex-col justify-center text-muted-foreground text-xs md:text-[13px] font-medium leading-[14px] font-sans">
-                  Admissions
-                </div>
-              </Link>
-              <Link href="/news" className="flex justify-start items-center hover:text-primary transition-colors">
-                <div className="flex flex-col justify-center text-muted-foreground text-xs md:text-[13px] font-medium leading-[14px] font-sans">
-                  News
-                </div>
-              </Link>
-              <Link
-                href="/#campus-life"
-                className="flex justify-start items-center hover:text-primary transition-colors"
-              >
-                <div className="flex flex-col justify-center text-muted-foreground text-xs md:text-[13px] font-medium leading-[14px] font-sans">
-                  Campus Life
-                </div>
-              </Link>
-            </div>
-          </div>
-          <div className="h-6 sm:h-7 md:h-8 flex justify-start items-start gap-2 sm:gap-3">
-            <Link
-              href="/#contact"
-              className="px-2 sm:px-3 md:px-[14px] py-1 sm:py-[6px] bg-primary shadow-[0px_1px_2px_oklch(0_0_0/0.12)] overflow-hidden rounded-full flex justify-center items-center hover:bg-primary/90 transition-colors hidden sm:flex"
-            >
-              <div className="flex flex-col justify-center text-primary-foreground text-xs md:text-[13px] font-medium leading-5 font-sans">
-                Apply Now
               </div>
             </Link>
 
-            <button
-              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="md:hidden flex flex-col justify-center items-center gap-1.5 p-2 hover:bg-muted rounded-full transition-all duration-300 ease-out"
-              aria-label="Toggle menu"
-              aria-expanded={mobileMenuOpen}
-            >
-              <div
-                className={`w-5 h-0.5 bg-foreground transition-all duration-300 ease-out origin-center ${mobileMenuOpen ? "rotate-45 translate-y-2" : ""}`}
-              />
-              <div
-                className={`w-5 h-0.5 bg-foreground transition-all duration-300 ease-out ${mobileMenuOpen ? "opacity-0 scale-0" : "opacity-100 scale-100"}`}
-              />
-              <div
-                className={`w-5 h-0.5 bg-foreground transition-all duration-300 ease-out origin-center ${mobileMenuOpen ? "-rotate-45 -translate-y-2" : ""}`}
-              />
-            </button>
+            {/* Desktop Navigation */}
+            <nav className="hidden md:flex items-center gap-6 lg:gap-8">
+              {[
+                { href: "/about", label: "About" },
+                { href: "/#programs", label: "Programs" },
+                { href: "/#admissions", label: "Admissions" },
+                { href: "/news", label: "News" },
+                { href: "/#campus-life", label: "Campus" },
+              ].map((link) => (
+                <Link
+                  key={link.href}
+                  href={link.href}
+                  className="text-sm font-medium text-muted-foreground hover:text-primary transition-colors duration-300"
+                >
+                  {link.label}
+                </Link>
+              ))}
+            </nav>
+
+            {/* Actions */}
+            <div className="flex items-center gap-2 sm:gap-3">
+              {/* Desktop CTA */}
+              <Link
+                href="/#contact"
+                className="hidden sm:flex px-4 py-2 bg-primary text-primary-foreground text-sm font-medium rounded-full hover:bg-primary/90 transition-colors duration-300"
+              >
+                Apply Now
+              </Link>
+
+              <button
+                onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+                className="md:hidden w-10 h-10 flex flex-col justify-center items-center gap-1.5 rounded-full hover:bg-muted/50 active:scale-95 transition-all duration-300"
+                aria-label="Toggle menu"
+                aria-expanded={mobileMenuOpen}
+              >
+                <span
+                  className={`block w-5 h-[1.5px] bg-foreground transition-all duration-300 ease-out origin-center ${
+                    mobileMenuOpen ? "rotate-45 translate-y-[7px]" : ""
+                  }`}
+                />
+                <span
+                  className={`block w-5 h-[1.5px] bg-foreground transition-all duration-300 ease-out ${
+                    mobileMenuOpen ? "opacity-0 scale-x-0" : ""
+                  }`}
+                />
+                <span
+                  className={`block w-5 h-[1.5px] bg-foreground transition-all duration-300 ease-out origin-center ${
+                    mobileMenuOpen ? "-rotate-45 -translate-y-[7px]" : ""
+                  }`}
+                />
+              </button>
+            </div>
           </div>
         </div>
-      </div>
+      </header>
     </>
   )
 }
