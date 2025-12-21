@@ -43,11 +43,16 @@
   --ring: oklch(0.35 0.08 250);
 
   /* Charts - Coffee, navy, and gold variations */
-  --chart-1: oklch(0.35 0.08 250); /* Navy blue */
-  --chart-2: oklch(0.75 0.12 75); /* Gold */
-  --chart-3: oklch(0.45 0.06 40); /* Deep coffee */
-  --chart-4: oklch(0.65 0.08 55); /* Medium coffee */
-  --chart-5: oklch(0.55 0.1 250); /* Light navy */
+  --chart-1: oklch(0.35 0.08 250);
+  /* Navy blue */
+  --chart-2: oklch(0.75 0.12 75);
+  /* Gold */
+  --chart-3: oklch(0.45 0.06 40);
+  /* Deep coffee */
+  --chart-4: oklch(0.65 0.08 55);
+  /* Medium coffee */
+  --chart-5: oklch(0.55 0.1 250);
+  /* Light navy */
 
   --radius: 0.625rem;
 
@@ -106,11 +111,16 @@
   --ring: oklch(0.75 0.12 75);
 
   /* Charts - Adjusted for dark mode */
-  --chart-1: oklch(0.65 0.12 250); /* Light navy */
-  --chart-2: oklch(0.8 0.15 75); /* Bright gold */
-  --chart-3: oklch(0.6 0.08 40); /* Light coffee */
-  --chart-4: oklch(0.7 0.1 55); /* Warm coffee */
-  --chart-5: oklch(0.55 0.12 250); /* Medium navy */
+  --chart-1: oklch(0.65 0.12 250);
+  /* Light navy */
+  --chart-2: oklch(0.8 0.15 75);
+  /* Bright gold */
+  --chart-3: oklch(0.6 0.08 40);
+  /* Light coffee */
+  --chart-4: oklch(0.7 0.1 55);
+  /* Warm coffee */
+  --chart-5: oklch(0.55 0.12 250);
+  /* Medium navy */
 
   /* Sidebar - Deep navy with gold accents */
   --sidebar: oklch(0.25 0.06 250);
@@ -170,6 +180,7 @@
   * {
     @apply border-border outline-ring/50;
   }
+
   body {
     @apply bg-background text-foreground;
   }

@@ -48,7 +48,7 @@ export default function FooterSection({ settings }: FooterSectionProps) {
     const primaryContact = settings.contactDirectory?.[0];
 
     return (
-        <footer className="w-full relative overflow-hidden bg-gradient-to-b from-background to-secondary/20">
+        <footer className="w-full relative overflow-hidden bg-gradient-to-b from-transparent to-primary/20">
             {/* Decorative Pattern Overlay - Scaled down for footer */}
             <div className="absolute bottom-0 left-1/2 transform -translate-x-1/2 z-0 pointer-events-none opacity-[0.03]">
                 <img
@@ -148,33 +148,33 @@ export default function FooterSection({ settings }: FooterSectionProps) {
                                 ))}
                                 {(!settings.institutionProfile?.chedPrograms ||
                                     settings.institutionProfile.chedPrograms.length === 0) && (
-                                    <>
-                                        <li>
-                                            <Link
-                                                href="/courses"
-                                                className="text-sm text-muted-foreground hover:text-primary transition-colors"
-                                            >
-                                                College Courses
-                                            </Link>
-                                        </li>
-                                        <li>
-                                            <Link
-                                                href="/courses"
-                                                className="text-sm text-muted-foreground hover:text-primary transition-colors"
-                                            >
-                                                Senior High School
-                                            </Link>
-                                        </li>
-                                        <li>
-                                            <Link
-                                                href="/courses"
-                                                className="text-sm text-muted-foreground hover:text-primary transition-colors"
-                                            >
-                                                TVET Programs
-                                            </Link>
-                                        </li>
-                                    </>
-                                )}
+                                        <>
+                                            <li>
+                                                <Link
+                                                    href="/courses"
+                                                    className="text-sm text-muted-foreground hover:text-primary transition-colors"
+                                                >
+                                                    College Courses
+                                                </Link>
+                                            </li>
+                                            <li>
+                                                <Link
+                                                    href="/courses"
+                                                    className="text-sm text-muted-foreground hover:text-primary transition-colors"
+                                                >
+                                                    Senior High School
+                                                </Link>
+                                            </li>
+                                            <li>
+                                                <Link
+                                                    href="/courses"
+                                                    className="text-sm text-muted-foreground hover:text-primary transition-colors"
+                                                >
+                                                    TVET Programs
+                                                </Link>
+                                            </li>
+                                        </>
+                                    )}
                             </ul>
                         </div>
 

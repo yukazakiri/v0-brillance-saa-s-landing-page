@@ -28,18 +28,18 @@ export default async function AboutPage() {
   }
 
   const milestones = [
-    { year: "1998", title: "Foundation", description: "Established with 50 students and a vision for excellence." },
-    { year: "2005", title: "Expansion", description: "Opened Downtown Campus with TESDA-certified programs." },
-    { year: "2012", title: "Recognition", description: "Achieved CHED recognition for IT and Business programs." },
+    { year: "1974", title: "Foundation", description: "Established by Engr. Wilfredo M. Bactad with a vision to bridge academic learning and industry requirements." },
+    { year: "1980s", title: "Growth", description: "Expanded programs in information technology and business administration." },
+    { year: "2000s", title: "Recognition", description: "Achieved CHED recognition for IT and Business programs." },
     {
-      year: "2018",
-      title: "Digital Era",
+      year: "2010s",
+      title: "Modernization",
       description: "Launched state-of-the-art computer labs and digital resources.",
     },
     {
-      year: "2024",
-      title: "Today",
-      description: "Leading institution with 2,000+ students and industry partnerships.",
+      year: "Today",
+      title: "Excellence",
+      description: "Leading institution with 2,000+ students and industry partnerships across technology, business, and hospitality management.",
     },
   ]
 
@@ -58,7 +58,7 @@ export default async function AboutPage() {
                   <circle cx="6" cy="6" r="2" fill="currentColor" />
                 </svg>
               }
-              text="Est. 1998"
+              text="Excellence Since 1974"
             />
             <h1 className="text-foreground font-serif leading-[0.95] tracking-tight">
               <span className="block text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-bold">Data Center</span>
@@ -66,8 +66,8 @@ export default async function AboutPage() {
               <span className="block text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-normal italic">Philippines</span>
             </h1>
             <p className="text-muted-foreground text-lg sm:text-xl md:text-2xl leading-relaxed font-sans max-w-[600px] mt-4">
-              Building futures through quality education in technology, business, and professional development for over
-              25 years.
+              Building futures through quality education in technology, business, and professional development for nearly
+              5 decades.
             </p>
           </div>
         </section>
@@ -76,7 +76,7 @@ export default async function AboutPage() {
         <section className="w-full border-b border-border px-4 sm:px-6 md:px-8 py-16 sm:py-20 flex justify-center">
           <div className="w-full max-w-[1000px] grid grid-cols-2 md:grid-cols-4 gap-8 md:gap-4">
             {[
-              { number: "25+", label: "Years" },
+              { number: "50+", label: "Years" },
               { number: "2K+", label: "Students" },
               { number: "50+", label: "Faculty" },
               { number: "95%", label: "Employed" },
@@ -100,8 +100,8 @@ export default async function AboutPage() {
             <div className="flex-shrink-0 w-full md:w-[320px]">
               <div className="aspect-[3/4] w-full border border-border rounded-lg overflow-hidden">
                 <img
-                  src="/placeholder.svg?height=480&width=360"
-                  alt="Dr. Jose M. Santos - Founder"
+                  src="/images/founder.png"
+                  alt="Engr. Wilfredo M. Bactad"
                   className="w-full h-full object-cover"
                 />
               </div>
@@ -110,11 +110,20 @@ export default async function AboutPage() {
             {/* Founder Info */}
             <div className="flex-1 flex flex-col gap-8">
               <div className="flex flex-col gap-2">
+                <Badge
+                  icon={
+                    <svg width="12" height="12" viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <circle cx="6" cy="6" r="5" stroke="currentColor" strokeWidth="1" fill="none" />
+                      <circle cx="6" cy="6" r="2" fill="currentColor" />
+                    </svg>
+                  }
+                  text="Excellence Since 1974"
+                />
                 <span className="text-muted-foreground text-xs font-sans font-semibold uppercase tracking-[0.25em]">
                   The Founder
                 </span>
                 <h2 className="text-foreground text-4xl sm:text-5xl md:text-6xl font-serif font-bold leading-[1.1] tracking-tight">
-                  Dr. Jose M. Santos
+                  Engr. Wilfredo M. Bactad
                 </h2>
                 <span className="text-muted-foreground text-base sm:text-lg font-sans mt-1">
                   Visionary Educator & Entrepreneur
@@ -127,18 +136,29 @@ export default async function AboutPage() {
                   one student at a time."
                 </p>
                 <div className="flex flex-col gap-4 text-muted-foreground text-base leading-relaxed font-sans">
-                  <p>
-                    Dr. Jose M. Santos founded Data Center College of the Philippines in 1998 with a bold vision: to
-                    create an institution that would bridge the gap between traditional education and the rapidly
-                    evolving demands of the technology industry.
+                  <p className="relative pl-0">
+                    <span className="absolute left-0 top-0 text-4xl sm:text-5xl md:text-6xl font-serif font-normal leading-none text-foreground">F</span>
+                    <span className="pl-[1.5rem] sm:pl-[2rem] md:pl-[2.5rem] block">ounded in 1974, Data Center College of The Philippines was established by Engr. Wilfredo M. Bactad with a vision to bridge the gap between academic learning and industry requirements. </span>
                   </p>
                   <p>
-                    With over three decades of experience in education and a deep commitment to student success, Dr.
-                    Santos built DCCPH from a small computer training center into one of Baguio City's most respected
-                    educational institutions. His philosophy of accessible, industry-relevant education continues to
-                    guide the college today.
+                    Our institution has evolved into a premier center for technology and business education in Baguio City.
+                    Our college has grown from a small institution to a respected name in education, particularly in the fields of information technology, business administration, and hospitality management. We continue to evolve our programs to meet the changing demands of the global job market for nearly five decades.
                   </p>
                 </div>
+              </div>
+
+              <div className="flex flex-col items-center gap-6 pt-4 border-t border-border">
+                <span className="text-foreground text-lg sm:text-xl font-serif self-end">Est. 1974</span>
+
+                <Link
+                  href="#milestones"
+                  className="px-8 py-4 bg-foreground text-background text-base font-semibold font-sans rounded-lg hover:shadow-[0px_8px_24px_rgba(55,50,47,0.2)] transition-all duration-300 active:scale-95 flex items-center gap-2"
+                >
+                  Learn more about our history
+                  <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M6 12L10 8L6 4" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                  </svg>
+                </Link>
               </div>
 
               {/* Founder Achievements */}
@@ -247,7 +267,7 @@ export default async function AboutPage() {
         </section>
 
         {/* Timeline - Horizontal on Desktop */}
-        <section className="w-full border-b border-border px-4 sm:px-6 md:px-8 py-20 sm:py-28 flex justify-center">
+        <section id="milestones" className="w-full border-b border-border px-4 sm:px-6 md:px-8 py-20 sm:py-28 flex justify-center">
           <div className="w-full max-w-[1000px] flex flex-col gap-12">
             <div className="flex flex-col gap-2">
               <span className="text-muted-foreground text-xs font-sans font-semibold uppercase tracking-[0.25em]">

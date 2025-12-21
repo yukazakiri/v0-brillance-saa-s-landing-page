@@ -17,7 +17,7 @@ export default function CollegeHeader({ settings }: CollegeHeaderProps) {
 
   useEffect(() => {
     const handleScroll = () => {
-      setScrolled(window.scrollY > 20)
+      setScrolled(window.scrollY > 50)
     }
     window.addEventListener("scroll", handleScroll, { passive: true })
     return () => window.removeEventListener("scroll", handleScroll)
@@ -34,88 +34,99 @@ export default function CollegeHeader({ settings }: CollegeHeaderProps) {
     <>
       <MobileMenu isOpen={mobileMenuOpen} onClose={() => setMobileMenuOpen(false)} />
 
-      <header className="fixed top-0 left-0 right-0 z-30 px-4 sm:px-6 lg:px-8 pt-3 sm:pt-4">
-        <div
-          className={`max-w-6xl mx-auto rounded-full border transition-all duration-500 ease-out ${
-            scrolled
-              ? "bg-background/95 backdrop-blur-md border-border shadow-sm"
-              : "bg-background/80 backdrop-blur-sm border-border/50"
+      {/* 
+        Positioned Absolute to overlay the Hero Section initially.
+        Fits within the parent container (1400px) because it's relative to that container.
+      */}
+      <header
+        className={`absolute top-0 left-0 w-full z-40 transition-all duration-500 ${scrolled
+          ? "fixed top-0 max-w-[1400px] left-1/2 -translate-x-1/2 bg-[#F7F5F3]/95 backdrop-blur-md shadow-sm border-b border-[rgba(26,58,82,0.1)]"
+          : "bg-transparent"
           }`}
-        >
-          <div className="flex items-center justify-between h-14 sm:h-16 px-4 sm:px-6">
-            {/* Logo */}
-            <Link href="/" className="flex items-center gap-2 sm:gap-2.5 group">
-              <Image
-                src={logoUrl || "/android-chrome-192x192.png"}
-                className="h-8 w-8 sm:h-9 sm:w-9 rounded-full border border-border shadow-sm"
-                alt={logoAlt}
-                width={192}
-                height={192}
-              />
-              <div className="flex flex-col leading-none">
-                <span className="font-bold text-sm sm:text-base tracking-tight text-primary">
-                  {settings.shortTitle || "DCCPH"}
+      >
+
+        {/* UTILITY BAR (Top Hat) - Hidden on scroll to save space, or keep distinct style */}
+        <div className={`w-full border-b border-[rgba(26,58,82,0.1)] ${scrolled ? "hidden md:block h-0 opacity-0 overflow-hidden" : "h-[43px] opacity-100 py-2"} transition-all duration-300 hidden md:block bg-[#F7F5F3]`}>
+          <div className="max-w-[1300px] mx-auto px-6 flex justify-between items-center text-[11px] uppercase tracking-widest font-medium text-[#605A57]">
+            <div className="flex gap-6">
+              <Link href="/faculty" className="hover:text-[#1a3a52] transition-colors">Faculty</Link>
+              <Link href="/alumni" className="hover:text-[#1a3a52] transition-colors">Alumni</Link>
+              <Link href="/parents" className="hover:text-[#1a3a52] transition-colors">Parents</Link>
+            </div>
+            <div className="flex gap-6">
+              <Link href="/portal" className="flex items-center gap-1 hover:text-[#1a3a52] transition-colors">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4" /><polyline points="10 17 15 12 10 7" /><line x1="15" y1="12" x2="3" y2="12" /></svg>
+                Portal Login
+              </Link>
+              <span>+63 74 442 2222</span>
+            </div>
+          </div>
+        </div>
+
+        {/* MAIN HEADER */}
+        <div className="w-full">
+          <div className="max-w-[1350px] mx-auto px-4 sm:px-8 h-20 flex items-center justify-between">
+
+            {/* Logo Section */}
+            <Link href="/" className="flex items-center gap-3 group">
+              <div className="relative">
+                <Image
+                  src={logoUrl || "/android-chrome-192x192.png"}
+                  className="h-10 w-10 sm:h-12 sm:w-12 object-contain transition-transform group-hover:scale-105"
+                  alt={logoAlt}
+                  width={192}
+                  height={192}
+                />
+              </div>
+              <div className="flex flex-col">
+                <span className="font-serif text-lg sm:text-xl md:text-2xl text-[#1a3a52] leading-none tracking-tight group-hover:opacity-80 transition-opacity">
+                  Data Center <span className="italic">College</span>
                 </span>
-                <span className="hidden sm:block text-[10px] text-muted-foreground font-medium -mt-0.5">
-                  Baguio City
+                <span className="text-[10px] sm:text-xs tracking-[0.2em] text-[#605A57] uppercase mt-0.5">
+                  of the Philippines
                 </span>
               </div>
             </Link>
 
             {/* Desktop Navigation */}
-            <nav className="hidden md:flex items-center gap-6 lg:gap-8">
+            <nav className="hidden lg:flex items-center gap-8">
               {[
                 { href: "/about", label: "About" },
-                { href: "/#programs", label: "Programs" },
+                { href: "/#programs", label: "Academics" },
                 { href: "/#admissions", label: "Admissions" },
-                { href: "/news", label: "News" },
-                { href: "/#campus-life", label: "Campus" },
+                { href: "/#campus", label: "Campus Life" },
               ].map((link) => (
                 <Link
                   key={link.href}
                   href={link.href}
-                  className="text-sm font-medium text-muted-foreground hover:text-primary transition-colors duration-300"
+                  className="text-sm font-medium text-[#1a3a52] hover:text-[#C79244] transition-colors relative group py-2"
                 >
                   {link.label}
+                  <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-[#C79244] transition-all duration-300 group-hover:w-full" />
                 </Link>
               ))}
-            </nav>
-
-            {/* Actions */}
-            <div className="flex items-center gap-2 sm:gap-3">
-              {/* Desktop CTA */}
               <Link
                 href="/#contact"
-                className="hidden sm:flex px-4 py-2 bg-primary text-primary-foreground text-sm font-medium rounded-full hover:bg-primary/90 transition-colors duration-300"
+                className="ml-4 px-6 py-2.5 bg-[#1a3a52] text-white text-xs font-semibold tracking-wider uppercase rounded-sm hover:bg-[#1a3a52]/90 transition-all hover:shadow-md"
               >
                 Apply Now
               </Link>
+            </nav>
 
-              <button
-                onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-                className="md:hidden w-10 h-10 flex flex-col justify-center items-center gap-1.5 rounded-full hover:bg-muted/50 active:scale-95 transition-all duration-300"
-                aria-label="Toggle menu"
-                aria-expanded={mobileMenuOpen}
-              >
-                <span
-                  className={`block w-5 h-[1.5px] bg-foreground transition-all duration-300 ease-out origin-center ${
-                    mobileMenuOpen ? "rotate-45 translate-y-[7px]" : ""
-                  }`}
-                />
-                <span
-                  className={`block w-5 h-[1.5px] bg-foreground transition-all duration-300 ease-out ${
-                    mobileMenuOpen ? "opacity-0 scale-x-0" : ""
-                  }`}
-                />
-                <span
-                  className={`block w-5 h-[1.5px] bg-foreground transition-all duration-300 ease-out origin-center ${
-                    mobileMenuOpen ? "-rotate-45 -translate-y-[7px]" : ""
-                  }`}
-                />
-              </button>
-            </div>
+            {/* Mobile Menu Button */}
+            <button
+              onClick={() => setMobileMenuOpen(true)}
+              className="lg:hidden p-2 text-[#1a3a52] hover:bg-black/5 rounded-md transition-colors"
+            >
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <line x1="3" y1="12" x2="21" y2="12"></line>
+                <line x1="3" y1="6" x2="21" y2="6"></line>
+                <line x1="3" y1="18" x2="21" y2="18"></line>
+              </svg>
+            </button>
           </div>
         </div>
+
       </header>
     </>
   )
