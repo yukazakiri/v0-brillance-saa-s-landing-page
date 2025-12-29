@@ -1,6 +1,8 @@
 import type React from "react"
 import type { Metadata } from "next"
 
+import { fetchSettings } from "@/lib/sanity/queries"
+import { buildImageUrl } from "@/lib/sanity/image"
 import "./globals.css"
 
 import { Inter, Instrument_Serif, Libre_Baskerville as V0_Font_Libre_Baskerville, IBM_Plex_Mono as V0_Font_IBM_Plex_Mono, Lora as V0_Font_Lora } from 'next/font/google'
@@ -25,11 +27,66 @@ const instrumentSerif = Instrument_Serif({
   preload: true,
 })
 
-export const metadata: Metadata = {
-  title: "Brillance - Effortless Custom Contract Billing",
-  description:
-    "Streamline your billing process with seamless automation for every custom contract, tailored by Brillance.",
-  generator: 'v0.app'
+export async function generateMetadata(): Promise<Metadata> {
+  const settings = await fetchSettings()
+
+  const title = settings?.siteTitle || "Data Center College of The Philippines"
+  const description = settings?.defaultSeo?.metaDescription || 
+    settings?.tagline || 
+    "Empowering the next generation of IT professionals, business leaders, and innovators"
+  const ogImage = buildImageUrl(settings?.defaultSeo?.shareImage) || "/hero-images/maincampus.png"
+
+  return {
+    title: {
+      default: title,
+      template: `%s | ${settings?.shortTitle || "DCCP"}`,
+    },
+    description,
+    keywords: settings?.defaultSeo?.keywords || ["Data Center College", "DCCP", "Baguio City", "IT School", "Business School"],
+    authors: [{ name: "Data Center College of The Philippines" }],
+    creator: "Data Center College of The Philippines",
+    metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || "https://dccp.edu.ph"),
+    openGraph: {
+      type: "website",
+      locale: "en_PH",
+      url: process.env.NEXT_PUBLIC_SITE_URL || "https://dccp.edu.ph",
+      title,
+      description,
+      siteName: settings?.shortTitle || "DCCP",
+      images: ogImage ? [
+        {
+          url: ogImage,
+          width: 1200,
+          height: 630,
+          alt: settings?.defaultSeo?.shareImage?.alt || title,
+        },
+      ] : [],
+    },
+    twitter: {
+      card: "summary_large_image",
+      title,
+      description,
+      images: ogImage ? [ogImage] : [],
+      creator: "@dccp_official", // Placeholder if not in settings
+    },
+    icons: {
+      icon: [
+        { url: "/favicon.ico" },
+        { url: "/favicon-16x16.png", sizes: "16x16", type: "image/png" },
+        { url: "/favicon-32x32.png", sizes: "32x32", type: "image/png" },
+      ],
+      apple: [
+        { url: "/apple-touch-icon.png" },
+      ],
+      other: [
+        {
+          rel: "mask-icon",
+          url: "/safari-pinned-tab.svg",
+        },
+      ],
+    },
+    manifest: "/site.webmanifest",
+  }
 }
 
 export default function RootLayout({

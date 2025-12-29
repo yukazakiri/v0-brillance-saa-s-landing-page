@@ -1,9 +1,36 @@
 import type React from "react"
 import Link from "next/link"
+import { Metadata } from "next"
 import { fetchSettings } from "@/lib/sanity/queries"
+import { buildImageUrl } from "@/lib/sanity/image"
 import type { Settings } from "@/lib/sanity/types"
 import CollegeHeader from "@/components/college-header"
 import FooterSection from "@/components/footer-section"
+
+export async function generateMetadata(): Promise<Metadata> {
+  const settings = await fetchSettings()
+  
+  const title = "About Us"
+  const description = settings?.institutionProfile?.overview || 
+    "Established in 1974, Data Center College of The Philippines is a premier institution for technology and business education in Baguio City."
+  const ogImage = buildImageUrl(settings?.defaultSeo?.shareImage) || "/images/founder.png"
+
+  return {
+    title,
+    description,
+    openGraph: {
+      title: `${title} | ${settings?.shortTitle || "DCCP"}`,
+      description,
+      images: ogImage ? [{ url: ogImage }] : [],
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: `${title} | ${settings?.shortTitle || "DCCP"}`,
+      description,
+      images: ogImage ? [ogImage] : [],
+    },
+  }
+}
 
 // Badge component matching other sections
 function Badge({ icon, text }: { icon: React.ReactNode; text: string }) {

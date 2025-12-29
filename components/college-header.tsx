@@ -4,8 +4,9 @@ import { getImageUrl } from "@/lib/sanity/image"
 import type { Settings } from "@/lib/sanity/types"
 import Image from "next/image"
 import Link from "next/link"
-import { useState, useEffect } from "react"
+import { useState, useEffect, useRef } from "react"
 import MobileMenu from "./mobile-menu"
+import ViewTransitionLink from "./view-transition-link"
 
 interface CollegeHeaderProps {
   settings: Settings
@@ -14,13 +15,40 @@ interface CollegeHeaderProps {
 export default function CollegeHeader({ settings }: CollegeHeaderProps) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const [scrolled, setScrolled] = useState(false)
+  const scrollTimeoutRef = useRef<NodeJS.Timeout | null>(null)
 
   useEffect(() => {
-    const handleScroll = () => {
-      setScrolled(window.scrollY > 50)
+    let lastScrollY = window.scrollY
+    let ticking = false
+
+    const updateScrollState = () => {
+      const currentScrollY = window.scrollY
+      const scrollThreshold = 50 // Standard threshold
+      
+      if (currentScrollY > scrollThreshold) {
+        setScrolled(true)
+      } else {
+        setScrolled(false)
+      }
+      
+      lastScrollY = currentScrollY
+      ticking = false
     }
+
+    const handleScroll = () => {
+      if (!ticking) {
+        requestAnimationFrame(updateScrollState)
+        ticking = true
+      }
+    }
+
     window.addEventListener("scroll", handleScroll, { passive: true })
-    return () => window.removeEventListener("scroll", handleScroll)
+    return () => {
+      window.removeEventListener("scroll", handleScroll)
+      if (scrollTimeoutRef.current) {
+        clearTimeout(scrollTimeoutRef.current)
+      }
+    }
   }, [])
 
   const logoUrl =
@@ -35,79 +63,99 @@ export default function CollegeHeader({ settings }: CollegeHeaderProps) {
       <MobileMenu isOpen={mobileMenuOpen} onClose={() => setMobileMenuOpen(false)} />
 
       {/* 
-        Positioned Absolute to overlay the Hero Section initially.
-        Fits within the parent container (1400px) because it's relative to that container.
+        Fixed Header Implementation
+        - Always fixed to viewport top
+        - Transparent initially, white/blur on scroll
+        - No positional transitions (prevents vibration)
+        - Full width (no "floating island" width jumps)
       */}
       <header
-        className={`absolute top-0 left-0 w-full z-40 transition-all duration-500 ${scrolled
-          ? "fixed top-0 max-w-[1400px] left-1/2 -translate-x-1/2 bg-[#F7F5F3]/95 backdrop-blur-md shadow-sm border-b border-[rgba(26,58,82,0.1)]"
-          : "bg-transparent"
+        className={`fixed top-0 left-0 w-full z-50 transition-colors duration-500 ease-in-out ${scrolled
+          ? "bg-[#F7F5F3]/95 backdrop-blur-md shadow-md border-b border-[rgba(26,58,82,0.06)]"
+          : "bg-transparent border-b border-transparent"
           }`}
       >
 
-        {/* UTILITY BAR (Top Hat) - Hidden on scroll to save space, or keep distinct style */}
-        <div className={`w-full border-b border-[rgba(26,58,82,0.1)] ${scrolled ? "hidden md:block h-0 opacity-0 overflow-hidden" : "h-[43px] opacity-100 py-2"} transition-all duration-300 hidden md:block bg-[#F7F5F3]`}>
-          <div className="max-w-[1300px] mx-auto px-6 flex justify-between items-center text-[11px] uppercase tracking-widest font-medium text-[#605A57]">
+        {/* UTILITY BAR (Top Hat) */}
+        {/* Collapses height and opacity on scroll */}
+        <div 
+          className={`w-full overflow-hidden bg-[#F7F5F3] transition-all duration-500 ease-in-out md:block hidden border-b border-[rgba(26,58,82,0.1)] ${scrolled ? "max-h-0 opacity-0" : "max-h-[50px] opacity-100"}`}
+        >
+          <div className="max-w-[1350px] mx-auto px-4 sm:px-8 py-2 flex justify-between items-center text-[11px] uppercase tracking-widest font-medium text-[#605A57]">
             <div className="flex gap-6">
-              <Link href="/faculty" className="hover:text-[#1a3a52] transition-colors">Faculty</Link>
-              <Link href="/alumni" className="hover:text-[#1a3a52] transition-colors">Alumni</Link>
-              <Link href="/parents" className="hover:text-[#1a3a52] transition-colors">Parents</Link>
+              <Link href="/faculty" className="hover:text-[#1a3a52] transition-colors duration-200">Faculty</Link>
+              <Link href="/alumni" className="hover:text-[#1a3a52] transition-colors duration-200">Alumni</Link>
+              <Link href="/parents" className="hover:text-[#1a3a52] transition-colors duration-200">Parents</Link>
             </div>
             <div className="flex gap-6">
-              <Link href="/portal" className="flex items-center gap-1 hover:text-[#1a3a52] transition-colors">
+              <ViewTransitionLink href="/portal" className="flex items-center gap-1 hover:text-[#1a3a52] transition-colors duration-200" transitionType="slide">
                 <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4" /><polyline points="10 17 15 12 10 7" /><line x1="15" y1="12" x2="3" y2="12" /></svg>
                 Portal Login
-              </Link>
+              </ViewTransitionLink>
               <span>+63 74 442 2222</span>
             </div>
           </div>
         </div>
 
-        {/* MAIN HEADER */}
+        {/* MAIN HEADER CONTENT */}
         <div className="w-full">
-          <div className="max-w-[1350px] mx-auto px-4 sm:px-8 h-20 flex items-center justify-between">
+          <div 
+            className={`max-w-[1350px] mx-auto px-4 sm:px-8 flex items-center justify-between transition-all duration-500 ease-in-out ${scrolled ? "h-16" : "h-20"}`}
+          >
 
             {/* Logo Section */}
-            <Link href="/" className="flex items-center gap-3 group">
+            <ViewTransitionLink href="/" className="flex items-center gap-3 group" transitionType="slide-reverse">
               <div className="relative">
                 <Image
                   src={logoUrl || "/android-chrome-192x192.png"}
-                  className="h-10 w-10 sm:h-12 sm:w-12 object-contain transition-transform group-hover:scale-105"
+                  className={`object-contain transition-all duration-500 ease-in-out group-hover:scale-105 ${scrolled ? "h-8 w-8 sm:h-10 sm:w-10" : "h-10 w-10 sm:h-12 sm:w-12"}`}
                   alt={logoAlt}
                   width={192}
                   height={192}
                 />
               </div>
-              <div className="flex flex-col">
-                <span className="font-serif text-lg sm:text-xl md:text-2xl text-[#1a3a52] leading-none tracking-tight group-hover:opacity-80 transition-opacity">
+              <div className="flex flex-col transition-all duration-500 ease-in-out">
+                <span className={`font-serif text-[#1a3a52] leading-none tracking-tight group-hover:opacity-80 transition-all duration-500 ease-in-out ${scrolled ? "text-base sm:text-lg md:text-xl" : "text-lg sm:text-xl md:text-2xl"}`}>
                   Data Center <span className="italic">College</span>
                 </span>
-                <span className="text-[10px] sm:text-xs tracking-[0.2em] text-[#605A57] uppercase mt-0.5">
+                <span className={`text-[#605A57] uppercase mt-0.5 transition-all duration-500 ease-in-out tracking-[0.2em] ${scrolled ? "text-[8px] sm:text-[9px]" : "text-[10px] sm:text-xs"}`}>
                   of the Philippines
                 </span>
               </div>
-            </Link>
+            </ViewTransitionLink>
 
             {/* Desktop Navigation */}
-            <nav className="hidden lg:flex items-center gap-8">
+            <nav className="hidden lg:flex items-center gap-6 xl:gap-8">
               {[
                 { href: "/about", label: "About" },
                 { href: "/#programs", label: "Academics" },
                 { href: "/#admissions", label: "Admissions" },
                 { href: "/#campus", label: "Campus Life" },
               ].map((link) => (
-                <Link
-                  key={link.href}
-                  href={link.href}
-                  className="text-sm font-medium text-[#1a3a52] hover:text-[#C79244] transition-colors relative group py-2"
-                >
-                  {link.label}
-                  <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-[#C79244] transition-all duration-300 group-hover:w-full" />
-                </Link>
+                link.href === "/about" ? (
+                  <ViewTransitionLink
+                    key={link.href}
+                    href={link.href}
+                    className={`text-[#1a3a52] hover:text-[#C79244] transition-all duration-300 relative group py-2 font-medium ${scrolled ? "text-xs" : "text-sm"}`}
+                    transitionType="slide"
+                  >
+                    {link.label}
+                    <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-[#C79244] transition-all duration-300 ease-in-out group-hover:w-full" />
+                  </ViewTransitionLink>
+                ) : (
+                  <Link
+                    key={link.href}
+                    href={link.href}
+                    className={`text-[#1a3a52] hover:text-[#C79244] transition-all duration-300 relative group py-2 font-medium ${scrolled ? "text-xs" : "text-sm"}`}
+                  >
+                    {link.label}
+                    <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-[#C79244] transition-all duration-300 ease-in-out group-hover:w-full" />
+                  </Link>
+                )
               ))}
               <Link
                 href="/#contact"
-                className="ml-4 px-6 py-2.5 bg-[#1a3a52] text-white text-xs font-semibold tracking-wider uppercase rounded-sm hover:bg-[#1a3a52]/90 transition-all hover:shadow-md"
+                className={`ml-4 font-semibold tracking-wider uppercase rounded-sm transition-all duration-500 ease-in-out hover:shadow-md ${scrolled ? "px-4 py-2 text-xs bg-[#1a3a52] text-white hover:bg-[#1a3a52]/90" : "px-6 py-2.5 text-xs bg-[#1a3a52] text-white hover:bg-[#1a3a52]/90"}`}
               >
                 Apply Now
               </Link>
@@ -116,9 +164,9 @@ export default function CollegeHeader({ settings }: CollegeHeaderProps) {
             {/* Mobile Menu Button */}
             <button
               onClick={() => setMobileMenuOpen(true)}
-              className="lg:hidden p-2 text-[#1a3a52] hover:bg-black/5 rounded-md transition-colors"
+              className="lg:hidden p-2 text-[#1a3a52] hover:bg-black/5 rounded-md transition-all duration-200 hover:scale-110"
             >
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="transition-transform duration-200 hover:rotate-90">
                 <line x1="3" y1="12" x2="21" y2="12"></line>
                 <line x1="3" y1="6" x2="21" y2="6"></line>
                 <line x1="3" y1="18" x2="21" y2="18"></line>

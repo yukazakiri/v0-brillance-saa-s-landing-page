@@ -313,6 +313,18 @@ export interface SanityCourse {
         shareImage?: SanityImage;
     };
     status?: "active" | "inactive" | "archived";
+    
+    // Properties referenced in mapCourseToLocalCourse that were missing
+    description?: string;
+    durationYears?: number;
+    careerPaths?: string[];
+    competencies?: string[];
+    scholarshipsAvailable?: boolean;
+    tuitionRange?: string;
+    enrollmentCap?: number;
+    programType?: string;
+    qualificationLevel?: string;
+    tesdaRegistrationNumber?: string;
 }
 
 export interface Course {
@@ -325,4 +337,189 @@ export interface Course {
     highlights: string[];
     credential?: string;
     scholarshipsAvailable?: boolean;
+}
+
+// Student Portal Page types
+export interface LinkObject {
+    label: string;
+    style: "primary" | "secondary" | "text";
+    linkType: "page" | "program" | "external" | "email";
+    page?: { _ref: string }; // Reference to page
+    program?: { _ref: string }; // Reference to course
+    url?: string;
+    email?: string;
+    openInNewTab?: boolean;
+}
+
+export interface SoftwareFeature {
+    featureName: string;
+    shortDescription?: string;
+    icon?: SanityImage;
+    screenshot?: SanityImage;
+    detailedDescription?: any[]; // Portable Text
+    highlight?: boolean;
+}
+
+export interface SoftwareFeatureSection {
+    _key: string;
+    _type: "softwareFeatureSection";
+    sectionTitle: string;
+    sectionDescription?: string;
+    layout: "grid" | "list" | "tabs";
+    features: SoftwareFeature[];
+}
+
+export interface MediaItem {
+    title?: string;
+    description?: string;
+    image?: SanityImage;
+    videoUrl?: string;
+    order?: number;
+}
+
+export interface SoftwareShowcaseSection {
+    _key: string;
+    _type: "softwareShowcaseSection";
+    showcaseTitle: string;
+    showcaseSubtitle?: string;
+    showcaseType: "gallery" | "video" | "interactive" | "carousel";
+    mediaItems: MediaItem[];
+}
+
+export interface TechnicalSpecItem {
+    label: string;
+    value: string;
+    description?: string;
+}
+
+export interface TechnicalSpecCategory {
+    category: string;
+    items: TechnicalSpecItem[];
+}
+
+export interface TechnicalSpecsSection {
+    _key: string;
+    _type: "technicalSpecsSection";
+    sectionTitle: string;
+    sectionDescription?: string;
+    specifications: TechnicalSpecCategory[];
+}
+
+export interface StudentTestimonial {
+    studentName: string;
+    studentProgram?: string;
+    testimonial: string;
+    studentPhoto?: SanityImage;
+    rating?: number;
+    highlight?: boolean;
+}
+
+export interface StudentTestimonialSection {
+    _key: string;
+    _type: "studentTestimonialSection";
+    sectionTitle: string;
+    sectionDescription?: string;
+    testimonials: StudentTestimonial[];
+}
+
+export interface Resource {
+    resourceTitle?: string;
+    resourceUrl?: string;
+    resourceType?: "documentation" | "tutorial" | "download" | "video";
+}
+
+export interface GettingStartedStep {
+    stepNumber: number;
+    stepTitle: string;
+    stepDescription?: string;
+    stepImage?: SanityImage;
+    resources?: Resource[];
+}
+
+export interface GettingStartedSection {
+    _key: string;
+    _type: "gettingStartedSection";
+    sectionTitle: string;
+    sectionDescription?: string;
+    steps: GettingStartedStep[];
+}
+
+export type PortalSection =
+    | SoftwareFeatureSection
+    | SoftwareShowcaseSection
+    | TechnicalSpecsSection
+    | StudentTestimonialSection
+    | GettingStartedSection;
+
+export interface HeroImage {
+    image: SanityImage;
+    title?: string;
+    description?: string;
+    cta?: { label?: string; url?: string };
+    order?: number;
+    isPrimary?: boolean;
+}
+
+export interface HeroSection {
+    eyebrow?: string;
+    heading: string;
+    subheading?: string;
+    heroLayout: "single" | "carousel" | "gallery" | "alternating";
+    heroImages?: HeroImage[];
+    heroImage?: SanityImage; // Primary image for 'single' layout
+    backgroundImage?: SanityImage;
+    carouselSettings?: {
+        autoPlay?: boolean;
+        interval?: number;
+        showDots?: boolean;
+        showArrows?: boolean;
+    };
+    ctas?: LinkObject[];
+}
+
+export interface OverviewSection {
+    overviewTitle: string;
+    overviewDescription: string;
+    keyBenefits?: Array<{ benefit: string; description?: string }>;
+}
+
+export interface TargetAudience {
+    audienceType: string;
+    customAudience?: string;
+}
+
+export interface AccessInfo {
+    accessMethod?: "free-all" | "free-program" | "subscription" | "purchase" | "campus";
+    accessLink?: string;
+    accessInstructions?: string;
+}
+
+export interface SupportInfo {
+    supportEmail?: string;
+    documentationLink?: string;
+    tutorialLink?: string;
+    supportHours?: string;
+}
+
+export interface StudentPortalPage {
+    _id: string;
+    _type: "studentPortalPage";
+    title: string;
+    slug: { current: string };
+    softwareName: string;
+    hero?: HeroSection;
+    softwareVersion?: string;
+    softwareCategory?: string;
+    overview?: OverviewSection;
+    sections?: PortalSection[];
+    targetAudience?: TargetAudience[];
+    accessInfo?: AccessInfo;
+    supportInfo?: SupportInfo;
+    seo?: {
+        metaTitle?: string;
+        metaDescription?: string;
+        shareImage?: SanityImage;
+        noIndex?: boolean;
+    };
+    lastUpdated?: string;
 }

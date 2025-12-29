@@ -3,6 +3,7 @@
 import type { Settings } from "@/lib/sanity/types"
 import { useEffect, useState } from "react"
 import Link from "next/link"
+import ViewTransitionLink from "./view-transition-link"
 
 interface CollegeHeroProps {
   settings: Settings

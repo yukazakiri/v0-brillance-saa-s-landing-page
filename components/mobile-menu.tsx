@@ -2,6 +2,7 @@
 
 import Link from "next/link"
 import { useEffect } from "react"
+import ViewTransitionLink from "./view-transition-link"
 
 interface MobileMenuProps {
   isOpen: boolean
@@ -32,7 +33,7 @@ export default function MobileMenu({ isOpen, onClose }: MobileMenuProps) {
 
   return (
     <div
-      className={`fixed inset-0 z-50 md:hidden flex flex-col bg-background transition-all duration-500 ease-out ${isOpen ? "opacity-100 pointer-events-auto translate-x-0" : "opacity-0 pointer-events-none translate-x-full"
+      className={`fixed inset-0 z-[100] md:hidden flex flex-col bg-background transition-all duration-500 ease-out ${isOpen ? "opacity-100 pointer-events-auto translate-x-0" : "opacity-0 pointer-events-none translate-x-full"
         }`}
     >
       {/* Header with close button */}
@@ -53,27 +54,56 @@ export default function MobileMenu({ isOpen, onClose }: MobileMenuProps) {
 
       {/* Navigation Links */}
       <nav className="flex-1 flex flex-col justify-center px-6 -mt-8">
-        {navLinks.map((link, index) => (
-          <Link
-            key={link.href}
-            href={link.href}
-            onClick={onClose}
-            className={`group py-3 border-b border-border/50 transition-all duration-500 ease-out ${isOpen ? "opacity-100 translate-x-0" : "opacity-0 translate-x-8"
-              }`}
-            style={{
-              transitionDelay: isOpen ? `${index * 50 + 100}ms` : "0ms",
-            }}
-          >
-            <div className="flex items-baseline justify-between">
-              <span className="text-4xl sm:text-5xl font-serif font-medium text-foreground group-hover:text-primary group-active:text-primary transition-colors duration-300">
-                {link.label}
-              </span>
-              <span className="text-xs font-mono text-muted-foreground group-hover:text-primary transition-colors duration-300">
-                0{index + 1}
-              </span>
-            </div>
-          </Link>
-        ))}
+        {navLinks.map((link, index) => {
+          const isTransitionLink = link.href === "/" || link.href === "/about"
+          
+          if (isTransitionLink) {
+            return (
+              <ViewTransitionLink
+                key={link.href}
+                href={link.href}
+                onClick={onClose}
+                className={`group py-3 border-b border-border/50 transition-all duration-500 ease-out ${isOpen ? "opacity-100 translate-x-0" : "opacity-0 translate-x-8"
+                  }`}
+                style={{
+                  transitionDelay: isOpen ? `${index * 50 + 100}ms` : "0ms",
+                }}
+                transitionType={link.href === "/" ? "slide-reverse" : "slide"}
+              >
+                <div className="flex items-baseline justify-between">
+                  <span className="text-4xl sm:text-5xl font-serif font-medium text-foreground group-hover:text-primary group-active:text-primary transition-colors duration-300">
+                    {link.label}
+                  </span>
+                  <span className="text-xs font-mono text-muted-foreground group-hover:text-primary transition-colors duration-300">
+                    0{index + 1}
+                  </span>
+                </div>
+              </ViewTransitionLink>
+            )
+          }
+
+          return (
+            <Link
+              key={link.href}
+              href={link.href}
+              onClick={onClose}
+              className={`group py-3 border-b border-border/50 transition-all duration-500 ease-out ${isOpen ? "opacity-100 translate-x-0" : "opacity-0 translate-x-8"
+                }`}
+              style={{
+                transitionDelay: isOpen ? `${index * 50 + 100}ms` : "0ms",
+              }}
+            >
+              <div className="flex items-baseline justify-between">
+                <span className="text-4xl sm:text-5xl font-serif font-medium text-foreground group-hover:text-primary group-active:text-primary transition-colors duration-300">
+                  {link.label}
+                </span>
+                <span className="text-xs font-mono text-muted-foreground group-hover:text-primary transition-colors duration-300">
+                  0{index + 1}
+                </span>
+              </div>
+            </Link>
+          )
+        })}
       </nav>
 
       {/* Bottom CTA */}

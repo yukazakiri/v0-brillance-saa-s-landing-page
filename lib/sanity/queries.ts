@@ -2,7 +2,7 @@ import { groq } from "next-sanity"
 
 import { client } from "./client"
 import { getImageUrl } from "./image"
-import type { Article, Course, SanityCourse, SanityFAQ, SanityPost, Settings } from "./types"
+import type { Article, Course, SanityCourse, SanityFAQ, SanityPost, Settings, StudentPortalPage } from "./types"
 
 const dateFormatter = new Intl.DateTimeFormat("en-US", {
   month: "long",
@@ -552,5 +552,151 @@ export async function fetchFAQs(): Promise<SanityFAQ[]> {
   } catch (error) {
     console.error("Error fetching FAQs:", error)
     return []
+  }
+}
+
+// Student Portal Page Query
+export const STUDENT_PORTAL_PAGE_QUERY = groq`
+  *[_type == "studentPortalPage"][0] {
+    _id,
+    _type,
+    title,
+    slug,
+    softwareName,
+    hero {
+      eyebrow,
+      heading,
+      subheading,
+      heroLayout,
+      heroImages[] {
+        image {
+          asset->{
+            _id,
+            url,
+            metadata { dimensions, lqip }
+          },
+          alt,
+          externalUrl
+        },
+        title,
+        description,
+        cta,
+        order,
+        isPrimary
+      },
+      heroImage {
+        asset->{
+          _id,
+          url,
+          metadata { dimensions, lqip }
+        },
+        alt,
+        externalUrl
+      },
+      backgroundImage {
+        asset->{
+          _id,
+          url,
+          metadata { dimensions, lqip }
+        },
+        externalUrl
+      },
+      carouselSettings,
+      ctas[] {
+        label,
+        style,
+        linkType,
+        page->{_id, slug},
+        program->{_id, slug},
+        url,
+        email,
+        openInNewTab
+      }
+    },
+    softwareVersion,
+    softwareCategory,
+    overview {
+      overviewTitle,
+      overviewDescription,
+      keyBenefits
+    },
+    sections[] {
+      ...,
+      _type == "softwareFeatureSection" => {
+        features[] {
+          ...,
+          icon {
+            asset->{ _id, url },
+            externalUrl
+          },
+          screenshot {
+            asset->{ _id, url, metadata { dimensions, lqip } },
+            alt,
+            externalUrl
+          }
+        }
+      },
+      _type == "softwareShowcaseSection" => {
+        mediaItems[] {
+          ...,
+          image {
+            asset->{ _id, url, metadata { dimensions, lqip } },
+            alt,
+            externalUrl
+          }
+        }
+      },
+      _type == "studentTestimonialSection" => {
+        testimonials[] {
+          ...,
+          studentPhoto {
+            asset->{ _id, url, metadata { dimensions, lqip } },
+            externalUrl
+          }
+        }
+      },
+      _type == "technicalSpecsSection" => {
+        specifications[] {
+          category,
+          items[] {
+            label,
+            value,
+            description
+          }
+        }
+      },
+      _type == "gettingStartedSection" => {
+        steps[] {
+          ...,
+          stepImage {
+            asset->{ _id, url, metadata { dimensions, lqip } },
+            externalUrl
+          }
+        }
+      }
+    },
+    targetAudience,
+    accessInfo,
+    supportInfo,
+    seo {
+      metaTitle,
+      metaDescription,
+      shareImage {
+        asset->{ _id, url, metadata { dimensions, lqip } },
+        alt,
+        externalUrl
+      },
+      noIndex
+    },
+    lastUpdated
+  }
+`
+
+export async function fetchStudentPortalPage(): Promise<StudentPortalPage | null> {
+  try {
+    return await client.fetch<StudentPortalPage>(STUDENT_PORTAL_PAGE_QUERY)
+  } catch (error) {
+    console.error("Error fetching student portal page:", error)
+    return null
   }
 }

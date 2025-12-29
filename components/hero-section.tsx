@@ -1,10 +1,15 @@
 'use client'
-import { Logo } from '@/components/logo'
+
+import { cn } from "@/lib/utils"
 import Link from 'next/link'
-import { useState } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { Button } from '@/components/ui/button'
 import { Menu, X } from 'lucide-react'
 import Image from 'next/image'
+import ViewTransitionLink from './view-transition-link'
+import type { HeroSection as HeroSectionType } from "@/lib/sanity/types"
+import { getImageUrl } from "@/lib/sanity/image"
+import useEmblaCarousel from "embla-carousel-react"
 
 const menuItems = [
   { name: 'Student Portal', href: '#' },
@@ -13,8 +18,61 @@ const menuItems = [
   { name: 'Library', href: '#' },
 ]
 
-export default function HeroSection() {
+interface HeroSectionProps {
+  data?: HeroSectionType;
+  softwareName?: string;
+  softwareVersion?: string;
+}
+
+export default function HeroSection({ data, softwareName }: HeroSectionProps) {
   const [menuState, setMenuState] = useState(false)
+
+  // Use Sanity data if available, otherwise fallback to hardcoded defaults
+  const heading = data?.heading || "Welcome to DCCPHub"
+  const subheading = data?.subheading || "Your centralized gateway to academic resources, student services, and faculty tools. Access everything you need for your journey at Data Center College."
+  const eyebrow = data?.eyebrow || "Official Portal"
+  
+  // Use primary hero image from Sanity or fallback
+  const primaryImage = data?.heroLayout === "single" ? data?.heroImage : data?.heroImages?.find(img => img.isPrimary)?.image
+  
+  // Logic to handle multiple stacked images if present in heroImages
+  const stackedImages = data?.heroLayout === "single" 
+    ? (primaryImage ? [primaryImage] : []) 
+    : data?.heroImages?.sort((a, b) => (a.order || 0) - (b.order || 0)).map(h => h.image) || []
+
+  // Default image if no images from Sanity
+  const hasImages = stackedImages.length > 0;
+  const defaultImage = "/hero-images/image.png";
+
+  // Embla Carousel setup - The Proxy Interaction Layer
+  const [emblaRef, emblaApi] = useEmblaCarousel({ loop: true })
+  const [selectedIndex, setSelectedIndex] = useState(0)
+
+  const onSelect = useCallback(() => {
+    if (!emblaApi) return
+    setSelectedIndex(emblaApi.selectedScrollSnap())
+  }, [emblaApi])
+
+  useEffect(() => {
+    if (!emblaApi) return
+    onSelect()
+    emblaApi.on('select', onSelect)
+  }, [emblaApi, onSelect])
+
+  // Process heading to highlight software name if present
+  // This simplistic replacement mimics the design: "Welcome to <span...>DCCPHub</span>"
+  const highlightText = softwareName || "DCCPHub"
+  const headingParts = heading.split(highlightText)
+  const renderedHeading = headingParts.length > 1 ? (
+    <>
+      {headingParts[0]}
+      <span className="text-[#C79244] italic">{highlightText}</span>
+      {headingParts[1]}
+    </>
+  ) : (
+    heading
+  )
+
   return (
     <>
       <header className="fixed top-0 left-1/2 -translate-x-1/2 w-full max-w-[1400px] z-50">
@@ -55,10 +113,11 @@ export default function HeroSection() {
               </div>
 
               {/* Center Branding */}
-              <Link
+              <ViewTransitionLink
                 href="/"
                 aria-label="home"
-                className="lg:absolute lg:left-1/2 lg:-translate-x-1/2 flex items-center gap-4 transition-all hover:scale-[1.03] duration-500 group">
+                className="lg:absolute lg:left-1/2 lg:-translate-x-1/2 flex items-center gap-4 transition-all hover:scale-[1.03] duration-500 group"
+                transitionType="slide-reverse">
                 <div className="flex flex-col items-center">
                   <span className="font-serif text-3xl md:text-4xl font-bold text-[#1a3a52] tracking-tight leading-none group-hover:text-[#C79244] transition-colors">DCCPHub</span>
                   <div className="flex items-center gap-2 mt-2">
@@ -67,7 +126,7 @@ export default function HeroSection() {
                     <div className="h-[1px] w-4 bg-[#C79244]/40"></div>
                   </div>
                 </div>
-              </Link>
+              </ViewTransitionLink>
 
               {/* Mobile Toggle */}
               <button
@@ -141,41 +200,139 @@ export default function HeroSection() {
             <div className="relative z-10 mx-auto max-w-3xl text-center">
               <div className="inline-flex items-center gap-2 px-3 py-1 bg-[#1a3a52]/5 border border-[#1a3a52]/10 rounded-full mb-6 text-[#1a3a52] text-xs font-semibold uppercase tracking-wider">
                 <span className="w-1.5 h-1.5 rounded-full bg-[#C79244]"></span>
-                Official Portal
+                {eyebrow}
               </div>
               <h1 className="text-balance text-4xl font-serif text-[#1a3a52] font-semibold md:text-5xl lg:text-7xl">
-                Welcome to <span className="text-[#C79244] italic">DCCPHub</span>
+                {renderedHeading}
               </h1>
               <p className="text-[#605A57] mx-auto my-8 max-w-2xl text-lg md:text-xl">
-                Your centralized gateway to academic resources, student services, and faculty tools. Access everything you need for your journey at Data Center College.
+                {subheading}
               </p>
 
-              <Button
-                asChild
-                size="lg"
-                className="bg-[#1a3a52] hover:bg-[#1a3a52]/90 text-white shadow-lg hover:shadow-xl transition-all hover:-translate-y-0.5"
-              >
-                <Link href="#">
-                  <span className="btn-label">Student Login</span>
-                </Link>
-              </Button>
+              <div className="flex justify-center gap-4">
+                {data?.ctas ? (
+                  data.ctas.map((cta, idx) => {
+                    const href = cta.url || (cta.page?._ref ? `/pages/${cta.page._ref}` : "#")
+                    return (
+                      <Button
+                        key={idx}
+                        asChild
+                        size="lg"
+                        className={cn(
+                          "bg-[#1a3a52] hover:bg-[#1a3a52]/90 text-white shadow-lg hover:shadow-xl transition-all hover:-translate-y-0.5",
+                          cta.style !== "primary" && "bg-transparent border border-[#1a3a52] text-[#1a3a52] hover:bg-[#1a3a52]/5 shadow-none"
+                        )}
+                      >
+                        <Link href={href} target={cta.openInNewTab ? "_blank" : undefined}>
+                          <span className="btn-label">{cta.label}</span>
+                        </Link>
+                      </Button>
+                    )
+                  })
+                ) : (
+                  <Button
+                    asChild
+                    size="lg"
+                    className="bg-[#1a3a52] hover:bg-[#1a3a52]/90 text-white shadow-lg hover:shadow-xl transition-all hover:-translate-y-0.5"
+                  >
+                    <Link href="#">
+                      <span className="btn-label">Student Login</span>
+                    </Link>
+                  </Button>
+                )}
+              </div>
             </div>
           </div>
 
-          <div className="mx-auto 2xl:max-w-7xl mt-12">
-            <div className="perspective-distant pl-8 lg:pl-44">
-              <div className="lg:h-[500px] rotate-x-20 mask-b-from-55% mask-b-to-100% mask-r-from-75% skew-x-12 pl-6 pt-6">
-                <div className="relative w-full h-full rounded-2xl border-4 border-white shadow-2xl overflow-hidden bg-[#1a3a52]">
-                  <Image
-                    className="object-cover opacity-90"
-                    src="/hero-images/image.png"
-                    alt="DCCPHub Dashboard"
-                    fill
-                  />
-                  {/* Overlay */}
-                  <div className="absolute inset-0 bg-gradient-to-t from-[#1a3a52] to-transparent mix-blend-multiply opacity-60" />
+          <div className="mx-auto 2xl:max-w-7xl mt-12 pb-20 relative h-[400px] lg:h-[600px] w-full perspective-distant">
+            {/* Interaction Layer (Proxy Embla) */}
+            {stackedImages.length > 1 && (
+              <div className="absolute inset-0 z-50 opacity-0" ref={emblaRef}>
+                <div className="flex w-full h-full touch-pan-y">
+                  {stackedImages.map((_, idx) => (
+                    <div key={idx} className="flex-[0_0_100%] min-w-0 h-full cursor-grab active:cursor-grabbing" />
+                  ))}
                 </div>
               </div>
+            )}
+
+            {/* Visual Layer (3D Stack) */}
+            <div className="w-full h-full flex justify-center items-center pointer-events-none">
+              {!hasImages ? (
+                // Fallback Layout if no images
+                <div 
+                  className="absolute transition-all duration-700 ease-in-out transform-style-3d w-full max-w-[300px] sm:max-w-[500px] lg:max-w-[900px] px-4 z-30"
+                  style={{ transform: 'translate3d(0, 0, 0) scale(1) rotateX(20deg)' }}
+                >
+                  <div className="relative w-full aspect-[16/10] rounded-2xl border-[3px] border-white/80 shadow-2xl overflow-hidden bg-[#1a3a52]">
+                    <Image
+                      className="object-cover opacity-90"
+                      src={defaultImage}
+                      alt="DCCPHub Dashboard"
+                      fill
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-[#1a3a52] to-transparent mix-blend-multiply opacity-60" />
+                  </div>
+                </div>
+              ) : (
+                stackedImages.map((img, idx) => {
+                  if (!img) return null
+                  
+                  const total = stackedImages.length;
+                  // Use embla's selectedIndex state
+                  const diff = (idx - selectedIndex + total) % total;
+                  
+                  let transformStyle = {};
+                  let zIndex = 0;
+                  let opacity = 0;
+                  
+                  if (diff === 0) {
+                    // Center (Active)
+                    zIndex = 30;
+                    opacity = 1;
+                    transformStyle = { transform: 'translate3d(0, 0, 0) scale(1) rotateX(20deg)' };
+                  } else if (diff === 1) {
+                    // Right (Next)
+                    zIndex = 20;
+                    opacity = 0.6;
+                    transformStyle = { transform: 'translate3d(60px, 40px, -100px) scale(0.9) rotateY(-8deg) rotateX(20deg)' };
+                  } else if (diff === total - 1) {
+                    // Left (Prev)
+                    zIndex = 20;
+                    opacity = 0.6;
+                    transformStyle = { transform: 'translate3d(-60px, 40px, -100px) scale(0.9) rotateY(8deg) rotateX(20deg)' };
+                  } else {
+                    // Back / Hidden
+                    zIndex = 10;
+                    opacity = 0;
+                    transformStyle = { transform: 'translate3d(0, 80px, -200px) scale(0.8)' };
+                  }
+
+                  return (
+                    <div 
+                      key={idx} 
+                      className="absolute transition-all duration-700 ease-in-out transform-style-3d w-full max-w-[300px] sm:max-w-[500px] lg:max-w-[900px] px-4"
+                      style={{
+                        zIndex,
+                        opacity,
+                        ...transformStyle
+                      }}
+                    >
+                      <div className="relative w-full aspect-[16/10] rounded-2xl border-[3px] border-white/80 shadow-2xl overflow-hidden bg-[#1a3a52]">
+                        <Image
+                          src={getImageUrl(img)}
+                          alt={img.alt || softwareName || "Hero Image"}
+                          fill
+                          className="object-cover"
+                          priority={idx === 0}
+                        />
+                        {/* Overlay */}
+                        <div className="absolute inset-0 bg-gradient-to-t from-[#1a3a52] to-transparent mix-blend-multiply opacity-40" />
+                      </div>
+                    </div>
+                  )
+                })
+              )}
             </div>
           </div>
         </section>

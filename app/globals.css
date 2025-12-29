@@ -219,3 +219,97 @@
 .backdrop-blur-custom {
   backdrop-filter: blur(8.25px);
 }
+
+/* View Transitions for Portal Navigation */
+::view-transition {
+  background-color: var(--background);
+}
+
+::view-transition-group(root) {
+  animation-duration: 0.5s;
+}
+
+/* Forward Transition (Default) */
+::view-transition-old(root) {
+  animation: modern-fade-out-left 0.5s cubic-bezier(0.87, 0, 0.13, 1) both;
+}
+
+::view-transition-new(root) {
+  animation: modern-fade-in-right 0.5s cubic-bezier(0.87, 0, 0.13, 1) both;
+}
+
+/* Reverse Transition */
+html[data-reverse="true"]::view-transition-old(root) {
+  animation: modern-fade-out-right 0.5s cubic-bezier(0.87, 0, 0.13, 1) both;
+  z-index: 1;
+}
+
+html[data-reverse="true"]::view-transition-new(root) {
+  animation: modern-fade-in-left 0.5s cubic-bezier(0.87, 0, 0.13, 1) both;
+  z-index: 2;
+}
+
+/* Modern Slide Animations */
+@keyframes modern-fade-out-left {
+  from {
+    opacity: 1;
+    transform: translateX(0) scale(1);
+    filter: blur(0px);
+  }
+  to {
+    opacity: 0;
+    transform: translateX(-40px) scale(0.95);
+    filter: blur(4px);
+  }
+}
+
+@keyframes modern-fade-in-right {
+  from {
+    opacity: 0;
+    transform: translateX(40px) scale(0.95);
+    filter: blur(4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0) scale(1);
+    filter: blur(0px);
+  }
+}
+
+@keyframes modern-fade-out-right {
+  from {
+    opacity: 1;
+    transform: translateX(0) scale(1);
+    filter: blur(0px);
+  }
+  to {
+    opacity: 0;
+    transform: translateX(40px) scale(0.95);
+    filter: blur(4px);
+  }
+}
+
+@keyframes modern-fade-in-left {
+  from {
+    opacity: 0;
+    transform: translateX(-40px) scale(0.95);
+    filter: blur(4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0) scale(1);
+    filter: blur(0px);
+  }
+}
+
+/* Respect user's motion preferences */
+@media (prefers-reduced-motion: reduce) {
+  ::view-transition-old(root),
+  ::view-transition-new(root) {
+    animation: none;
+  }
+  
+  ::view-transition-group(root) {
+    animation-duration: 0.1s;
+  }
+}
