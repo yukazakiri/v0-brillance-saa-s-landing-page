@@ -9,7 +9,7 @@ interface CTASectionProps {
 export default function CTASection({ settings }: CTASectionProps) {
     // Get primary contact email or URL for the CTA
     const primaryContact = settings.contactDirectory?.[0];
-    const ctaUrl = primaryContact?.url || primaryContact?.email ? `mailto:${primaryContact.email}` : "/#contact";
+    const ctaUrl = primaryContact?.url || primaryContact?.email ? `mailto:${primaryContact.email}` : "/apply";
 
     return (
         <div className="w-full relative overflow-hidden flex flex-col justify-center items-center gap-2">

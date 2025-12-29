@@ -193,7 +193,7 @@ export default function ProgramsPageContent({ settings }: ProgramsPageContentPro
             Faculty & Staff
           </Link>
           <Link
-            href="/#contact"
+            href="/apply"
             className="block px-4 py-3.5 text-base font-semibold text-foreground hover:bg-muted rounded-lg transition-all duration-200"
             onClick={() => setMobileMenuOpen(false)}
           >
@@ -203,7 +203,7 @@ export default function ProgramsPageContent({ settings }: ProgramsPageContentPro
 
         <div className="border-t border-border px-6 py-5 bg-muted/30">
           <Link
-            href="/#contact"
+            href="/apply"
             onClick={() => setMobileMenuOpen(false)}
             className="w-full px-5 py-3.5 bg-gradient-to-r from-primary to-primary/90 text-primary-foreground text-base font-semibold rounded-lg shadow-md hover:shadow-lg active:scale-95 transition-all duration-200 block text-center"
           >
@@ -259,7 +259,7 @@ export default function ProgramsPageContent({ settings }: ProgramsPageContentPro
                     <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-gradient-to-r from-primary to-primary/90 group-hover:w-full transition-all duration-300 ease-out"></span>
                   </Link>
                   <Link
-                    href="/#contact"
+                    href="/apply"
                     className="text-muted-foreground text-sm font-medium hover:text-foreground transition-all duration-300 ease-out relative group"
                   >
                     Contact
@@ -292,7 +292,7 @@ export default function ProgramsPageContent({ settings }: ProgramsPageContentPro
 
                 <div className="hidden md:flex h-8 md:h-9 ml-4 md:ml-6">
                   <Link
-                    href="/#contact"
+                    href="/apply"
                     className="px-4 md:px-5 py-1.5 md:py-2 bg-gradient-to-r from-primary to-primary/90 text-primary-foreground shadow-[0px_2px_8px_rgba(55,50,47,0.3)] overflow-hidden rounded-full flex justify-center items-center hover:shadow-[0px_4px_12px_rgba(55,50,47,0.4)] hover:scale-105 transition-all duration-300 ease-out active:scale-95"
                   >
                     <div className="flex flex-col justify-center text-primary-foreground text-xs sm:text-base md:text-[15px] font-medium leading-5 font-sans">
@@ -584,13 +584,13 @@ export default function ProgramsPageContent({ settings }: ProgramsPageContentPro
                 </p>
                 <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
                   <Link
-                    href="/#contact"
+                    href="/apply"
                     className="px-8 py-3 bg-gradient-to-r from-primary to-primary/90 text-primary-foreground rounded-full font-semibold hover:shadow-lg hover:scale-105 transition-all duration-300"
                   >
                     Apply Now
                   </Link>
                   <Link
-                    href="/#contact"
+                    href="/apply"
                     className="px-8 py-3 border-2 border-border text-foreground rounded-full font-semibold hover:bg-muted hover:border-primary/30 transition-all duration-300"
                   >
                     Contact Admissions

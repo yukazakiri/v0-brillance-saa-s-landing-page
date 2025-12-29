@@ -109,7 +109,7 @@ export default function MobileMenu({ isOpen, onClose }: MobileMenuProps) {
       {/* Bottom CTA */}
       <div className="px-6 pb-8">
         <Link
-          href="/#contact"
+          href="/apply"
           onClick={onClose}
           className={`block w-full py-4 bg-primary text-primary-foreground text-center text-base font-semibold rounded-full transition-all duration-500 ease-out hover:bg-primary/90 active:scale-[0.98] ${isOpen ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"
             }`}

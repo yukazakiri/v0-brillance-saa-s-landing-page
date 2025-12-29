@@ -446,11 +446,11 @@ export default async function CoursePage({ params }: { params: Promise<{ slug: s
                                         </Button>
                                     ) : (
                                         <Button asChild className="w-full">
-                                            <Link href="/#contact">Apply Now</Link>
+                                            <Link href="/apply">Apply Now</Link>
                                         </Button>
                                     )}
                                     <Button asChild variant="outline" className="w-full">
-                                        <Link href="/#contact">Request Information</Link>
+                                        <Link href="/apply">Request Information</Link>
                                     </Button>
                                 </div>
 
