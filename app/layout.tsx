@@ -1,5 +1,6 @@
 import type React from "react"
 import type { Metadata } from "next"
+import Script from "next/script"
 
 import { fetchSettings } from "@/lib/sanity/queries"
 import { buildImageUrl } from "@/lib/sanity/image"
@@ -118,6 +119,8 @@ export default function RootLayout({
             </div>
           </div>
         </div>
+        <Script src="https://cdn.botpress.cloud/webchat/v3.5/inject.js" strategy="afterInteractive" />
+        <Script src="https://files.bpcontent.cloud/2025/03/12/02/20250312025656-J40NI3RT.js" strategy="afterInteractive" />
       </body>
     </html>
   )
