@@ -76,9 +76,9 @@ export default function ApplicationModal({
               Click the button below to proceed to our secure enrollment portal. You will be redirected to <strong>portal.dccp.edu.ph</strong>.
             </p>
             <div className="pt-2">
-              <a 
-                href="https://portal.dccp.edu.ph/enrollment" 
-                target="_blank" 
+              <a
+                href="https://portal.dccp.edu.ph/enrollment"
+                target="_blank"
                 rel="noopener noreferrer"
                 className="w-full"
               >
@@ -89,10 +89,10 @@ export default function ApplicationModal({
               </a>
             </div>
           </div>
-          
+
           <div className="text-center">
             <p className="text-xs text-gray-500">
-              Need help? Contact us at admissions@dccp.edu.ph or +63 74 442 2222
+              Need help? Contact us at baguio-campus@dccph.edu.ph or +63 74 442 2222
             </p>
           </div>
         </div>

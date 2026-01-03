@@ -40,7 +40,7 @@ export default function ApplyInterstitial() {
       <div className="bg-[#1a3a52] p-8 text-white relative overflow-hidden">
         {/* Abstract pattern overlay */}
         <div className="absolute top-0 right-0 w-64 h-64 bg-white/5 rounded-full -translate-y-1/2 translate-x-1/2 blur-3xl pointer-events-none" />
-        
+
         <div className="relative z-10">
           <div className="flex items-center gap-3 mb-4">
             <div className="p-2 bg-white/10 rounded-lg backdrop-blur-sm">
@@ -55,39 +55,39 @@ export default function ApplyInterstitial() {
 
         {/* Countdown Indicator */}
         {!isCancelled && !isRedirecting && (
-           <div className="absolute bottom-0 left-0 w-full h-1.5 bg-white/10">
-             <div 
-               className="h-full bg-[#c79244] transition-all duration-1000 ease-linear"
-               style={{ width: `${(countdown / 5) * 100}%` }}
-             />
-           </div>
+          <div className="absolute bottom-0 left-0 w-full h-1.5 bg-white/10">
+            <div
+              className="h-full bg-[#c79244] transition-all duration-1000 ease-linear"
+              style={{ width: `${(countdown / 5) * 100}%` }}
+            />
+          </div>
         )}
       </div>
 
       <div className="p-8 space-y-8">
         {!isCancelled ? (
           <div className="bg-amber-50 border border-amber-100 rounded-xl p-4 flex items-start gap-3">
-             <div className="p-2 bg-amber-100 rounded-full shrink-0">
-               <Loader2 className="w-4 h-4 text-amber-700 animate-spin" />
-             </div>
-             <div>
-               <p className="font-semibold text-amber-900">Redirecting in {countdown} seconds...</p>
-               <p className="text-sm text-amber-700/80 mt-1">
-                 We are taking you to <strong>portal.dccp.edu.ph</strong>
-               </p>
-             </div>
+            <div className="p-2 bg-amber-100 rounded-full shrink-0">
+              <Loader2 className="w-4 h-4 text-amber-700 animate-spin" />
+            </div>
+            <div>
+              <p className="font-semibold text-amber-900">Redirecting in {countdown} seconds...</p>
+              <p className="text-sm text-amber-700/80 mt-1">
+                We are taking you to <strong>portal.dccp.edu.ph</strong>
+              </p>
+            </div>
           </div>
         ) : (
           <div className="bg-red-50 border border-red-100 rounded-xl p-4 flex items-start gap-3">
-             <div className="p-2 bg-red-100 rounded-full shrink-0">
-               <X className="w-4 h-4 text-red-700" />
-             </div>
-             <div>
-               <p className="font-semibold text-red-900">Redirection Cancelled</p>
-               <p className="text-sm text-red-700/80 mt-1">
-                 You can stay here or go back.
-               </p>
-             </div>
+            <div className="p-2 bg-red-100 rounded-full shrink-0">
+              <X className="w-4 h-4 text-red-700" />
+            </div>
+            <div>
+              <p className="font-semibold text-red-900">Redirection Cancelled</p>
+              <p className="text-sm text-red-700/80 mt-1">
+                You can stay here or go back.
+              </p>
+            </div>
           </div>
         )}
 
@@ -115,11 +115,11 @@ export default function ApplyInterstitial() {
         </section>
 
         <div className="flex flex-col sm:flex-row gap-3 pt-4 border-t border-border">
-          <ApplyButton 
+          <ApplyButton
             onClick={handleContinue}
             disabled={isRedirecting}
-            variant="default" 
-            size="large" 
+            variant="default"
+            size="large"
             className="w-full sm:flex-1 justify-center"
           >
             {isRedirecting ? (
@@ -134,7 +134,7 @@ export default function ApplyInterstitial() {
               </>
             )}
           </ApplyButton>
-          
+
           <button
             onClick={handleCancel}
             disabled={isRedirecting}
@@ -157,7 +157,7 @@ export default function ApplyInterstitial() {
               <div className="p-2 bg-muted rounded-full">
                 <CheckCircle2 className="w-4 h-4 text-[#1a3a52]" />
               </div>
-              <span>Email: admissions@dccp.edu.ph</span>
+              <span>Email: baguio-campus@dccph.edu.ph</span>
             </div>
           </div>
         </section>
