@@ -5,12 +5,20 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Menu, X } from "lucide-react";
 import ViewTransitionLink from "@/components/view-transition-link";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogTrigger,
+} from "@/components/animate-ui/components/radix/dialog";
 
 const menuItems = [
-  { name: "Student Portal", href: "#" },
-  { name: "Faculty Portal", href: "#" },
-  { name: "LMS", href: "#" },
-  { name: "Library", href: "#" },
+  { name: "Student Portal", href: "https://portal.dccp.edu.ph", external: true },
+  { name: "Faculty Portal", href: "https://portal.dccp.edu.ph", external: true },
+  { name: "LMS", href: "#", dialog: true },
+  { name: "Library", href: "#", dialog: true },
 ];
 
 export default function PortalHeader() {
@@ -29,18 +37,38 @@ export default function PortalHeader() {
             Student & Faculty Gateway
           </span>
           <div className="flex gap-6">
-            <Link
-              href="#"
-              className="text-[10px] text-white/60 hover:text-white uppercase tracking-widest transition-colors font-bold"
-            >
-              Support
-            </Link>
-            <Link
-              href="#"
-              className="text-[10px] text-white/60 hover:text-white uppercase tracking-widest transition-colors font-bold border-l border-white/10 pl-6"
-            >
-              Admissions
-            </Link>
+            <Dialog>
+              <DialogTrigger asChild>
+                <button className="text-[10px] text-white/60 hover:text-white uppercase tracking-widest transition-colors font-bold bg-transparent border-none cursor-pointer">
+                  Support
+                </button>
+              </DialogTrigger>
+              <DialogContent>
+                <DialogHeader>
+                  <DialogTitle>Coming Soon</DialogTitle>
+                  <DialogDescription>
+                    Support services are currently being developed.
+                    For immediate assistance, please contact the administration office or email support@dccp.edu.ph.
+                  </DialogDescription>
+                </DialogHeader>
+              </DialogContent>
+            </Dialog>
+            <Dialog>
+              <DialogTrigger asChild>
+                <button className="text-[10px] text-white/60 hover:text-white uppercase tracking-widest transition-colors font-bold border-l border-white/10 pl-6 bg-transparent border-t-0 border-r-0 border-b-0 cursor-pointer">
+                  Admissions
+                </button>
+              </DialogTrigger>
+              <DialogContent>
+                <DialogHeader>
+                  <DialogTitle>Coming Soon</DialogTitle>
+                  <DialogDescription>
+                    Online admissions portal is currently under development.
+                    For admission inquiries, please visit the main campus or contact baguio-campus@dccph.edu.ph.
+                  </DialogDescription>
+                </DialogHeader>
+              </DialogContent>
+            </Dialog>
           </div>
         </div>
       </div>
@@ -54,14 +82,16 @@ export default function PortalHeader() {
             {/* Desktop Left Nav */}
             <div className="hidden lg:flex items-center gap-10 h-full">
               <Link
-                href="#"
+                href="https://portal.dccp.edu.ph"
+                target="_blank"
                 className="text-[11px] font-bold uppercase tracking-[0.3em] text-[#605A57] hover:text-[#1a3a52] transition-all relative group py-2"
               >
                 Portal Home
                 <span className="absolute bottom-0 left-0 w-0 h-[2px] bg-[#1a3a52] transition-all group-hover:w-full"></span>
               </Link>
               <Link
-                href="#"
+                href="https://portal.dccp.edu.ph"
+                target="_blank"
                 className="text-[11px] font-bold uppercase tracking-[0.3em] text-[#605A57] hover:text-[#1a3a52] transition-all relative group py-2"
               >
                 Faculty
@@ -103,34 +133,58 @@ export default function PortalHeader() {
             {/* Desktop Right Nav & CTAs */}
             <div className="hidden lg:flex items-center gap-10 h-full">
               <div className="flex items-center gap-10 border-r border-[rgba(26,58,82,0.1)] pr-10 h-10">
-                <Link
-                  href="#"
-                  className="text-[11px] font-bold uppercase tracking-[0.3em] text-[#605A57] hover:text-[#1a3a52] transition-all relative group py-2"
-                >
-                  LMS
-                  <span className="absolute bottom-0 left-0 w-0 h-[2px] bg-[#1a3a52] transition-all group-hover:w-full"></span>
-                </Link>
-                <Link
-                  href="#"
-                  className="text-[11px] font-bold uppercase tracking-[0.3em] text-[#605A57] hover:text-[#1a3a52] transition-all relative group py-2"
-                >
-                  Library
-                  <span className="absolute bottom-0 left-0 w-0 h-[2px] bg-[#1a3a52] transition-all group-hover:w-full"></span>
-                </Link>
+                <Dialog>
+                  <DialogTrigger asChild>
+                    <button className="text-[11px] font-bold uppercase tracking-[0.3em] text-[#605A57] hover:text-[#1a3a52] transition-all relative group py-2 bg-transparent border-none cursor-pointer">
+                      LMS
+                      <span className="absolute bottom-0 left-0 w-0 h-[2px] bg-[#1a3a52] transition-all group-hover:w-full"></span>
+                    </button>
+                  </DialogTrigger>
+                  <DialogContent>
+                    <DialogHeader>
+                      <DialogTitle>Coming Soon</DialogTitle>
+                      <DialogDescription>
+                        The Learning Management System (LMS) is currently under development.
+                        Check back soon for access to online courses and learning materials.
+                      </DialogDescription>
+                    </DialogHeader>
+                  </DialogContent>
+                </Dialog>
+                <Dialog>
+                  <DialogTrigger asChild>
+                    <button className="text-[11px] font-bold uppercase tracking-[0.3em] text-[#605A57] hover:text-[#1a3a52] transition-all relative group py-2 bg-transparent border-none cursor-pointer">
+                      Library
+                      <span className="absolute bottom-0 left-0 w-0 h-[2px] bg-[#1a3a52] transition-all group-hover:w-full"></span>
+                    </button>
+                  </DialogTrigger>
+                  <DialogContent>
+                    <DialogHeader>
+                      <DialogTitle>Coming Soon</DialogTitle>
+                      <DialogDescription>
+                        The Digital Library is currently under development.
+                        Check back soon for access to e-books, journals, and other learning resources.
+                      </DialogDescription>
+                    </DialogHeader>
+                  </DialogContent>
+                </Dialog>
               </div>
 
               <div className="flex items-center gap-6">
                 <Link
-                  href="#"
+                  href="https://portal.dccp.edu.ph/login"
+                  target="_blank"
                   className="text-[11px] font-bold uppercase tracking-[0.2em] text-[#1a3a52] hover:opacity-70 transition-opacity"
                 >
                   Sign In
                 </Link>
                 <Button
+                  asChild
                   size="sm"
                   className="bg-[#1a3a52] hover:bg-[#1a3a52]/90 text-white font-bold uppercase tracking-[0.2em] text-[10px] px-8 rounded-none h-11 transition-all border border-[#1a3a52] hover:-translate-y-0.5"
                 >
-                  Register
+                  <Link href="https://portal.dccp.edu.ph/signup" target="_blank">
+                    Register
+                  </Link>
                 </Button>
               </div>
             </div>
@@ -143,27 +197,60 @@ export default function PortalHeader() {
             <ul className="space-y-8">
               {menuItems.map((item, index) => (
                 <li key={index}>
-                  <Link
-                    href={item.href}
-                    className="text-2xl font-serif text-[#1a3a52] hover:text-[#C79244] transition-colors block border-b border-[rgba(26,58,82,0.08)] pb-6 flex justify-between items-center group"
-                  >
-                    {item.name}
-                    <span className="text-xl opacity-0 group-hover:opacity-100 transition-all translate-x-[-10px] group-hover:translate-x-0">
-                      →
-                    </span>
-                  </Link>
+                  {item.dialog ? (
+                    <Dialog>
+                      <DialogTrigger asChild>
+                        <button className="text-2xl font-serif text-[#1a3a52] hover:text-[#C79244] transition-colors block border-b border-[rgba(26,58,82,0.08)] pb-6 flex justify-between items-center group w-full text-left bg-transparent border-t-0 border-r-0 border-l-0">
+                          {item.name}
+                          <span className="text-xl opacity-0 group-hover:opacity-100 transition-all translate-x-[-10px] group-hover:translate-x-0">
+                            →
+                          </span>
+                        </button>
+                      </DialogTrigger>
+                      <DialogContent>
+                        <DialogHeader>
+                          <DialogTitle>Coming Soon</DialogTitle>
+                          <DialogDescription>
+                            {item.name === "LMS"
+                              ? "The Learning Management System (LMS) is currently under development. Check back soon for access to online courses and learning materials."
+                              : "The Digital Library is currently under development. Check back soon for access to e-books, journals, and other learning resources."
+                            }
+                          </DialogDescription>
+                        </DialogHeader>
+                      </DialogContent>
+                    </Dialog>
+                  ) : (
+                    <Link
+                      href={item.href}
+                      target={item.external ? "_blank" : undefined}
+                      className="text-2xl font-serif text-[#1a3a52] hover:text-[#C79244] transition-colors block border-b border-[rgba(26,58,82,0.08)] pb-6 flex justify-between items-center group"
+                    >
+                      {item.name}
+                      <span className="text-xl opacity-0 group-hover:opacity-100 transition-all translate-x-[-10px] group-hover:translate-x-0">
+                        →
+                      </span>
+                    </Link>
+                  )}
                 </li>
               ))}
             </ul>
             <div className="grid gap-4 pt-6">
-              <Button className="w-full bg-[#1a3a52] text-white rounded-none h-14 uppercase tracking-[0.3em] text-[10px] font-bold">
-                Registration
+              <Button
+                asChild
+                className="w-full bg-[#1a3a52] text-white rounded-none h-14 uppercase tracking-[0.3em] text-[10px] font-bold"
+              >
+                <Link href="https://portal.dccp.edu.ph/signup" target="_blank">
+                  Registration
+                </Link>
               </Button>
               <Button
+                asChild
                 variant="outline"
                 className="w-full border-[rgba(26,58,82,0.2)] text-[#1a3a52] rounded-none h-14 uppercase tracking-[0.3em] text-[10px] font-bold"
               >
-                Portal Login
+                <Link href="https://portal.dccp.edu.ph/login" target="_blank">
+                  Portal Login
+                </Link>
               </Button>
             </div>
           </div>
