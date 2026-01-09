@@ -236,7 +236,7 @@ export interface SanityCourse {
         current: string;
     };
     heroImage?: SanityImage;
-    offeringCategory: "ched" | "tesda" | "short";
+    offeringCategory: "ched" | "tesda" | "short" | "shs";
     degreeType?: "bachelor" | "master" | "doctorate" | "certificate";
     credential?: string;
     majors?: string[];
@@ -313,7 +313,7 @@ export interface SanityCourse {
         shareImage?: SanityImage;
     };
     status?: "active" | "inactive" | "archived";
-    
+
     // Properties referenced in mapCourseToLocalCourse that were missing
     description?: string;
     durationYears?: number;
@@ -331,7 +331,7 @@ export interface Course {
     id: string;
     slug: string;
     title: string;
-    category: "ched" | "tesda" | "short";
+    category: "ched" | "tesda" | "short" | "shs";
     description?: string;
     duration: string;
     highlights: string[];

@@ -137,7 +137,7 @@ function mapPostToArticle(post: SanityPost): Article {
   // Get author name: prefer authors array, fallback to legacy author field
   const authorName =
     post.authors && post.authors.length > 0
-      ? post.authors.map((a) => a.name).join(", ")
+      ? post.authors.filter((a) => a).map((a) => a.name).join(", ")
       : (post.author ?? "Editorial Team")
 
   return {
