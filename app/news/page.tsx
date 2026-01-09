@@ -1,9 +1,12 @@
 import NewsPageContent from "@/components/news-page-content"
 import { fetchAllPosts, fetchSettings } from "@/lib/sanity/queries"
-import type { Settings } from "@/lib/sanity/types"
+import type { Article, Settings } from "@/lib/sanity/types"
+
+// Revalidate page every 60 seconds to pick up new Sanity content
+export const revalidate = 60
 
 export default async function NewsPage() {
-  let articles = []
+  let articles: Article[] = []
   let settings = null
 
   try {

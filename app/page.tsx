@@ -5,6 +5,9 @@ import {
 } from "@/lib/sanity/queries";
 import type { Settings } from "@/lib/sanity/types";
 
+// Revalidate page every 60 seconds to pick up new Sanity content
+export const revalidate = 60;
+
 // College-specific components
 import CTASection from "@/components/cta-section";
 import FacultyStaffSection from "@/components/faculty-staff-section";
