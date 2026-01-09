@@ -136,45 +136,40 @@ export default function FooterSection({ settings }: FooterSectionProps) {
                                 Programs
                             </h4>
                             <ul className="space-y-2.5">
-                                {settings.institutionProfile?.chedPrograms?.slice(0, 5).map((program, idx) => (
-                                    <li key={idx}>
+                                <ul className="space-y-2.5">
+                                    <li>
                                         <Link
-                                            href="/courses"
-                                            className="text-sm text-muted-foreground hover:text-primary transition-colors line-clamp-1"
+                                            href="/programs/bsit"
+                                            className="text-sm text-muted-foreground hover:text-primary transition-colors"
                                         >
-                                            {program.name}
+                                            BS Information Technology
                                         </Link>
                                     </li>
-                                ))}
-                                {(!settings.institutionProfile?.chedPrograms ||
-                                    settings.institutionProfile.chedPrograms.length === 0) && (
-                                        <>
-                                            <li>
-                                                <Link
-                                                    href="/courses"
-                                                    className="text-sm text-muted-foreground hover:text-primary transition-colors"
-                                                >
-                                                    College Courses
-                                                </Link>
-                                            </li>
-                                            <li>
-                                                <Link
-                                                    href="/courses"
-                                                    className="text-sm text-muted-foreground hover:text-primary transition-colors"
-                                                >
-                                                    Senior High School
-                                                </Link>
-                                            </li>
-                                            <li>
-                                                <Link
-                                                    href="/courses"
-                                                    className="text-sm text-muted-foreground hover:text-primary transition-colors"
-                                                >
-                                                    TVET Programs
-                                                </Link>
-                                            </li>
-                                        </>
-                                    )}
+                                    <li>
+                                        <Link
+                                            href="/programs/bsba"
+                                            className="text-sm text-muted-foreground hover:text-primary transition-colors"
+                                        >
+                                            BS Business Administration
+                                        </Link>
+                                    </li>
+                                    <li>
+                                        <Link
+                                            href="/programs/bshrm"
+                                            className="text-sm text-muted-foreground hover:text-primary transition-colors"
+                                        >
+                                            BS Hotel & Restaurant Mgt.
+                                        </Link>
+                                    </li>
+                                    <li>
+                                        <Link
+                                            href="/courses"
+                                            className="text-sm text-primary font-medium hover:underline flex items-center gap-1 mt-2"
+                                        >
+                                            View All Programs &rarr;
+                                        </Link>
+                                    </li>
+                                </ul>
                             </ul>
                         </div>
 

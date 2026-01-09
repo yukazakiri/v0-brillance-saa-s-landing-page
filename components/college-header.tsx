@@ -78,18 +78,16 @@ export default function CollegeHeader({ settings }: CollegeHeaderProps) {
         - Full width (no "floating island" width jumps)
       */}
       <header
-        className={`fixed top-0 left-0 w-full z-50 transition-colors duration-500 ease-in-out ${
-          scrolled
+        className={`fixed top-0 left-0 w-full z-50 transition-colors duration-500 ease-in-out ${scrolled
             ? "bg-[#F7F5F3]/95 backdrop-blur-md shadow-md border-b border-[rgba(26,58,82,0.06)]"
             : "bg-transparent border-b border-transparent"
-        }`}
+          }`}
       >
         {/* UTILITY BAR (Top Hat) */}
         {/* Collapses height and opacity on scroll */}
         <div
-          className={`w-full overflow-hidden bg-[#F7F5F3] transition-all duration-500 ease-in-out md:block hidden border-b border-[rgba(26,58,82,0.1)] ${
-            scrolled ? "max-h-0 opacity-0" : "max-h-[50px] opacity-100"
-          }`}
+          className={`w-full overflow-hidden bg-[#F7F5F3] transition-all duration-500 ease-in-out md:block hidden border-b border-[rgba(26,58,82,0.1)] ${scrolled ? "max-h-0 opacity-0" : "max-h-[50px] opacity-100"
+            }`}
         >
           <div className="max-w-[1350px] mx-auto px-4 sm:px-8 py-2 flex justify-between items-center text-[11px] uppercase tracking-widest font-medium text-[#605A57]">
             <div className="flex gap-6">
@@ -142,9 +140,8 @@ export default function CollegeHeader({ settings }: CollegeHeaderProps) {
         {/* MAIN HEADER CONTENT */}
         <div className="w-full">
           <div
-            className={`max-w-[1350px] mx-auto px-4 sm:px-8 flex items-center justify-between transition-all duration-500 ease-in-out ${
-              scrolled ? "h-16" : "h-20"
-            }`}
+            className={`max-w-[1350px] mx-auto px-4 sm:px-8 flex items-center justify-between transition-all duration-500 ease-in-out ${scrolled ? "h-16" : "h-20"
+              }`}
           >
             {/* Logo Section */}
             <ViewTransitionLink
@@ -155,11 +152,10 @@ export default function CollegeHeader({ settings }: CollegeHeaderProps) {
               <div className="relative">
                 <Image
                   src={logoUrl || "/android-chrome-192x192.png"}
-                  className={`object-contain transition-all duration-500 ease-in-out group-hover:scale-105 ${
-                    scrolled
+                  className={`object-contain transition-all duration-500 ease-in-out group-hover:scale-105 ${scrolled
                       ? "h-8 w-8 sm:h-10 sm:w-10"
                       : "h-10 w-10 sm:h-12 sm:w-12"
-                  }`}
+                    }`}
                   alt={logoAlt}
                   width={192}
                   height={192}
@@ -195,16 +191,15 @@ export default function CollegeHeader({ settings }: CollegeHeaderProps) {
             <nav className="hidden lg:flex items-center gap-6 xl:gap-8">
               {[
                 { href: "/about", label: "About" },
-                { href: "/#programs", label: "Academics" },
+                { href: "/academics", label: "Academics" },
                 { href: "/news", label: "News and Announcements" },
               ].map((link) =>
                 link.href === "/about" ? (
                   <ViewTransitionLink
                     key={link.href}
                     href={link.href}
-                    className={`text-[#1a3a52] hover:text-[#C79244] transition-all duration-300 relative group py-2 font-medium ${
-                      scrolled ? "text-xs" : "text-sm"
-                    }`}
+                    className={`text-[#1a3a52] hover:text-[#C79244] transition-all duration-300 relative group py-2 font-medium ${scrolled ? "text-xs" : "text-sm"
+                      }`}
                     transitionType="slide"
                   >
                     {link.label}
@@ -214,9 +209,8 @@ export default function CollegeHeader({ settings }: CollegeHeaderProps) {
                   <Link
                     key={link.href}
                     href={link.href}
-                    className={`text-[#1a3a52] hover:text-[#C79244] transition-all duration-300 relative group py-2 font-medium ${
-                      scrolled ? "text-xs" : "text-sm"
-                    }`}
+                    className={`text-[#1a3a52] hover:text-[#C79244] transition-all duration-300 relative group py-2 font-medium ${scrolled ? "text-xs" : "text-sm"
+                      }`}
                   >
                     {link.label}
                     <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-[#C79244] transition-all duration-300 ease-in-out group-hover:w-full"></span>
