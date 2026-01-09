@@ -9,10 +9,10 @@ import FooterSection from "@/components/footer-section"
 
 export async function generateMetadata(): Promise<Metadata> {
   const settings = await fetchSettings()
-  
+
   const title = "About Us"
-  const description = settings?.institutionProfile?.overview || 
-    "Established in 1974, Data Center College of The Philippines is a premier institution for technology and business education in Baguio City."
+  const description = settings?.institutionProfile?.overview ||
+    "Established in 1970, Data Center College of The Philippines is a premier institution for technology and business education in Baguio City."
   const ogImage = buildImageUrl(settings?.defaultSeo?.shareImage) || "/images/founder.png"
 
   return {
@@ -55,7 +55,7 @@ export default async function AboutPage() {
   }
 
   const milestones = [
-    { year: "1974", title: "Foundation", description: "Established by Engr. Wilfredo M. Bactad with a vision to bridge academic learning and industry requirements." },
+    { year: "1970", title: "Foundation", description: "Established by Engr. Wilfredo M. Bactad with a vision to bridge academic learning and industry requirements." },
     { year: "1980s", title: "Growth", description: "Expanded programs in information technology and business administration." },
     { year: "2000s", title: "Recognition", description: "Achieved CHED recognition for IT and Business programs." },
     {
@@ -85,12 +85,22 @@ export default async function AboutPage() {
                   <circle cx="6" cy="6" r="2" fill="currentColor" />
                 </svg>
               }
-              text="Excellence Since 1974"
+              text="Excellence Since 1970"
             />
-            <h1 className="text-foreground font-serif leading-[0.95] tracking-tight">
-              <span className="block text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-bold">Data Center</span>
-              <span className="block text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-bold">College of the</span>
-              <span className="block text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-normal italic">Philippines</span>
+            <h1 className="text-foreground font-serif leading-[0.95] tracking-tight flex flex-col gap-4">
+              <span className="block text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-bold">Data Center College</span>
+              <span
+                className="block text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-normal italic text-foreground/90"
+                style={{ fontFamily: "'Brush Script MT', cursive" }}
+              >
+                of The Philippines
+              </span>
+              <span
+                className="block text-xl sm:text-2xl md:text-3xl font-sans font-medium uppercase tracking-widest text-muted-foreground"
+                style={{ fontFamily: "ui-sans-serif" }}
+              >
+                of Baguio City, Inc.
+              </span>
             </h1>
             <p className="text-muted-foreground text-lg sm:text-xl md:text-2xl leading-relaxed font-sans max-w-[600px] mt-4">
               Building futures through quality education in technology, business, and professional development for nearly
@@ -99,22 +109,43 @@ export default async function AboutPage() {
           </div>
         </section>
 
-        {/* Stats Section - Large Numbers */}
+        {/* Institutional Highlights - Text Focused */}
         <section className="w-full border-b border-border px-4 sm:px-6 md:px-8 py-16 sm:py-20 flex justify-center">
-          <div className="w-full max-w-[1000px] grid grid-cols-2 md:grid-cols-4 gap-8 md:gap-4">
+          <div className="w-full max-w-[1200px] grid grid-cols-2 md:grid-cols-4 gap-8 md:gap-12">
             {[
-              { number: "50+", label: "Years" },
-              { number: "2K+", label: "Students" },
-              { number: "50+", label: "Faculty" },
-              { number: "95%", label: "Employed" },
+              {
+                value: "Since 1970",
+                label: "Our Legacy",
+                desc: "Over 5 decades of educational service",
+              },
+              {
+                value: "Tech & Biz",
+                label: "Core Focus",
+                desc: "Specialized in IT and Business Administration",
+              },
+              {
+                value: "Accredited",
+                label: "Quality Education",
+                desc: "Recognized by CHED and TESDA",
+              },
+              {
+                value: "Holistic",
+                label: "Our Approach",
+                desc: "Integrating skills with character formation",
+              },
             ].map((stat, index) => (
-              <div key={index} className="flex flex-col gap-1">
-                <span className="text-foreground text-6xl sm:text-7xl md:text-8xl font-serif font-bold leading-none tracking-tighter">
-                  {stat.number}
+              <div key={index} className="flex flex-col gap-3 group">
+                <span className="text-foreground text-3xl sm:text-4xl md:text-5xl font-serif font-bold leading-none tracking-tight group-hover:text-muted-foreground/80 transition-colors duration-300">
+                  {stat.value}
                 </span>
-                <span className="text-muted-foreground text-sm font-sans font-medium uppercase tracking-[0.2em]">
-                  {stat.label}
-                </span>
+                <div className="flex flex-col gap-1">
+                  <span className="text-foreground text-xs font-sans font-bold uppercase tracking-[0.2em]">
+                    {stat.label}
+                  </span>
+                  <span className="text-muted-foreground text-sm font-sans leading-relaxed">
+                    {stat.desc}
+                  </span>
+                </div>
               </div>
             ))}
           </div>
@@ -144,7 +175,7 @@ export default async function AboutPage() {
                       <circle cx="6" cy="6" r="2" fill="currentColor" />
                     </svg>
                   }
-                  text="Excellence Since 1974"
+                  text="Excellence Since 1970"
                 />
                 <span className="text-muted-foreground text-xs font-sans font-semibold uppercase tracking-[0.25em]">
                   The Founder
@@ -165,44 +196,19 @@ export default async function AboutPage() {
                 <div className="flex flex-col gap-4 text-muted-foreground text-base leading-relaxed font-sans">
                   <p className="relative pl-0">
                     <span className="absolute left-0 top-0 text-4xl sm:text-5xl md:text-6xl font-serif font-normal leading-none text-foreground">F</span>
-                    <span className="pl-[1.5rem] sm:pl-[2rem] md:pl-[2.5rem] block">ounded in 1974, Data Center College of The Philippines was established by Engr. Wilfredo M. Bactad with a vision to bridge the gap between academic learning and industry requirements. </span>
+                    <span className="pl-[1.5rem] sm:pl-[2rem] md:pl-[2.5rem] block">ounded in 1970, Data Center College of The Philippines was established by Engr. Wilfredo M. Bactad with a vision to bridge the gap between academic learning and industry requirements. </span>
                   </p>
                   <p>
-                    Our institution has evolved into a premier center for technology and business education in Baguio City.
-                    Our college has grown from a small institution to a respected name in education, particularly in the fields of information technology, business administration, and hospitality management. We continue to evolve our programs to meet the changing demands of the global job market for nearly five decades.
+                    Our institution has evolved into a premier center for technology and business education in Baguio City, offering a comprehensive curriculum that includes both CHED-recognized degree programs and TESDA-accredited skills training. We have grown into a respected name in Information Technology, Business Administration, and Hospitality Management. By integrating practical vocational skills with academic excellence, we continue to evolve our programs to meet the changing demands of the global job market for over five decades.
                   </p>
                 </div>
               </div>
 
-              <div className="flex flex-col items-center gap-6 pt-4 border-t border-border">
-                <span className="text-foreground text-lg sm:text-xl font-serif self-end">Est. 1974</span>
-
-                <Link
-                  href="#milestones"
-                  className="px-8 py-4 bg-foreground text-background text-base font-semibold font-sans rounded-lg hover:shadow-[0px_8px_24px_rgba(55,50,47,0.2)] transition-all duration-300 active:scale-95 flex items-center gap-2"
-                >
-                  Learn more about our history
-                  <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M6 12L10 8L6 4" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-                  </svg>
-                </Link>
-              </div>
-
-              {/* Founder Achievements */}
-              <div className="flex flex-wrap gap-6 pt-4 border-t border-border mt-2">
-                <div className="flex flex-col gap-0">
-                  <span className="text-foreground text-2xl sm:text-3xl font-serif font-bold">PhD</span>
-                  <span className="text-muted-foreground text-xs font-sans uppercase tracking-wider">Education</span>
-                </div>
-                <div className="flex flex-col gap-0">
-                  <span className="text-foreground text-2xl sm:text-3xl font-serif font-bold">30+</span>
-                  <span className="text-muted-foreground text-xs font-sans uppercase tracking-wider">
-                    Years in Education
-                  </span>
-                </div>
-                <div className="flex flex-col gap-0">
-                  <span className="text-foreground text-2xl sm:text-3xl font-serif font-bold">15K+</span>
-                  <span className="text-muted-foreground text-xs font-sans uppercase tracking-wider">Alumni</span>
+              <div className="pt-8 border-t border-border mt-6">
+                <div className="flex flex-col gap-2">
+                  <p className="text-muted-foreground text-lg font-serif italic text-balance">
+                    "Our commitment goes beyond the classroom. We are dedicated to nurturing not just skilled professionals, but character-driven leaders who will shape the future."
+                  </p>
                 </div>
               </div>
             </div>
