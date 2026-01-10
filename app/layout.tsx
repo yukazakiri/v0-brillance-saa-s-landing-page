@@ -121,6 +121,12 @@ export default function RootLayout({
         </div>
         <Script src="https://cdn.botpress.cloud/webchat/v3.5/inject.js" strategy="afterInteractive" />
         <Script src="https://files.bpcontent.cloud/2025/03/12/02/20250312025656-J40NI3RT.js" strategy="afterInteractive" />
+        <Script 
+          defer 
+          src="https://cloud.umami.is/script.js" 
+          data-website-id="fdd1a0c6-e79d-4ba5-bdeb-a5bdee72fa09" 
+          strategy="afterInteractive" 
+        />
       </body>
     </html>
   )
