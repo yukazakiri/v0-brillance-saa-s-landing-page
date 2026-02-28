@@ -1,4 +1,13 @@
-import { ArrowLeft, Calendar, Hash, Tag as TagIcon, User } from "lucide-react";
+import {
+  ArrowLeft,
+  Calendar,
+  ExternalLink,
+  Facebook,
+  Hash,
+  Share2,
+  Tag as TagIcon,
+  User,
+} from "lucide-react";
 import type { Metadata } from "next";
 import { PortableText, type PortableTextComponents } from "next-sanity";
 import Link from "next/link";
@@ -9,6 +18,8 @@ import { Button } from "@/components/ui/button";
 
 import CollegeHeader from "@/components/college-header";
 import FooterSection from "@/components/footer-section";
+import { getFacebookConfig, getFacebookPosts } from "@/lib/facebook";
+import type { NormalizedFacebookPost } from "@/lib/facebook/types";
 import { buildImageUrl } from "@/lib/sanity/image";
 import {
   fetchPostBySlug,
@@ -53,11 +64,55 @@ function getSiteBaseUrl() {
 
 export async function generateStaticParams() {
   const slugs = await fetchPostSlugs();
-  return slugs.map((slug) => ({ slug }));
+  const sanityParams = slugs.map((slug) => ({ slug }));
+
+  // Add Facebook post slugs if configured
+  const config = getFacebookConfig();
+  if (config) {
+    try {
+      const { posts } = await getFacebookPosts({ limit: 20 });
+      const facebookParams = posts.map((post) => ({
+        slug: `fb-${post.id}`,
+      }));
+      return [...sanityParams, ...facebookParams];
+    } catch (error) {
+      console.error("Error fetching Facebook posts for static params:", error);
+    }
+  }
+
+  return sanityParams;
 }
 
 async function getPost(slug: string): Promise<SanityPost | null> {
   return fetchPostBySlug(slug);
+}
+
+// Check if slug is for a Facebook post
+function isFacebookSlug(slug: string): boolean {
+  return slug.startsWith("fb-");
+}
+
+// Extract Facebook post ID from slug
+function getFacebookIdFromSlug(slug: string): string {
+  return slug.replace("fb-", "");
+}
+
+// Fetch a specific Facebook post by ID
+async function getFacebookPost(
+  postId: string,
+): Promise<NormalizedFacebookPost | null> {
+  const config = getFacebookConfig();
+  if (!config) return null;
+
+  try {
+    // Fetch all posts and find the one we need
+    // In production, you might want to cache this or use a direct API call
+    const { posts } = await getFacebookPosts({ limit: 50 });
+    return posts.find((p) => p.id === postId) || null;
+  } catch (error) {
+    console.error("Error fetching Facebook post:", error);
+    return null;
+  }
 }
 
 export async function generateMetadata({
@@ -66,6 +121,44 @@ export async function generateMetadata({
   params: Promise<{ slug: string }>;
 }): Promise<Metadata> {
   const { slug } = await params;
+
+  // Handle Facebook posts
+  if (isFacebookSlug(slug)) {
+    const facebookId = getFacebookIdFromSlug(slug);
+    const fbPost = await getFacebookPost(facebookId);
+    if (!fbPost) return {};
+
+    const baseUrl = getSiteBaseUrl();
+    const canonicalUrl = baseUrl ? `${baseUrl}/news/${slug}` : `/news/${slug}`;
+
+    return {
+      title: fbPost.message
+        ? fbPost.message.slice(0, 60) + "..."
+        : "Facebook Post",
+      description: fbPost.message || "A post from Facebook",
+      alternates: canonicalUrl ? { canonical: canonicalUrl } : undefined,
+      openGraph: {
+        title: fbPost.message
+          ? fbPost.message.slice(0, 60) + "..."
+          : "Facebook Post",
+        description: fbPost.message || "A post from Facebook",
+        url: canonicalUrl,
+        type: "article",
+        images: fbPost.image
+          ? [
+              {
+                url: fbPost.image,
+                width: 1200,
+                height: 630,
+                alt: "Facebook post image",
+              },
+            ]
+          : undefined,
+      },
+    };
+  }
+
+  // Handle Sanity posts
   const post = await fetchPostBySlug(slug);
   if (!post) return {};
 
@@ -102,11 +195,7 @@ export default async function NewsArticlePage({
   params: Promise<{ slug: string }>;
 }) {
   const { slug } = await params;
-  const [post, settings] = await Promise.all([getPost(slug), fetchSettings()]);
-
-  if (!post) {
-    notFound();
-  }
+  const settings = await fetchSettings();
 
   const siteSettings: Settings = settings ?? {
     _id: "default",
@@ -116,6 +205,27 @@ export default async function NewsArticlePage({
     tagline:
       "Empowering the next generation of IT professionals, business leaders, and innovators",
   };
+
+  // Handle Facebook posts
+  if (isFacebookSlug(slug)) {
+    const facebookId = getFacebookIdFromSlug(slug);
+    const fbPost = await getFacebookPost(facebookId);
+
+    if (!fbPost) {
+      notFound();
+    }
+
+    return (
+      <FacebookPostPage post={fbPost} settings={siteSettings} slug={slug} />
+    );
+  }
+
+  // Handle Sanity posts
+  const post = await getPost(slug);
+
+  if (!post) {
+    notFound();
+  }
 
   const heroImage = buildImageUrl(post.featuredImage);
   const heroMedia = heroImage ?? "/hero-images/maincampus.png";
@@ -267,6 +377,245 @@ export default async function NewsArticlePage({
       </div>
 
       <FooterSection settings={siteSettings} />
+    </>
+  );
+}
+
+// Facebook Post Page Component
+function FacebookPostPage({
+  post,
+  settings,
+  slug,
+}: {
+  post: NormalizedFacebookPost;
+  settings: Settings;
+  slug: string;
+}) {
+  const publishedDate = dateFormatter.format(new Date(post.createdAt));
+  const categoryLabel = post.isShared
+    ? "Shared Post"
+    : formatCategoryLabel(post.type);
+  const authorName =
+    post.isShared && post.sharedFrom?.name
+      ? `Shared from ${post.sharedFrom.name}`
+      : "Facebook";
+  const baseUrl = getSiteBaseUrl();
+  const canonicalUrl = baseUrl ? `${baseUrl}/news/${slug}` : `/news/${slug}`;
+  const shareLinks = [
+    {
+      label: "Facebook",
+      href: `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(canonicalUrl)}`,
+    },
+    {
+      label: "Twitter",
+      href: `https://twitter.com/intent/tweet?url=${encodeURIComponent(canonicalUrl)}&text=${encodeURIComponent(
+        post.message?.slice(0, 100) || "Facebook Post",
+      )}`,
+    },
+    {
+      label: "LinkedIn",
+      href: `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(canonicalUrl)}`,
+    },
+  ];
+
+  return (
+    <>
+      <CollegeHeader settings={settings} />
+
+      {/* Hero Image Section */}
+      <div className="relative w-full h-[50vh] sm:h-[60vh] lg:h-[70vh] overflow-hidden mt-16 sm:mt-20">
+        {post.image ? (
+          <img
+            src={post.image}
+            alt={post.message?.slice(0, 60) || "Facebook post"}
+            className="w-full h-full object-cover"
+          />
+        ) : (
+          <div className="w-full h-full bg-gradient-to-br from-[#1877f2] to-[#0d5bbf] flex items-center justify-center">
+            <Facebook className="w-24 h-24 text-white/30" />
+          </div>
+        )}
+        <div className="absolute inset-0 bg-gradient-to-t from-background via-background/40 to-transparent" />
+
+        {/* Facebook Badge */}
+        <div className="absolute top-4 right-4 sm:top-6 sm:right-6">
+          <div className="px-4 py-2 bg-[#1877f2] text-white text-xs font-bold uppercase tracking-wider rounded-full flex items-center gap-2 shadow-lg">
+            <Facebook className="w-4 h-4" />
+            Facebook
+          </div>
+        </div>
+      </div>
+
+      <div className="w-full px-2 sm:px-4 md:px-8 lg:px-12 py-10">
+        <div className="w-full max-w-[1000px] mx-auto flex flex-col gap-10">
+          {/* Article Header */}
+          <header className="border-b border-border/50 pb-10">
+            <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
+              {/* Breadcrumb Navigation */}
+              <nav className="mb-8 flex items-center gap-2 text-sm text-muted-foreground">
+                <Link
+                  href="/"
+                  className="hover:text-foreground transition-colors"
+                >
+                  Home
+                </Link>
+                <span className="text-muted-foreground/50">/</span>
+                <Link
+                  href="/news"
+                  className="hover:text-foreground transition-colors"
+                >
+                  News
+                </Link>
+                <span className="text-muted-foreground/50">/</span>
+                <span className="text-foreground truncate max-w-[200px]">
+                  {post.message?.slice(0, 50) || "Facebook Post"}
+                </span>
+              </nav>
+
+              <div className="space-y-6">
+                <div className="flex items-center gap-3">
+                  <span className="text-xs font-medium tracking-[0.2em] uppercase text-muted-foreground">
+                    {categoryLabel}
+                  </span>
+                  <span className="w-1 h-1 rounded-full bg-muted-foreground/30" />
+                  <span className="text-xs text-muted-foreground">
+                    {publishedDate}
+                  </span>
+                </div>
+
+                <h1 className="text-3xl sm:text-4xl lg:text-5xl font-serif leading-[1.15] tracking-tight text-foreground">
+                  {post.message
+                    ? post.message.slice(0, 100) +
+                      (post.message.length > 100 ? "..." : "")
+                    : "Facebook Post"}
+                </h1>
+
+                <div className="flex items-center gap-2 text-sm text-muted-foreground pt-2">
+                  <Facebook className="w-4 h-4 text-[#1877f2]" />
+                  <span>{authorName}</span>
+                </div>
+
+                {/* Shared From Info */}
+                {post.isShared && post.sharedFrom?.name && (
+                  <div className="flex items-center gap-3 p-4 bg-[#f7f5f3] rounded-lg border border-[rgba(26,58,82,0.12)]">
+                    <Share2 className="w-5 h-5 text-[#1877f2]" />
+                    <div>
+                      <p className="text-sm font-medium text-[#1a3a52]">
+                        Shared from{" "}
+                        <span className="text-[#1877f2]">
+                          {post.sharedFrom.name}
+                        </span>
+                      </p>
+                      {post.originalPost?.author && (
+                        <p className="text-xs text-[#605A57] mt-1">
+                          Original by {post.originalPost.author.name}
+                        </p>
+                      )}
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+          </header>
+
+          <div className="w-full max-w-[820px] mx-auto flex flex-col gap-8">
+            {/* Post Content */}
+            <article className="prose prose-neutral prose-lg max-w-none text-[#433C38]">
+              {post.message ? (
+                <p className="whitespace-pre-wrap">{post.message}</p>
+              ) : (
+                <p className="text-muted-foreground italic">
+                  This post doesn't have text content.
+                </p>
+              )}
+            </article>
+
+            {/* Original Post (for shared posts) */}
+            {post.isShared && post.originalPost && (
+              <div className="border border-[rgba(26,58,82,0.12)] rounded-lg overflow-hidden bg-[#f7f5f3]">
+                <div className="p-4 bg-[#1a3a52]/5 border-b border-[rgba(26,58,82,0.12)]">
+                  <p className="text-sm font-medium text-[#1a3a52] flex items-center gap-2">
+                    <Share2 className="w-4 h-4" />
+                    Original Post
+                  </p>
+                </div>
+                {post.originalPost.image && (
+                  <img
+                    src={post.originalPost.image}
+                    alt="Original post"
+                    className="w-full max-h-[400px] object-cover"
+                  />
+                )}
+                {post.originalPost.message && (
+                  <div className="p-4">
+                    <p className="text-sm text-[#433C38] line-clamp-4">
+                      {post.originalPost.message}
+                    </p>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* Engagement Stats */}
+            <div className="flex items-center gap-6 py-4 border-y border-[rgba(55,50,47,0.12)]">
+              <span className="text-sm text-[#605A57]">
+                <strong className="text-[#1a3a52]">{post.likes}</strong> likes
+              </span>
+              {post.comments > 0 && (
+                <span className="text-sm text-[#605A57]">
+                  <strong className="text-[#1a3a52]">{post.comments}</strong>{" "}
+                  comments
+                </span>
+              )}
+              {post.shares > 0 && (
+                <span className="text-sm text-[#605A57]">
+                  <strong className="text-[#1a3a52]">{post.shares}</strong>{" "}
+                  shares
+                </span>
+              )}
+            </div>
+
+            {/* View on Facebook Button */}
+            {post.permalink && (
+              <div className="flex justify-center">
+                <a
+                  href={post.permalink}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-2 px-6 py-3 bg-[#1877f2] text-white text-sm font-semibold rounded-full hover:bg-[#1877f2]/90 transition-colors"
+                >
+                  <Facebook className="w-4 h-4" />
+                  View on Facebook
+                  <ExternalLink className="w-4 h-4" />
+                </a>
+              </div>
+            )}
+
+            {/* Share Links */}
+            <div className="border-t border-[rgba(55,50,47,0.12)] pt-6 flex flex-col gap-4">
+              <h3 className="text-sm font-semibold text-[#6B635D] uppercase tracking-[0.3em]">
+                Share this story
+              </h3>
+              <div className="flex flex-wrap gap-3">
+                {shareLinks.map((share) => (
+                  <a
+                    key={share.label}
+                    href={share.href}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="inline-flex items-center gap-2 px-4 py-2 rounded-full border border-[rgba(55,50,47,0.2)] text-sm font-semibold text-[#37322F] hover:bg-[#37322F] hover:text-white transition-colors"
+                  >
+                    {share.label}
+                    <span aria-hidden>↗</span>
+                  </a>
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <FooterSection settings={settings} />
     </>
   );
 }
