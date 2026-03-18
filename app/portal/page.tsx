@@ -11,7 +11,6 @@ import PortalHero from "@/components/portal/portal-hero";
 import OverviewSection from "@/components/portal/overview-section";
 import FeatureSection from "@/components/portal/feature-section";
 import ShowcaseSection from "@/components/portal/showcase-section";
-import TestimonialSection from "@/components/portal/testimonial-section";
 import GettingStartedSection from "@/components/portal/getting-started-section";
 import SpecsSection from "@/components/portal/specs-section";
 
@@ -98,7 +97,7 @@ export default async function PortalPage() {
             case "softwareShowcaseSection":
               return <ShowcaseSection key={section._key} data={section} />;
             case "studentTestimonialSection":
-              return <TestimonialSection key={section._key} data={section} />;
+              return null;
             case "gettingStartedSection":
               return (
                 <GettingStartedSection key={section._key} data={section} />

@@ -18,7 +18,6 @@ import CoursesAndProgramsSection from "@/components/courses-programs-section";
 import FAQSection from "@/components/faq-section";
 import FooterSection from "@/components/footer-section";
 import NewsAnnouncementsSection from "@/components/news-announcements-section";
-import TestimonialsSection from "@/components/testimonials-section";
 
 export default async function LandingPage() {
   let newsArticles: Awaited<ReturnType<typeof fetchLatestPosts>> = [];
@@ -54,7 +53,6 @@ export default async function LandingPage() {
       <AboutSection settings={siteSettings} />
       <CoursesAndProgramsSection courses={courses} />
       {/*<FacultyStaffSection />*/}
-      <TestimonialsSection />
       <FAQSection />
       <CTASection settings={siteSettings} />
       <FooterSection settings={siteSettings} />
