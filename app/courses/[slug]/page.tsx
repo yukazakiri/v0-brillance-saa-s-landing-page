@@ -207,7 +207,7 @@ export default async function CoursePage({ params }: { params: Promise<{ slug: s
                                 </section>
                             )}
 
-                            {course.highlights && course.highlights.length > 0 && (
+                            {course.highlights && course.highlights.length > 0 && course.level !== "undergrad" && (
                                 <section className="bg-card border border-border rounded-lg p-6 md:p-8">
                                     <h2 className="text-2xl font-serif font-semibold text-foreground mb-4">
                                         Program Highlights
@@ -223,7 +223,7 @@ export default async function CoursePage({ params }: { params: Promise<{ slug: s
                                 </section>
                             )}
 
-                            {course.learningOutcomes && course.learningOutcomes.length > 0 && (
+                            {course.learningOutcomes && course.learningOutcomes.length > 0 && course.level !== "undergrad" && (
                                 <section className="bg-card border border-border rounded-lg p-6 md:p-8">
                                     <h2 className="text-2xl font-serif font-semibold text-foreground mb-4">
                                         Learning Outcomes
@@ -339,7 +339,7 @@ export default async function CoursePage({ params }: { params: Promise<{ slug: s
                                     Program Details
                                 </h3>
                                 <div className="space-y-5">
-                                    {course.creditHours && (
+                                    {course.creditHours && course.level !== "undergrad" && (
                                         <div>
                                             <div className="flex items-center gap-2 text-sm text-muted-foreground mb-1">
                                                 <FileText className="w-4 h-4" />
@@ -363,19 +363,19 @@ export default async function CoursePage({ params }: { params: Promise<{ slug: s
                                         </div>
                                     )}
 
-                                    {course.tuition && (
+                                    {(course.tuition || course.level === "undergrad") && (
                                         <div>
                                             <div className="flex items-center gap-2 text-sm text-muted-foreground mb-1">
                                                 <DollarSign className="w-4 h-4" />
                                                 Tuition
                                             </div>
                                             <div className="text-base font-medium text-foreground">
-                                                {course.tuition}
+                                                {course.level === "undergrad" ? "₱14,000 - ₱20,000" : course.tuition}
                                             </div>
                                         </div>
                                     )}
 
-                                    {course.financialAidHighlight && (
+                                    {course.financialAidHighlight && course.level !== "undergrad" && (
                                         <div className="bg-green-500/10 border border-green-500/20 rounded-lg p-3">
                                             <div className="flex items-center gap-2 text-sm font-medium text-green-700 mb-1">
                                                 <Award className="w-4 h-4" />
