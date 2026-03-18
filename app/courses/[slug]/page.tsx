@@ -207,7 +207,32 @@ export default async function CoursePage({ params }: { params: Promise<{ slug: s
                                 </section>
                             )}
 
-                            {course.highlights && course.highlights.length > 0 && (
+                            {course.level === "undergrad" && (
+                                <section className="bg-blue-50 border-2 border-blue-200 rounded-lg p-6 md:p-8">
+                                    <h2 className="text-2xl font-serif font-semibold text-blue-900 mb-4 flex items-center gap-2">
+                                        <Award className="w-6 h-6" />
+                                        CHED Program Information
+                                    </h2>
+                                    <div className="space-y-3 text-blue-900/90">
+                                        <p>
+                                            This program is officially recognized and accredited by the <strong>Commission on Higher Education (CHED)</strong> of the Philippines.
+                                        </p>
+                                        <p>
+                                            CHED accreditation ensures that this undergraduate program meets rigorous national standards for curriculum quality, faculty qualifications, facilities, and educational outcomes.
+                                        </p>
+                                        {course.code && (
+                                            <p>
+                                                <strong>Program Code:</strong> {course.code}
+                                            </p>
+                                        )}
+                                        <p className="text-sm">
+                                            For more information about this program's accreditation status, visit the <a href="https://www.ched.gov.ph" target="_blank" rel="noopener noreferrer" className="underline hover:text-blue-700 font-semibold">CHED website</a>.
+                                        </p>
+                                    </div>
+                                </section>
+                            )}
+
+                            {course.highlights && course.highlights.length > 0 && course.level !== "undergrad" && (
                                 <section className="bg-card border border-border rounded-lg p-6 md:p-8">
                                     <h2 className="text-2xl font-serif font-semibold text-foreground mb-4">
                                         Program Highlights
@@ -223,7 +248,7 @@ export default async function CoursePage({ params }: { params: Promise<{ slug: s
                                 </section>
                             )}
 
-                            {course.learningOutcomes && course.learningOutcomes.length > 0 && (
+                            {course.learningOutcomes && course.learningOutcomes.length > 0 && course.level !== "undergrad" && (
                                 <section className="bg-card border border-border rounded-lg p-6 md:p-8">
                                     <h2 className="text-2xl font-serif font-semibold text-foreground mb-4">
                                         Learning Outcomes
@@ -375,7 +400,7 @@ export default async function CoursePage({ params }: { params: Promise<{ slug: s
                                         </div>
                                     )}
 
-                                    {course.financialAidHighlight && (
+                                    {course.financialAidHighlight && course.level !== "undergrad" && (
                                         <div className="bg-green-500/10 border border-green-500/20 rounded-lg p-3">
                                             <div className="flex items-center gap-2 text-sm font-medium text-green-700 mb-1">
                                                 <Award className="w-4 h-4" />
