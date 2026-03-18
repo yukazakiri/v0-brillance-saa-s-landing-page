@@ -89,7 +89,7 @@ export default function CollegeHero({ settings }: CollegeHeroProps) {
           <div className="inline-flex items-center gap-2 px-3 py-1.5 bg-background/80 backdrop-blur-md border border-[rgba(26,58,82,0.1)] rounded-full animate-in fade-in slide-in-from-bottom-4 duration-700 shadow-sm">
             <span className="w-2 h-2 rounded-full bg-primtext-primary"></span>
             <span className="text-primary text-xs font-semibold uppercase tracking-wider">
-              Est. 2026 — Baguio City
+              Est. 1970 — Baguio City
             </span>
           </div>
 
