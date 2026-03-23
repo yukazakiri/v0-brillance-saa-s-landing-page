@@ -455,7 +455,7 @@ export default async function NewsArticlePage({
       <CollegeHeader settings={siteSettings} />
 
       {/* Hero Image Section */}
-      <div className="relative w-full h-[50vh] sm:h-[60vh] lg:h-[70vh] overflow-hidden mt-16 sm:mt-20">
+      <div className="relative w-full h-[50vh] sm:h-[60vh] lg:h-[70vh] overflow-hidden">
         <img
           src={heroMedia}
           alt={post.featuredImage?.alt || post.title}
@@ -464,13 +464,13 @@ export default async function NewsArticlePage({
         <div className="absolute inset-0 bg-gradient-to-t from-background via-background/40 to-transparent" />
       </div>
 
-      <div className="w-full px-2 sm:px-4 md:px-8 lg:px-12 py-10">
-        <div className="w-full max-w-[1000px] mx-auto flex flex-col gap-10">
+      <div className="w-full py-10">
+        <div className="w-full max-w-[900px] mx-auto px-4 sm:px-6 lg:px-8 flex flex-col gap-10">
           {/* Article Header */}
-          <header className="border-b border-border/50 pb-10">
-            <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
+          <header className="border-b border-border/50 pb-10 w-full">
+            <div className="w-full space-y-6">
               {/* Breadcrumb Navigation */}
-              <nav className="mb-8 flex items-center gap-2 text-sm text-muted-foreground">
+              <nav className="flex items-center gap-2 text-sm text-muted-foreground">
                 <Link
                   href="/"
                   className="hover:text-foreground transition-colors"
@@ -490,8 +490,7 @@ export default async function NewsArticlePage({
                 </span>
               </nav>
 
-              <div className="space-y-6">
-                <div className="flex items-center gap-3">
+              <div className="flex items-center gap-3">
                   <span className="text-xs font-medium tracking-[0.2em] uppercase text-muted-foreground">
                     {categoryLabel}
                   </span>
@@ -509,15 +508,14 @@ export default async function NewsArticlePage({
                   {summaryText}
                 </p>
 
-                <div className="flex items-center gap-2 text-sm text-muted-foreground pt-2">
-                  <User className="w-4 h-4" />
-                  <span>{authorName}</span>
-                </div>
+              <div className="flex items-center gap-2 text-sm text-muted-foreground pt-2">
+                <User className="w-4 h-4" />
+                <span>{authorName}</span>
               </div>
             </div>
           </header>
 
-          <div className="w-full max-w-[820px] mx-auto flex flex-col gap-8">
+          <div className="w-full flex flex-col gap-8">
             {tags.length > 0 && (
               <div className="flex flex-wrap gap-2 text-xs font-medium text-[#4A403B]">
                 {tags.map((tag) => (
