@@ -454,17 +454,20 @@ export default async function NewsArticlePage({
     <>
       <CollegeHeader settings={siteSettings} />
 
-      {/* Hero Image Section */}
-      <div className="relative w-full h-[50vh] sm:h-[60vh] lg:h-[70vh] overflow-hidden">
-        <img
-          src={heroMedia}
-          alt={post.featuredImage?.alt || post.title}
-          className="w-full h-full object-cover"
-        />
-        <div className="absolute inset-0 bg-gradient-to-t from-background via-background/40 to-transparent" />
-      </div>
+      {/* Hero Image Section - Full Width */}
+      <section className="w-full h-[50vh] sm:h-[60vh] lg:h-[70vh] overflow-hidden bg-background">
+        <div className="relative w-full h-full">
+          <img
+            src={heroMedia}
+            alt={post.featuredImage?.alt || post.title}
+            className="w-full h-full object-cover"
+          />
+          <div className="absolute inset-0 bg-gradient-to-t from-background via-background/40 to-transparent" />
+        </div>
+      </section>
 
-      <div className="w-full py-10">
+      {/* Article Header Section - Separate */}
+      <div className="w-full bg-background py-12 sm:py-16 lg:py-20">
         <div className="w-full max-w-[900px] mx-auto px-4 sm:px-6 lg:px-8 flex flex-col gap-10">
           {/* Article Header */}
           <header className="border-b border-border/50 pb-10 w-full">
