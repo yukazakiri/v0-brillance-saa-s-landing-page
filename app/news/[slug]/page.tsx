@@ -186,6 +186,10 @@ const portableTextComponents: PortableTextComponents = {
       );
     },
   },
+  unknownBlockType: ({ value }) => {
+    console.warn(`Unknown block type: ${value._type}`);
+    return null;
+  },
   block: {
     normal: ({ children }) => (
       <p className="mb-4 leading-7 text-base">{children}</p>
