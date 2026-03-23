@@ -41,13 +41,143 @@ const portableTextComponents: PortableTextComponents = {
       const imageUrl = value ? buildImageUrl(value, 900, 600) : null;
       if (!imageUrl) return null;
       return (
-        <img
-          src={imageUrl}
-          alt={value?.alt || "News article image"}
-          className="w-full rounded-2xl shadow-md"
-        />
+        <figure className="my-6">
+          <img
+            src={imageUrl}
+            alt={value?.alt || "News article image"}
+            className="w-full rounded-2xl shadow-md"
+          />
+          {value?.credit && (
+            <figcaption className="text-sm text-muted-foreground italic mt-2 px-2">
+              Photo Credit: {value.credit}
+            </figcaption>
+          )}
+          {value?.caption && (
+            <figcaption className="text-sm text-foreground mt-1 px-2">
+              {value.caption}
+            </figcaption>
+          )}
+        </figure>
       );
     },
+    embed: ({ value }) => {
+      if (!value || !value.url) return null;
+      
+      // Handle Facebook embeds
+      if (value.url.includes("facebook.com")) {
+        return (
+          <div className="my-8 flex justify-center">
+            <iframe
+              src={`https://www.facebook.com/plugins/post.php?href=${encodeURIComponent(value.url)}&width=500&show_text=true`}
+              width="500"
+              height="400"
+              style={{
+                border: "none",
+                overflow: "hidden",
+                borderRadius: "8px",
+              }}
+              allowFullScreen={true}
+              allow="autoplay; clipboard-write; encrypted-media; picture-in-picture; web-share"
+              title="Facebook Post"
+              className="w-full max-w-[500px]"
+            />
+          </div>
+        );
+      }
+      
+      // Handle YouTube embeds
+      if (value.url.includes("youtube.com") || value.url.includes("youtu.be")) {
+        let videoId = "";
+        if (value.url.includes("youtube.com")) {
+          videoId = new URL(value.url).searchParams.get("v") || "";
+        } else {
+          videoId = value.url.split("/").pop() || "";
+        }
+        
+        if (!videoId) return null;
+        
+        return (
+          <div className="my-8 aspect-video w-full rounded-2xl overflow-hidden shadow-md">
+            <iframe
+              width="100%"
+              height="100%"
+              src={`https://www.youtube.com/embed/${videoId}`}
+              title="Video embed"
+              frameBorder="0"
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+              allowFullScreen
+            />
+          </div>
+        );
+      }
+      
+      // Generic iframe embed
+      return (
+        <div className="my-8 rounded-2xl overflow-hidden shadow-md">
+          <iframe
+            src={value.url}
+            title="Embedded content"
+            frameBorder="0"
+            allow="autoplay; clipboard-write; encrypted-media; picture-in-picture; web-share"
+            allowFullScreen
+            className="w-full aspect-video"
+          />
+        </div>
+      );
+    },
+  },
+  block: {
+    normal: ({ children }) => (
+      <p className="mb-4 leading-7 text-base">{children}</p>
+    ),
+    h1: ({ children }) => (
+      <h1 className="text-3xl font-bold mt-8 mb-4 leading-tight">{children}</h1>
+    ),
+    h2: ({ children }) => (
+      <h2 className="text-2xl font-bold mt-6 mb-3 leading-tight">{children}</h2>
+    ),
+    h3: ({ children }) => (
+      <h3 className="text-xl font-bold mt-5 mb-3 leading-tight">{children}</h3>
+    ),
+    h4: ({ children }) => (
+      <h4 className="text-lg font-bold mt-4 mb-2 leading-tight">{children}</h4>
+    ),
+    blockquote: ({ children }) => (
+      <blockquote className="border-l-4 border-primary pl-4 italic my-4 text-muted-foreground py-2">
+        {children}
+      </blockquote>
+    ),
+  },
+  list: {
+    bullet: ({ children }) => (
+      <ul className="list-disc list-inside space-y-2 my-4 ml-4">{children}</ul>
+    ),
+    number: ({ children }) => (
+      <ol className="list-decimal list-inside space-y-2 my-4 ml-4">{children}</ol>
+    ),
+  },
+  listItem: {
+    bullet: ({ children }) => <li className="mb-2">{children}</li>,
+    number: ({ children }) => <li className="mb-2">{children}</li>,
+  },
+  marks: {
+    strong: ({ children }) => <strong className="font-bold">{children}</strong>,
+    em: ({ children }) => <em className="italic">{children}</em>,
+    code: ({ children }) => (
+      <code className="bg-muted px-2 py-1 rounded font-mono text-sm">
+        {children}
+      </code>
+    ),
+    link: ({ value, children }) => (
+      <a
+        href={value?.href}
+        target={value?.blank ? "_blank" : "_self"}
+        rel={value?.blank ? "noopener noreferrer" : ""}
+        className="text-primary hover:underline"
+      >
+        {children}
+      </a>
+    ),
   },
 };
 
@@ -342,14 +472,14 @@ export default async function NewsArticlePage({
               </div>
             )}
 
-            <article className="prose prose-neutral prose-lg max-w-none text-[#433C38]">
+            <article className="w-full space-y-4 text-[#433C38]">
               {Array.isArray(post.content) && post.content.length > 0 ? (
                 <PortableText
                   value={post.content}
                   components={portableTextComponents}
                 />
               ) : (
-                <p>Details for this announcement will be available soon.</p>
+                <p className="text-muted-foreground">Details for this announcement will be available soon.</p>
               )}
             </article>
 
