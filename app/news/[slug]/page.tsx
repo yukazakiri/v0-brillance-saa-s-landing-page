@@ -41,11 +41,23 @@ const portableTextComponents: PortableTextComponents = {
       const imageUrl = value ? buildImageUrl(value, 900, 600) : null;
       if (!imageUrl) return null;
       return (
-        <img
-          src={imageUrl}
-          alt={value?.alt || "News article image"}
-          className="w-full rounded-2xl shadow-md my-6"
-        />
+        <figure className="my-6">
+          <img
+            src={imageUrl}
+            alt={value?.alt || "News article image"}
+            className="w-full rounded-2xl shadow-md"
+          />
+          {value?.credit && (
+            <figcaption className="text-sm text-muted-foreground italic mt-2 px-2">
+              Photo Credit: {value.credit}
+            </figcaption>
+          )}
+          {value?.caption && (
+            <figcaption className="text-sm text-foreground mt-1 px-2">
+              {value.caption}
+            </figcaption>
+          )}
+        </figure>
       );
     },
     embed: ({ value }) => {
