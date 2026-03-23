@@ -49,7 +49,7 @@ const portableTextComponents: PortableTextComponents = {
           />
           {value?.credit && (
             <figcaption className="text-sm text-muted-foreground italic mt-2 px-2">
-              Photo Credit: {value.credit}
+              📷 {value.credit}
             </figcaption>
           )}
           {value?.caption && (
@@ -60,10 +60,32 @@ const portableTextComponents: PortableTextComponents = {
         </figure>
       );
     },
+    facebook: ({ value }) => {
+      if (!value || !value.url) return null;
+      
+      return (
+        <div className="my-8 flex justify-center">
+          <iframe
+            src={`https://www.facebook.com/plugins/post.php?href=${encodeURIComponent(value.url)}&width=500&show_text=true`}
+            width="500"
+            height="400"
+            style={{
+              border: "none",
+              overflow: "hidden",
+              borderRadius: "8px",
+            }}
+            allowFullScreen={true}
+            allow="autoplay; clipboard-write; encrypted-media; picture-in-picture; web-share"
+            title="Facebook Post"
+            className="w-full max-w-[500px]"
+          />
+        </div>
+      );
+    },
     embed: ({ value }) => {
       if (!value || !value.url) return null;
       
-      // Handle Facebook embeds
+      // Handle Facebook embeds (for generic embed type)
       if (value.url.includes("facebook.com")) {
         return (
           <div className="my-8 flex justify-center">
