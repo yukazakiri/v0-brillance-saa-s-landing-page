@@ -459,7 +459,7 @@ export default async function NewsArticlePage({
       <CollegeHeader settings={siteSettings} />
 
       {/* Hero Image Section - Full Width with top margin */}
-      <section className="w-full h-[50vh] sm:h-[60vh] lg:h-[70vh] overflow-hidden bg-background mt-20">
+      <section className="w-full h-[50vh] sm:h-[60vh] lg:h-[70vh] overflow-hidden bg-background mt-28 sm:mt-32 lg:mt-40">
         <div className="relative w-full h-full">
           <img
             src={heroMedia}
@@ -471,7 +471,7 @@ export default async function NewsArticlePage({
       </section>
 
       {/* Article Header Section - Separate with margin top */}
-      <div className="w-full bg-background py-12 sm:py-16 lg:py-20 mt-8">
+      <div className="w-full bg-background py-12 sm:py-16 lg:py-20 mt-12 sm:mt-16">
         <div className="w-full max-w-[900px] mx-auto px-4 sm:px-6 lg:px-8 flex flex-col gap-10">
           {/* Article Header */}
           <header className="border-b border-border/50 pb-10 w-full">
