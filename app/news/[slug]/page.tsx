@@ -64,22 +64,36 @@ const portableTextComponents: PortableTextComponents = {
       if (!value || !value.url) return null;
       
       return (
-        <div className="my-8 flex justify-center">
-          <iframe
-            src={`https://www.facebook.com/plugins/post.php?href=${encodeURIComponent(value.url)}&width=500&show_text=true`}
-            width="500"
-            height="400"
-            style={{
-              border: "none",
-              overflow: "hidden",
-              borderRadius: "8px",
-            }}
-            allowFullScreen={true}
-            allow="autoplay; clipboard-write; encrypted-media; picture-in-picture; web-share"
-            title="Facebook Post"
-            className="w-full max-w-[500px]"
-          />
-        </div>
+        <aside className="my-8 bg-muted border-l-4 border-primary p-6 rounded-r-lg">
+          <div className="flex items-center gap-2 mb-4 text-sm font-semibold text-foreground">
+            <span>📱 Facebook Post</span>
+          </div>
+          <div className="flex justify-center overflow-x-auto">
+            <div style={{ minWidth: "100%", maxWidth: "500px" }}>
+              <iframe
+                src={`https://www.facebook.com/plugins/post.php?href=${encodeURIComponent(value.url)}&width=500&show_text=true`}
+                width="100%"
+                height="400"
+                style={{
+                  border: "none",
+                  overflow: "hidden",
+                  borderRadius: "var(--radius)",
+                }}
+                allowFullScreen={true}
+                allow="autoplay; clipboard-write; encrypted-media; picture-in-picture; web-share"
+                title="Facebook Post"
+              />
+            </div>
+          </div>
+          <a 
+            href={value.url} 
+            target="_blank" 
+            rel="noopener noreferrer"
+            className="inline-block mt-3 text-sm text-primary hover:underline"
+          >
+            View on Facebook →
+          </a>
+        </aside>
       );
     },
     embed: ({ value }) => {
@@ -88,22 +102,36 @@ const portableTextComponents: PortableTextComponents = {
       // Handle Facebook embeds (for generic embed type)
       if (value.url.includes("facebook.com")) {
         return (
-          <div className="my-8 flex justify-center">
-            <iframe
-              src={`https://www.facebook.com/plugins/post.php?href=${encodeURIComponent(value.url)}&width=500&show_text=true`}
-              width="500"
-              height="400"
-              style={{
-                border: "none",
-                overflow: "hidden",
-                borderRadius: "8px",
-              }}
-              allowFullScreen={true}
-              allow="autoplay; clipboard-write; encrypted-media; picture-in-picture; web-share"
-              title="Facebook Post"
-              className="w-full max-w-[500px]"
-            />
-          </div>
+          <aside className="my-8 bg-muted border-l-4 border-primary p-6 rounded-r-lg">
+            <div className="flex items-center gap-2 mb-4 text-sm font-semibold text-foreground">
+              <span>📱 Facebook Post</span>
+            </div>
+            <div className="flex justify-center overflow-x-auto">
+              <div style={{ minWidth: "100%", maxWidth: "500px" }}>
+                <iframe
+                  src={`https://www.facebook.com/plugins/post.php?href=${encodeURIComponent(value.url)}&width=500&show_text=true`}
+                  width="100%"
+                  height="400"
+                  style={{
+                    border: "none",
+                    overflow: "hidden",
+                    borderRadius: "var(--radius)",
+                  }}
+                  allowFullScreen={true}
+                  allow="autoplay; clipboard-write; encrypted-media; picture-in-picture; web-share"
+                  title="Facebook Post"
+                />
+              </div>
+            </div>
+            <a 
+              href={value.url} 
+              target="_blank" 
+              rel="noopener noreferrer"
+              className="inline-block mt-3 text-sm text-primary hover:underline"
+            >
+              View on Facebook →
+            </a>
+          </aside>
         );
       }
       
@@ -119,34 +147,48 @@ const portableTextComponents: PortableTextComponents = {
         if (!videoId) return null;
         
         return (
-          <div className="my-8 aspect-video w-full rounded-2xl overflow-hidden shadow-md">
-            <iframe
-              width="100%"
-              height="100%"
-              src={`https://www.youtube.com/embed/${videoId}`}
-              title="Video embed"
-              frameBorder="0"
-              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-              allowFullScreen
-            />
-          </div>
+          <figure className="my-8 bg-card p-4 rounded-lg border border-border">
+            <div className="aspect-video w-full rounded-md overflow-hidden shadow-md bg-foreground/10">
+              <iframe
+                width="100%"
+                height="100%"
+                src={`https://www.youtube.com/embed/${videoId}`}
+                title="Video embed"
+                frameBorder="0"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                allowFullScreen
+              />
+            </div>
+            <figcaption className="text-sm text-muted-foreground text-center mt-3">
+              🎥 YouTube Video
+            </figcaption>
+          </figure>
         );
       }
       
       // Generic iframe embed
       return (
-        <div className="my-8 rounded-2xl overflow-hidden shadow-md">
-          <iframe
-            src={value.url}
-            title="Embedded content"
-            frameBorder="0"
-            allow="autoplay; clipboard-write; encrypted-media; picture-in-picture; web-share"
-            allowFullScreen
-            className="w-full aspect-video"
-          />
-        </div>
+        <figure className="my-8 bg-card p-4 rounded-lg border border-border">
+          <div className="aspect-video w-full rounded-md overflow-hidden shadow-md bg-foreground/10">
+            <iframe
+              src={value.url}
+              title="Embedded content"
+              frameBorder="0"
+              allow="autoplay; clipboard-write; encrypted-media; picture-in-picture; web-share"
+              allowFullScreen
+              className="w-full h-full"
+            />
+          </div>
+          <figcaption className="text-sm text-muted-foreground text-center mt-3">
+            🔗 Embedded Content
+          </figcaption>
+        </figure>
       );
     },
+  },
+  unknownBlockType: ({ value }) => {
+    console.warn(`Unknown block type: ${value._type}`);
+    return null;
   },
   block: {
     normal: ({ children }) => (
@@ -416,23 +458,26 @@ export default async function NewsArticlePage({
     <>
       <CollegeHeader settings={siteSettings} />
 
-      {/* Hero Image Section */}
-      <div className="relative w-full h-[50vh] sm:h-[60vh] lg:h-[70vh] overflow-hidden mt-16 sm:mt-20">
-        <img
-          src={heroMedia}
-          alt={post.featuredImage?.alt || post.title}
-          className="w-full h-full object-cover"
-        />
-        <div className="absolute inset-0 bg-gradient-to-t from-background via-background/40 to-transparent" />
-      </div>
+      {/* Hero Image Section - Full Width with top margin */}
+      <section className="w-full h-[50vh] sm:h-[60vh] lg:h-[70vh] overflow-hidden bg-background mt-28 sm:mt-32 lg:mt-40">
+        <div className="relative w-full h-full">
+          <img
+            src={heroMedia}
+            alt={post.featuredImage?.alt || post.title}
+            className="w-full h-full object-cover"
+          />
+          <div className="absolute inset-0 bg-gradient-to-t from-background via-background/40 to-transparent" />
+        </div>
+      </section>
 
-      <div className="w-full px-2 sm:px-4 md:px-8 lg:px-12 py-10">
-        <div className="w-full max-w-[1000px] mx-auto flex flex-col gap-10">
+      {/* Article Header Section - Separate with margin top */}
+      <div className="w-full bg-background py-12 sm:py-16 lg:py-20 mt-12 sm:mt-16">
+        <div className="w-full max-w-[900px] mx-auto px-4 sm:px-6 lg:px-8 flex flex-col gap-10">
           {/* Article Header */}
-          <header className="border-b border-border/50 pb-10">
-            <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
+          <header className="border-b border-border/50 pb-10 w-full">
+            <div className="w-full space-y-6">
               {/* Breadcrumb Navigation */}
-              <nav className="mb-8 flex items-center gap-2 text-sm text-muted-foreground">
+              <nav className="flex items-center gap-2 text-sm text-muted-foreground">
                 <Link
                   href="/"
                   className="hover:text-foreground transition-colors"
@@ -452,8 +497,7 @@ export default async function NewsArticlePage({
                 </span>
               </nav>
 
-              <div className="space-y-6">
-                <div className="flex items-center gap-3">
+              <div className="flex items-center gap-3">
                   <span className="text-xs font-medium tracking-[0.2em] uppercase text-muted-foreground">
                     {categoryLabel}
                   </span>
@@ -471,15 +515,14 @@ export default async function NewsArticlePage({
                   {summaryText}
                 </p>
 
-                <div className="flex items-center gap-2 text-sm text-muted-foreground pt-2">
-                  <User className="w-4 h-4" />
-                  <span>{authorName}</span>
-                </div>
+              <div className="flex items-center gap-2 text-sm text-muted-foreground pt-2">
+                <User className="w-4 h-4" />
+                <span>{authorName}</span>
               </div>
             </div>
           </header>
 
-          <div className="w-full max-w-[820px] mx-auto flex flex-col gap-8">
+          <div className="w-full flex flex-col gap-8">
             {tags.length > 0 && (
               <div className="flex flex-wrap gap-2 text-xs font-medium text-[#4A403B]">
                 {tags.map((tag) => (
