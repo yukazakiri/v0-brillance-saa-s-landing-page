@@ -64,22 +64,36 @@ const portableTextComponents: PortableTextComponents = {
       if (!value || !value.url) return null;
       
       return (
-        <div className="my-8 flex justify-center">
-          <iframe
-            src={`https://www.facebook.com/plugins/post.php?href=${encodeURIComponent(value.url)}&width=500&show_text=true`}
-            width="500"
-            height="400"
-            style={{
-              border: "none",
-              overflow: "hidden",
-              borderRadius: "8px",
-            }}
-            allowFullScreen={true}
-            allow="autoplay; clipboard-write; encrypted-media; picture-in-picture; web-share"
-            title="Facebook Post"
-            className="w-full max-w-[500px]"
-          />
-        </div>
+        <aside className="my-8 bg-blue-50 border-l-4 border-blue-500 p-6 rounded-r-lg">
+          <div className="flex items-center gap-2 mb-4 text-sm font-semibold text-blue-900">
+            <span>📱 Facebook Post</span>
+          </div>
+          <div className="flex justify-center overflow-x-auto">
+            <div style={{ minWidth: "100%", maxWidth: "500px" }}>
+              <iframe
+                src={`https://www.facebook.com/plugins/post.php?href=${encodeURIComponent(value.url)}&width=500&show_text=true`}
+                width="100%"
+                height="400"
+                style={{
+                  border: "none",
+                  overflow: "hidden",
+                  borderRadius: "8px",
+                }}
+                allowFullScreen={true}
+                allow="autoplay; clipboard-write; encrypted-media; picture-in-picture; web-share"
+                title="Facebook Post"
+              />
+            </div>
+          </div>
+          <a 
+            href={value.url} 
+            target="_blank" 
+            rel="noopener noreferrer"
+            className="inline-block mt-3 text-sm text-blue-600 hover:text-blue-800 hover:underline"
+          >
+            View on Facebook →
+          </a>
+        </aside>
       );
     },
     embed: ({ value }) => {
@@ -88,22 +102,36 @@ const portableTextComponents: PortableTextComponents = {
       // Handle Facebook embeds (for generic embed type)
       if (value.url.includes("facebook.com")) {
         return (
-          <div className="my-8 flex justify-center">
-            <iframe
-              src={`https://www.facebook.com/plugins/post.php?href=${encodeURIComponent(value.url)}&width=500&show_text=true`}
-              width="500"
-              height="400"
-              style={{
-                border: "none",
-                overflow: "hidden",
-                borderRadius: "8px",
-              }}
-              allowFullScreen={true}
-              allow="autoplay; clipboard-write; encrypted-media; picture-in-picture; web-share"
-              title="Facebook Post"
-              className="w-full max-w-[500px]"
-            />
-          </div>
+          <aside className="my-8 bg-blue-50 border-l-4 border-blue-500 p-6 rounded-r-lg">
+            <div className="flex items-center gap-2 mb-4 text-sm font-semibold text-blue-900">
+              <span>📱 Facebook Post</span>
+            </div>
+            <div className="flex justify-center overflow-x-auto">
+              <div style={{ minWidth: "100%", maxWidth: "500px" }}>
+                <iframe
+                  src={`https://www.facebook.com/plugins/post.php?href=${encodeURIComponent(value.url)}&width=500&show_text=true`}
+                  width="100%"
+                  height="400"
+                  style={{
+                    border: "none",
+                    overflow: "hidden",
+                    borderRadius: "8px",
+                  }}
+                  allowFullScreen={true}
+                  allow="autoplay; clipboard-write; encrypted-media; picture-in-picture; web-share"
+                  title="Facebook Post"
+                />
+              </div>
+            </div>
+            <a 
+              href={value.url} 
+              target="_blank" 
+              rel="noopener noreferrer"
+              className="inline-block mt-3 text-sm text-blue-600 hover:text-blue-800 hover:underline"
+            >
+              View on Facebook →
+            </a>
+          </aside>
         );
       }
       
@@ -119,32 +147,42 @@ const portableTextComponents: PortableTextComponents = {
         if (!videoId) return null;
         
         return (
-          <div className="my-8 aspect-video w-full rounded-2xl overflow-hidden shadow-md">
-            <iframe
-              width="100%"
-              height="100%"
-              src={`https://www.youtube.com/embed/${videoId}`}
-              title="Video embed"
-              frameBorder="0"
-              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-              allowFullScreen
-            />
-          </div>
+          <figure className="my-8 bg-gray-50 p-4 rounded-lg border border-gray-200">
+            <div className="aspect-video w-full rounded-lg overflow-hidden shadow-md bg-black">
+              <iframe
+                width="100%"
+                height="100%"
+                src={`https://www.youtube.com/embed/${videoId}`}
+                title="Video embed"
+                frameBorder="0"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                allowFullScreen
+              />
+            </div>
+            <figcaption className="text-sm text-muted-foreground text-center mt-3">
+              🎥 YouTube Video
+            </figcaption>
+          </figure>
         );
       }
       
       // Generic iframe embed
       return (
-        <div className="my-8 rounded-2xl overflow-hidden shadow-md">
-          <iframe
-            src={value.url}
-            title="Embedded content"
-            frameBorder="0"
-            allow="autoplay; clipboard-write; encrypted-media; picture-in-picture; web-share"
-            allowFullScreen
-            className="w-full aspect-video"
-          />
-        </div>
+        <figure className="my-8 bg-gray-50 p-4 rounded-lg border border-gray-200">
+          <div className="aspect-video w-full rounded-lg overflow-hidden shadow-md bg-black">
+            <iframe
+              src={value.url}
+              title="Embedded content"
+              frameBorder="0"
+              allow="autoplay; clipboard-write; encrypted-media; picture-in-picture; web-share"
+              allowFullScreen
+              className="w-full h-full"
+            />
+          </div>
+          <figcaption className="text-sm text-muted-foreground text-center mt-3">
+            🔗 Embedded Content
+          </figcaption>
+        </figure>
       );
     },
   },
