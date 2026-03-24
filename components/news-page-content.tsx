@@ -32,9 +32,10 @@ function formatCategoryLabel(category: string) {
 }
 
 // Bento Grid Component for Facebook and Sanity Gallery Images
-function BentoGrid({ posts, galleryImages = [] }: { posts: UnifiedPost[]; galleryImages?: Array<{ id: string; image: string; title: string; date: string }> }) {
-  // Combine both sources
+function BentoGrid({ posts, galleryImages = [] }: { posts: UnifiedPost[]; galleryImages?: UnifiedPost[] }) {
+  // Combine both sources - Facebook posts first, then article gallery images
   const combinedImages = [...posts, ...galleryImages].slice(0, 8);
+  console.log("[v0] BentoGrid received - posts:", posts.length, "gallery:", galleryImages.length, "combined:", combinedImages.length);
   
   if (!combinedImages.length) return null;
 
@@ -136,7 +137,7 @@ function BentoGrid({ posts, galleryImages = [] }: { posts: UnifiedPost[]; galler
 interface NewsPageContentProps {
   posts: UnifiedPost[];
   facebookImages: UnifiedPost[];
-  galleryImages?: Array<{ id: string; image: string; title: string; date: string }>;
+  galleryPosts?: UnifiedPost[];
   settings: Settings;
   showFooter?: boolean;
 }
@@ -144,7 +145,7 @@ interface NewsPageContentProps {
 export default function NewsPageContent({
   posts,
   facebookImages,
-  galleryImages = [],
+  galleryPosts = [],
   settings,
   showFooter = true,
 }: NewsPageContentProps) {
@@ -401,7 +402,7 @@ export default function NewsPageContent({
       {showFooter && <FooterSection settings={settings} />}
 
       {/* Bento Grid for Combined Facebook and Gallery Images */}
-      <BentoGrid posts={facebookImages} galleryImages={galleryImages} />
+      <BentoGrid posts={facebookImages} galleryImages={galleryPosts} />
     </div>
   );
 }
