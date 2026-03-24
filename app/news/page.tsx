@@ -19,6 +19,7 @@ export const revalidate = 60;
 export default async function NewsPage() {
   let articles: Article[] = [];
   let settings = null;
+  let articleGalleryPosts: any[] = [];
 
   let facebookPostsResult: {
     posts: NormalizedFacebookPost[];
@@ -39,6 +40,27 @@ export default async function NewsPage() {
     ]);
     [articles, settings] = sanityData;
     facebookPostsResult = fbData;
+    
+    // Create unified posts from articles with featured images for the gallery
+    // These will be added to Facebook images in the BentoGrid
+    articleGalleryPosts = articles
+      .filter(article => article.image) // Only include articles with featured images
+      .slice(0, 8)
+      .map(article => ({
+        id: article.id,
+        title: article.title,
+        excerpt: article.excerpt,
+        content: null,
+        image: article.image,
+        date: article.date,
+        author: article.author,
+        category: article.category,
+        slug: article.slug,
+        permalink: `/news/${article.slug}`,
+        source: "sanity" as const,
+      }));
+    
+    console.log("[v0] Gallery posts created from articles:", articleGalleryPosts.length, "Articles with images:", articles.filter(a => a.image).length);
   } catch (error) {
     console.error("Error fetching data:", error);
     // Continue with empty data if fetch fails
@@ -65,6 +87,7 @@ export default async function NewsPage() {
       <NewsPageContent
         posts={unifiedPosts}
         facebookImages={facebookPostsWithImages}
+        galleryPosts={articleGalleryPosts}
         settings={siteSettings}
         showFooter={false}
       />
