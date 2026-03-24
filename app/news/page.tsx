@@ -11,7 +11,6 @@ import {
   getFacebookPostsWithImages,
 } from "@/lib/unified-posts";
 import { fetchAllPosts, fetchSettings } from "@/lib/sanity/queries";
-import { client } from "@/lib/sanity/client";
 import type { Article, Settings } from "@/lib/sanity/types";
 
 // Revalidate page every 60 seconds to pick up new Sanity content
@@ -20,6 +19,7 @@ export const revalidate = 60;
 export default async function NewsPage() {
   let articles: Article[] = [];
   let settings = null;
+  let articleGalleryPosts: any[] = [];
 
   let facebookPostsResult: {
     posts: NormalizedFacebookPost[];
@@ -43,7 +43,7 @@ export default async function NewsPage() {
     
     // Create unified posts from articles with featured images for the gallery
     // These will be added to Facebook images in the BentoGrid
-    const articleGalleryPosts = articles
+    articleGalleryPosts = articles
       .filter(article => article.image) // Only include articles with featured images
       .slice(0, 8)
       .map(article => ({
