@@ -10,7 +10,8 @@ import {
   combineAndSortPosts,
   getFacebookPostsWithImages,
 } from "@/lib/unified-posts";
-import { fetchAllPosts, fetchSettings, client } from "@/lib/sanity/queries";
+import { fetchAllPosts, fetchSettings } from "@/lib/sanity/queries";
+import { client } from "@/lib/sanity/client";
 import type { Article, Settings } from "@/lib/sanity/types";
 
 // Revalidate page every 60 seconds to pick up new Sanity content
@@ -34,44 +35,22 @@ export default async function NewsPage() {
   };
 
   try {
-    // Fetch gallery images from Sanity - get images from post content
-    const galleryQuery = `
-      *[_type == "post" && content != null] {
-        _id,
-        title,
-        publishedAt,
-        content[] {
-          _type == "image" => {
-            _type,
-            asset-> {
-              url,
-              altText
-            }
-          }
-        }
-      } | order(publishedAt desc) [0:8]
-    `;
-    
-    const [sanityData, fbData, galleryData] = await Promise.all([
+    const [sanityData, fbData] = await Promise.all([
       Promise.all([fetchAllPosts(), fetchSettings()]),
       getFacebookPosts({ limit: 10 }),
-      client.fetch(galleryQuery),
     ]);
     [articles, settings] = sanityData;
     facebookPostsResult = fbData;
     
-    // Process gallery data to flatten images
-    const galleryImages = galleryData
-      .flatMap((post: any) => 
-        (post.content || [])
-          .filter((block: any) => block._type === "image" && block.asset?.url)
-          .map((block: any) => ({
-            id: `${post._id}-${block.asset.url}`,
-            image: block.asset.url,
-            title: post.title,
-            date: post.publishedAt || new Date().toISOString(),
-          }))
-      )
+    // Extract images from articles with content
+    galleryImages = articles
+      .filter(article => article.image) // Only include articles with featured images
+      .map(article => ({
+        id: article.id,
+        image: article.image,
+        title: article.title,
+        date: article.date,
+      }))
       .slice(0, 8);
   } catch (error) {
     console.error("Error fetching data:", error);
