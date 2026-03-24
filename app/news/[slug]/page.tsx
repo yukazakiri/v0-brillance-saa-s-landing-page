@@ -338,6 +338,7 @@ export async function generateMetadata({
         description: fbPost.message || "A post from Facebook",
         url: canonicalUrl,
         type: "article",
+        siteName: "Data Center College of the Philippines",
         images: fbPost.image
           ? [
               {
@@ -348,6 +349,15 @@ export async function generateMetadata({
               },
             ]
           : undefined,
+      },
+      twitter: {
+        card: "summary_large_image",
+        title: fbPost.message
+          ? fbPost.message.slice(0, 60) + "..."
+          : "Facebook Post",
+        description: fbPost.message || "A post from Facebook",
+        images: fbPost.image ? [fbPost.image] : undefined,
+        creator: "@dccp_baguio",
       },
     };
   }
@@ -369,6 +379,7 @@ export async function generateMetadata({
       description: post.seo?.metaDescription ?? post.excerpt ?? undefined,
       url: canonicalUrl,
       type: "article",
+      siteName: "Data Center College of the Philippines",
       images: ogImage
         ? [
             {
@@ -379,6 +390,15 @@ export async function generateMetadata({
             },
           ]
         : undefined,
+      publishedTime: post.publishedAt,
+      authors: post.author ? [post.author] : undefined,
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: post.seo?.metaTitle ?? post.title,
+      description: post.seo?.metaDescription ?? post.excerpt ?? undefined,
+      images: ogImage ? [ogImage] : undefined,
+      creator: "@dccp_baguio",
     },
   };
 }
