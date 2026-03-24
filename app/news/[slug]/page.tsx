@@ -457,20 +457,37 @@ export default async function NewsArticlePage({
   const canonicalUrl = baseUrl
     ? `${baseUrl}/news/${post.slug}`
     : `/news/${post.slug}`;
+  // Prepare share text with hashtags
+  const hashtagsText = tags.length > 0 ? " " + tags.map(tag => `#${tag.replace(/\s+/g, '')}`).join(" ") : " #DatalCenterCollege #DCCP";
+  const shareText = `${post.title} - ${summaryText.substring(0, 100)}${summaryText.length > 100 ? '...' : ''}${hashtagsText}`;
+  const linkedinTitle = post.title;
+  const linkedinSummary = summaryText.substring(0, 200);
+
   const shareLinks = [
     {
       label: "Facebook",
-      href: `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(canonicalUrl)}`,
+      href: `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(canonicalUrl)}&quote=${encodeURIComponent(post.title)}`,
+      title: "Share on Facebook",
     },
     {
       label: "Twitter",
-      href: `https://twitter.com/intent/tweet?url=${encodeURIComponent(canonicalUrl)}&text=${encodeURIComponent(
-        post.title,
-      )}`,
+      href: `https://twitter.com/intent/tweet?url=${encodeURIComponent(canonicalUrl)}&text=${encodeURIComponent(shareText)}`,
+      title: "Share on Twitter",
     },
     {
       label: "LinkedIn",
       href: `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(canonicalUrl)}`,
+      title: "Share on LinkedIn",
+    },
+    {
+      label: "WhatsApp",
+      href: `https://wa.me/?text=${encodeURIComponent(`${post.title}\n\n${summaryText}\n\n${canonicalUrl}`)}`,
+      title: "Share on WhatsApp",
+    },
+    {
+      label: "Email",
+      href: `mailto:?subject=${encodeURIComponent(post.title)}&body=${encodeURIComponent(`${post.title}\n\n${summaryText}\n\nRead more: ${canonicalUrl}`)}`,
+      title: "Share via Email",
     },
   ];
 
@@ -579,6 +596,7 @@ export default async function NewsArticlePage({
                     href={share.href}
                     target="_blank"
                     rel="noreferrer"
+                    title={share.title}
                     className="inline-flex items-center gap-2 px-4 py-2 rounded-full border border-[rgba(55,50,47,0.2)] text-sm font-semibold text-[#37322F] hover:bg-[#37322F] hover:text-white transition-colors"
                   >
                     {share.label}
@@ -616,20 +634,34 @@ function FacebookPostPage({
       : "Facebook";
   const baseUrl = getSiteBaseUrl();
   const canonicalUrl = baseUrl ? `${baseUrl}/news/${slug}` : `/news/${slug}`;
+  const fbShareText = `${post.message?.slice(0, 100) || "Facebook Post"} - From Data Center College of the Philippines #DCCP`;
+  const fbShareEmail = `Check this out from Data Center College:\n\n${post.message || 'A post from Data Center College'}\n\n${canonicalUrl}`;
+
   const shareLinks = [
     {
       label: "Facebook",
-      href: `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(canonicalUrl)}`,
+      href: `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(canonicalUrl)}&quote=${encodeURIComponent(post.message?.slice(0, 80) || "Check this out")}`,
+      title: "Share on Facebook",
     },
     {
       label: "Twitter",
-      href: `https://twitter.com/intent/tweet?url=${encodeURIComponent(canonicalUrl)}&text=${encodeURIComponent(
-        post.message?.slice(0, 100) || "Facebook Post",
-      )}`,
+      href: `https://twitter.com/intent/tweet?url=${encodeURIComponent(canonicalUrl)}&text=${encodeURIComponent(fbShareText)}`,
+      title: "Share on Twitter",
     },
     {
       label: "LinkedIn",
       href: `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(canonicalUrl)}`,
+      title: "Share on LinkedIn",
+    },
+    {
+      label: "WhatsApp",
+      href: `https://wa.me/?text=${encodeURIComponent(`${post.message?.slice(0, 100) || 'Check this out'}\n\n${canonicalUrl}`)}`,
+      title: "Share on WhatsApp",
+    },
+    {
+      label: "Email",
+      href: `mailto:?subject=${encodeURIComponent('Check this out from Data Center College')}&body=${encodeURIComponent(fbShareEmail)}`,
+      title: "Share via Email",
     },
   ];
 
@@ -806,26 +838,27 @@ function FacebookPostPage({
               </div>
             )}
 
-            {/* Share Links */}
-            <div className="border-t border-[rgba(55,50,47,0.12)] pt-6 flex flex-col gap-4">
-              <h3 className="text-sm font-semibold text-[#6B635D] uppercase tracking-[0.3em]">
-                Share this story
-              </h3>
-              <div className="flex flex-wrap gap-3">
-                {shareLinks.map((share) => (
-                  <a
-                    key={share.label}
-                    href={share.href}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="inline-flex items-center gap-2 px-4 py-2 rounded-full border border-[rgba(55,50,47,0.2)] text-sm font-semibold text-[#37322F] hover:bg-[#37322F] hover:text-white transition-colors"
-                  >
-                    {share.label}
-                    <span aria-hidden>↗</span>
-                  </a>
-                ))}
-              </div>
-            </div>
+  {/* Share Links */}
+  <div className="border-t border-[rgba(55,50,47,0.12)] pt-6 flex flex-col gap-4">
+    <h3 className="text-sm font-semibold text-[#6B635D] uppercase tracking-[0.3em]">
+      Share this story
+    </h3>
+    <div className="flex flex-wrap gap-3">
+      {shareLinks.map((share) => (
+        <a
+          key={share.label}
+          href={share.href}
+          target="_blank"
+          rel="noreferrer"
+          title={share.title}
+          className="inline-flex items-center gap-2 px-4 py-2 rounded-full border border-[rgba(55,50,47,0.2)] text-sm font-semibold text-[#37322F] hover:bg-[#37322F] hover:text-white transition-colors"
+        >
+          {share.label}
+          <span aria-hidden>↗</span>
+        </a>
+      ))}
+    </div>
+  </div>
           </div>
         </div>
       </div>
