@@ -1,6 +1,7 @@
 import type React from "react"
 import type { Metadata } from "next"
 import Script from "next/script"
+import { OpenPanelComponent } from "@openpanel/nextjs"
 
 import { fetchSettings } from "@/lib/sanity/queries"
 import { buildImageUrl } from "@/lib/sanity/image"
@@ -96,7 +97,15 @@ export default function RootLayout({
   children: React.ReactNode
 }) {
   return (
-    <html lang="en" className={`${inter.variable} ${instrumentSerif.variable} antialiased`}>
+    <>
+      <OpenPanelComponent
+        apiUrl="https://openpanel.dccp.edu.ph/api"
+        clientId="e4e45149-bbde-44d7-b436-f9a0ae1042b0"
+        trackScreenViews={true}
+        trackOutgoingLinks={true}
+        trackAttributes={true}
+      />
+      <html lang="en" className={`${inter.variable} ${instrumentSerif.variable} antialiased`}>
       <head>
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
@@ -112,32 +121,6 @@ export default function RootLayout({
           src="https://ackee-analytics.dccp.edu.ph/tracker.js" 
           data-ackee-server="https://ackee-analytics.dccp.edu.ph" 
           data-ackee-domain-id="873f7388-7480-4607-81b0-3dc491ce9f5a"
-          strategy="afterInteractive"
-        />
-        
-        {/* OpenPanel Analytics Initialization */}
-        <Script
-          id="openpanel-init"
-          strategy="beforeInteractive"
-          dangerouslySetInnerHTML={{
-            __html: `
-              window.op=window.op||function(){var n=[];return new Proxy(function(){arguments.length&&n.push([].slice.call(arguments))},{get:function(t,r){return"q"===r?n:function(){n.push([r].concat([].slice.call(arguments)))}},has:function(t,r){return"q"===r}})},();
-              window.op('init', {
-                apiUrl: 'https://openpanel.dccp.edu.ph/api',
-                clientId: 'e4e45149-bbde-44d7-b436-f9a0ae1042b0',
-                trackScreenViews: true,
-                trackOutgoingLinks: true,
-                trackAttributes: true,
-              });
-            `,
-          }}
-        />
-        
-        {/* OpenPanel Library */}
-        <Script 
-          src="https://openpanel.dev/op1.js" 
-          defer 
-          async
           strategy="afterInteractive"
         />
       </head>
@@ -164,5 +147,6 @@ export default function RootLayout({
         />
       </body>
     </html>
+    </>
   )
 }
