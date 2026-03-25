@@ -100,7 +100,7 @@ export default function RootLayout({
     <>
       <OpenPanelComponent
         apiUrl="https://openpanel.dccp.edu.ph/api"
-        clientId="e4e45149-bbde-44d7-b436-f9a0ae1042b0"
+        clientId={process.env.CLIENT_ID}
         trackScreenViews={true}
         trackOutgoingLinks={true}
         trackAttributes={true}
