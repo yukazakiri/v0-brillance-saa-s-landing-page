@@ -105,11 +105,39 @@ export default function RootLayout({
           href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
         />
         <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Instrument+Serif:wght@400&display=swap" />
+        
+        {/* Ackee Analytics */}
         <Script 
           async 
           src="https://ackee-analytics.dccp.edu.ph/tracker.js" 
           data-ackee-server="https://ackee-analytics.dccp.edu.ph" 
           data-ackee-domain-id="873f7388-7480-4607-81b0-3dc491ce9f5a"
+          strategy="afterInteractive"
+        />
+        
+        {/* OpenPanel Analytics Initialization */}
+        <Script
+          id="openpanel-init"
+          strategy="beforeInteractive"
+          dangerouslySetInnerHTML={{
+            __html: `
+              window.op=window.op||function(){var n=[];return new Proxy(function(){arguments.length&&n.push([].slice.call(arguments))},{get:function(t,r){return"q"===r?n:function(){n.push([r].concat([].slice.call(arguments)))}},has:function(t,r){return"q"===r}})},();
+              window.op('init', {
+                apiUrl: 'https://openpanel.dccp.edu.ph/api',
+                clientId: 'e4e45149-bbde-44d7-b436-f9a0ae1042b0',
+                trackScreenViews: true,
+                trackOutgoingLinks: true,
+                trackAttributes: true,
+              });
+            `,
+          }}
+        />
+        
+        {/* OpenPanel Library */}
+        <Script 
+          src="https://openpanel.dev/op1.js" 
+          defer 
+          async
           strategy="afterInteractive"
         />
       </head>
