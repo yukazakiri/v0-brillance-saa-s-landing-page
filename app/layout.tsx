@@ -105,6 +105,13 @@ export default function RootLayout({
           href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
         />
         <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Instrument+Serif:wght@400&display=swap" />
+        <Script 
+          async 
+          src="https://ackee-analytics.dccp.edu.ph/tracker.js" 
+          data-ackee-server="https://ackee-analytics.dccp.edu.ph" 
+          data-ackee-domain-id="873f7388-7480-4607-81b0-3dc491ce9f5a"
+          strategy="afterInteractive"
+        />
       </head>
       <body className="font-sans antialiased">
         <div className="w-full min-h-screen relative bg-[#F7F5F3] overflow-x-hidden flex flex-col justify-start items-center">
