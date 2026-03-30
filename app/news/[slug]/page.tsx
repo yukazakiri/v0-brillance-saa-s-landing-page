@@ -1,3 +1,5 @@
+'use client';
+
 import {
   ArrowLeft,
   Calendar,
@@ -560,25 +562,35 @@ export default async function NewsArticlePage({
                 {authorProfile && (
                   <div className="group relative pt-4 mt-4">
                     {/* Minimal Trigger */}
-                    <a
-                      href={authorProfile.website || "#"}
-                      onClick={(e) => {
-                        if (!authorProfile.website) {
-                          e.preventDefault();
-                        }
-                      }}
-                      className="inline-flex items-center gap-3 text-sm text-[#605A57] hover:text-[#1a3a52] transition-colors cursor-pointer"
-                    >
-                      {authorProfile.image?.asset?.url && (
-                        <img
-                          src={authorProfile.image.asset.url}
-                          alt={authorProfile.name}
-                          className="w-8 h-8 rounded-full object-cover"
-                        />
-                      )}
-                      <span className="font-medium">{authorProfile.name}</span>
-                      {authorProfile.website && <ExternalLink className="w-3 h-3 opacity-0 group-hover:opacity-100 transition-opacity" />}
-                    </a>
+                    {authorProfile.website ? (
+                      <a
+                        href={authorProfile.website}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex items-center gap-3 text-sm text-[#605A57] hover:text-[#1a3a52] transition-colors cursor-pointer"
+                      >
+                        {authorProfile.image?.asset?.url && (
+                          <img
+                            src={authorProfile.image.asset.url}
+                            alt={authorProfile.name}
+                            className="w-8 h-8 rounded-full object-cover"
+                          />
+                        )}
+                        <span className="font-medium">{authorProfile.name}</span>
+                        <ExternalLink className="w-3 h-3 opacity-0 group-hover:opacity-100 transition-opacity" />
+                      </a>
+                    ) : (
+                      <div className="inline-flex items-center gap-3 text-sm text-[#605A57]">
+                        {authorProfile.image?.asset?.url && (
+                          <img
+                            src={authorProfile.image.asset.url}
+                            alt={authorProfile.name}
+                            className="w-8 h-8 rounded-full object-cover"
+                          />
+                        )}
+                        <span className="font-medium">{authorProfile.name}</span>
+                      </div>
+                    )}
 
                     {/* Hover Card - Appears on hover */}
                     {(authorProfile.bio || authorProfile.email || (authorProfile.socialLinks && authorProfile.socialLinks.length > 0)) && (
