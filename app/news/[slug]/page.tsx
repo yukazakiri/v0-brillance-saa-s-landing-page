@@ -15,11 +15,6 @@ import { notFound } from "next/navigation";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import {
-  HoverCard,
-  HoverCardContent,
-  HoverCardTrigger,
-} from "@/components/ui/hover-card";
 
 import CollegeHeader from "@/components/college-header";
 import FooterSection from "@/components/footer-section";
@@ -456,7 +451,6 @@ export default async function NewsArticlePage({
   // Get author information from authors array or fallback to legacy author field
   const authorProfile = post.authors && post.authors.length > 0 ? post.authors[0] : null;
   const authorName = authorProfile?.name || post.author || "Editorial Team";
-  console.log("[v0] Author data:", { authorProfile, postAuthor: post.author, hasAuthors: !!post.authors?.length });
   
   const summaryText =
     post.seo?.metaDescription ??
@@ -562,80 +556,65 @@ export default async function NewsArticlePage({
                   {summaryText}
                 </p>
 
-                {/* Author Profile Section with Hover Card */}
-                <HoverCard>
-                  <HoverCardTrigger asChild>
-                    <div className="flex items-center gap-2 text-sm text-muted-foreground pt-2 cursor-pointer hover:text-foreground transition-colors">
-                      {authorProfile?.image?.asset?.url ? (
-                        <img
-                          src={authorProfile.image.asset.url}
-                          alt={authorName}
-                          className="w-6 h-6 rounded-full object-cover"
-                        />
-                      ) : (
-                        <User className="w-4 h-4" />
+                {/* Author Profile Section */}
+                {authorProfile ? (
+                  <div className="flex items-start gap-4 p-4 bg-[#f7f5f3] rounded-lg border border-[rgba(26,58,82,0.12)] mt-4">
+                    {authorProfile.image?.asset?.url && (
+                      <img
+                        src={authorProfile.image.asset.url}
+                        alt={authorProfile.name}
+                        className="w-12 h-12 rounded-full object-cover flex-shrink-0"
+                      />
+                    )}
+                    <div className="flex-1">
+                      <h3 className="font-semibold text-[#1a3a52]">{authorProfile.name}</h3>
+                      {authorProfile.bio && (
+                        <p className="text-sm text-[#605A57] mt-1">{authorProfile.bio}</p>
                       )}
-                      <span>{authorName}</span>
-                    </div>
-                  </HoverCardTrigger>
-                  {authorProfile && (
-                    <HoverCardContent className="w-80" align="start">
-                      <div className="flex gap-4">
-                        {authorProfile.image?.asset?.url && (
-                          <img
-                            src={authorProfile.image.asset.url}
-                            alt={authorProfile.name}
-                            className="w-16 h-16 rounded-full object-cover"
-                          />
-                        )}
-                        <div className="flex-1">
-                          <h3 className="font-semibold text-foreground">{authorProfile.name}</h3>
-                          {authorProfile.bio && (
-                            <p className="text-sm text-muted-foreground mt-2 line-clamp-3">
-                              {authorProfile.bio}
-                            </p>
+                      {(authorProfile.website || authorProfile.email || (authorProfile.socialLinks && authorProfile.socialLinks.length > 0)) && (
+                        <div className="flex flex-wrap items-center gap-3 mt-3">
+                          {authorProfile.website && (
+                            <a
+                              href={authorProfile.website}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="inline-flex items-center gap-1 text-sm text-[#1877f2] hover:underline"
+                            >
+                              Website
+                              <ExternalLink className="w-3 h-3" />
+                            </a>
                           )}
-                          {(authorProfile.website || authorProfile.email || (authorProfile.socialLinks && authorProfile.socialLinks.length > 0)) && (
-                            <div className="flex flex-wrap items-center gap-2 mt-3">
-                              {authorProfile.website && (
-                                <a
-                                  href={authorProfile.website}
-                                  target="_blank"
-                                  rel="noopener noreferrer"
-                                  className="inline-flex items-center gap-1 text-xs text-primary hover:underline"
-                                >
-                                  Website
-                                  <ExternalLink className="w-3 h-3" />
-                                </a>
-                              )}
-                              {authorProfile.email && (
-                                <a
-                                  href={`mailto:${authorProfile.email}`}
-                                  className="inline-flex items-center gap-1 text-xs text-primary hover:underline"
-                                >
-                                  Email
-                                </a>
-                              )}
-                              {authorProfile.socialLinks?.map((social, idx) => (
-                                <a
-                                  key={idx}
-                                  href={social.url}
-                                  target="_blank"
-                                  rel="noopener noreferrer"
-                                  title={social.platform}
-                                  className="inline-flex items-center gap-1 text-xs text-primary hover:underline capitalize"
-                                >
-                                  {social.handle || social.platform}
-                                  <ExternalLink className="w-3 h-3" />
-                                </a>
-                              ))}
-                            </div>
+                          {authorProfile.email && (
+                            <a
+                              href={`mailto:${authorProfile.email}`}
+                              className="inline-flex items-center gap-1 text-sm text-[#1877f2] hover:underline"
+                            >
+                              Email
+                            </a>
                           )}
+                          {authorProfile.socialLinks?.map((social, idx) => (
+                            <a
+                              key={idx}
+                              href={social.url}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              title={social.platform}
+                              className="inline-flex items-center gap-1 text-sm text-[#1877f2] hover:underline capitalize"
+                            >
+                              {social.handle || social.platform}
+                              <ExternalLink className="w-3 h-3" />
+                            </a>
+                          ))}
                         </div>
-                      </div>
-                    </HoverCardContent>
-                  )}
-                </HoverCard>
+                      )}
+                    </div>
+                  </div>
+                ) : (
+                  <div className="flex items-center gap-2 text-sm text-muted-foreground pt-2">
+                    <User className="w-4 h-4" />
+                    <span>{authorName}</span>
+                  </div>
+                )}
             </div>
           </header>
 
