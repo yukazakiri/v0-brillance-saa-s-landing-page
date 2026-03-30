@@ -41,7 +41,19 @@ const POST_PROJECTION = groq`{
   publishedAt,
   updatedAt,
   author,
-  "authors": authors[]->{ _id, name },
+  "authors": authors[]->{
+    _id,
+    name,
+    email,
+    bio,
+    image { asset->{ url } },
+    website,
+    socialLinks[] {
+      platform,
+      url,
+      handle
+    }
+  },
   status,
   featuredImage {
     asset->{

@@ -447,7 +447,11 @@ export default async function NewsArticlePage({
     ? dateFormatter.format(new Date(post.publishedAt))
     : "Coming soon";
   const categoryLabel = formatCategoryLabel(post.category);
-  const authorName = post.author || "Editorial Team";
+  
+  // Get author information from authors array or fallback to legacy author field
+  const authorProfile = post.authors && post.authors.length > 0 ? post.authors[0] : null;
+  const authorName = authorProfile?.name || post.author || "Editorial Team";
+  
   const summaryText =
     post.seo?.metaDescription ??
     post.excerpt ??
@@ -552,10 +556,63 @@ export default async function NewsArticlePage({
                   {summaryText}
                 </p>
 
-              <div className="flex items-center gap-2 text-sm text-muted-foreground pt-2">
-                <User className="w-4 h-4" />
-                <span>{authorName}</span>
-              </div>
+                {/* Author Profile Section */}
+                {authorProfile ? (
+                  <div className="flex items-start gap-4 p-4 bg-[#f7f5f3] rounded-lg border border-[rgba(26,58,82,0.12)] mt-4">
+                    {authorProfile.image?.asset?.url && (
+                      <img
+                        src={authorProfile.image.asset.url}
+                        alt={authorProfile.name}
+                        className="w-12 h-12 rounded-full object-cover"
+                      />
+                    )}
+                    <div className="flex-1">
+                      <h3 className="font-semibold text-[#1a3a52]">{authorProfile.name}</h3>
+                      {authorProfile.bio && (
+                        <p className="text-sm text-[#605A57] mt-1">{authorProfile.bio}</p>
+                      )}
+                      {(authorProfile.website || authorProfile.email || (authorProfile.socialLinks && authorProfile.socialLinks.length > 0)) && (
+                        <div className="flex items-center gap-3 mt-2">
+                          {authorProfile.website && (
+                            <a
+                              href={authorProfile.website}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="text-sm text-[#1877f2] hover:underline"
+                            >
+                              Website
+                            </a>
+                          )}
+                          {authorProfile.email && (
+                            <a
+                              href={`mailto:${authorProfile.email}`}
+                              className="text-sm text-[#1877f2] hover:underline"
+                            >
+                              Email
+                            </a>
+                          )}
+                          {authorProfile.socialLinks?.map((social, idx) => (
+                            <a
+                              key={idx}
+                              href={social.url}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              title={social.platform}
+                              className="text-sm text-[#1877f2] hover:underline capitalize"
+                            >
+                              {social.handle || social.platform}
+                            </a>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                ) : (
+                  <div className="flex items-center gap-2 text-sm text-muted-foreground pt-2">
+                    <User className="w-4 h-4" />
+                    <span>{authorName}</span>
+                  </div>
+                )}
             </div>
           </header>
 
