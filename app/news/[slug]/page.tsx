@@ -17,6 +17,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 
 import CollegeHeader from "@/components/college-header";
+import AuthorByline from "@/components/author-byline";
 import FooterSection from "@/components/footer-section";
 import { getFacebookConfig, getFacebookPosts } from "@/lib/facebook";
 import type { NormalizedFacebookPost } from "@/lib/facebook/types";
@@ -556,29 +557,15 @@ export default async function NewsArticlePage({
                   {summaryText}
                 </p>
 
-                {/* Author - Minimal Byline */}
-                <div className="flex items-center gap-2 text-sm text-[#605A57] pt-2">
-                  {authorProfile?.image?.asset?.url ? (
-                    <img
-                      src={authorProfile.image.asset.url}
-                      alt={authorName}
-                      className="w-6 h-6 rounded-full object-cover"
-                    />
-                  ) : (
-                    <User className="w-4 h-4" />
-                  )}
-                  <span className="font-medium">By {authorName}</span>
-                  {authorProfile?.website && (
-                    <a
-                      href={authorProfile.website}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="ml-1 text-[#1877f2] hover:underline inline-flex items-center gap-1"
-                    >
-                      <ExternalLink className="w-3 h-3" />
-                    </a>
-                  )}
-                </div>
+                {/* Author - Minimal Byline with Hover Popup */}
+                <AuthorByline
+                  name={authorName}
+                  image={authorProfile?.image}
+                  bio={authorProfile?.bio}
+                  website={authorProfile?.website}
+                  email={authorProfile?.email}
+                  socialLinks={authorProfile?.socialLinks}
+                />
             </div>
           </header>
 
