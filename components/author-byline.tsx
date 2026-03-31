@@ -1,6 +1,3 @@
-'use client';
-
-import { useState } from 'react';
 import { User, ExternalLink } from 'lucide-react';
 
 interface AuthorBylineProps {
@@ -20,6 +17,7 @@ interface AuthorBylineProps {
   }>;
 }
 
+// Server component version with CSS-based hover popup
 export default function AuthorByline({
   name,
   image,
@@ -28,31 +26,98 @@ export default function AuthorByline({
   email,
   socialLinks,
 }: AuthorBylineProps) {
-  const [showPopup, setShowPopup] = useState(false);
+  const hasDetails = bio || email || (socialLinks && socialLinks.length > 0) || website;
 
-  return (
-    <div className="relative">
-      <div
-        className="flex items-center gap-2 text-sm text-[#605A57] pt-2 cursor-pointer hover:text-[#1a3a52] transition-colors"
-        onMouseEnter={() => setShowPopup(true)}
-        onMouseLeave={() => setShowPopup(false)}
+  // If there's no website, don't make it a link
+  const authorElement = (
+    <div
+      className="flex items-center gap-2 text-sm text-[#605A57] pt-2 hover:text-[#1a3a52] transition-colors"
+    >
+      {image?.asset?.url ? (
+        <img
+          src={image.asset.url}
+          alt={name}
+          className="w-6 h-6 rounded-full object-cover"
+        />
+      ) : (
+        <User className="w-4 h-4" />
+      )}
+      <span className="font-medium">By {name}</span>
+      {website && <ExternalLink className="w-3 h-3 opacity-50" />}
+    </div>
+  );
+
+  // If website exists, wrap in a link
+  if (website) {
+    return (
+      <a
+        href={website}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="group relative inline-block"
       >
-        {image?.asset?.url ? (
-          <img
-            src={image.asset.url}
-            alt={name}
-            className="w-6 h-6 rounded-full object-cover"
-          />
-        ) : (
-          <User className="w-4 h-4" />
-        )}
-        <span className="font-medium">By {name}</span>
-        {website && <ExternalLink className="w-3 h-3 opacity-50 hover:opacity-100" />}
-      </div>
+        {authorElement}
 
-      {/* Hover Popup */}
-      {showPopup && (bio || email || (socialLinks && socialLinks.length > 0) || website) && (
-        <div className="absolute left-0 top-full mt-2 z-50 w-80 bg-white rounded-lg shadow-lg border border-[rgba(26,58,82,0.12)] p-4 pointer-events-auto">
+        {/* Hover Popup - CSS based */}
+        {hasDetails && (
+          <div className="absolute left-0 top-full mt-2 z-50 w-80 bg-white rounded-lg shadow-lg border border-[rgba(26,58,82,0.12)] p-4 hidden group-hover:block pointer-events-none group-hover:pointer-events-auto">
+            <div className="flex gap-3">
+              {image?.asset?.url && (
+                <img
+                  src={image.asset.url}
+                  alt={name}
+                  className="w-14 h-14 rounded-full object-cover flex-shrink-0"
+                />
+              )}
+              <div className="flex-1">
+                <h3 className="font-semibold text-[#1a3a52]">{name}</h3>
+                {bio && <p className="text-xs text-[#605A57] mt-1 line-clamp-2">{bio}</p>}
+                {(website || email || (socialLinks && socialLinks.length > 0)) && (
+                  <div className="flex flex-wrap gap-2 mt-2">
+                    {website && (
+                      <span className="inline-flex items-center gap-1 text-xs text-[#1877f2] px-2 py-1 bg-[#f7f5f3] rounded">
+                        Visit Site
+                        <ExternalLink className="w-3 h-3" />
+                      </span>
+                    )}
+                    {email && (
+                      <a
+                        href={`mailto:${email}`}
+                        className="inline-flex items-center gap-1 text-xs text-[#1877f2] hover:underline px-2 py-1 bg-[#f7f5f3] rounded transition-colors hover:bg-[#e8e6e3]"
+                      >
+                        Email
+                      </a>
+                    )}
+                    {socialLinks?.map((social, idx) => (
+                      <a
+                        key={idx}
+                        href={social.url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex items-center gap-1 text-xs text-[#1877f2] hover:underline px-2 py-1 bg-[#f7f5f3] rounded transition-colors hover:bg-[#e8e6e3] capitalize"
+                      >
+                        {social.platform || social.handle}
+                        <ExternalLink className="w-3 h-3" />
+                      </a>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        )}
+      </a>
+    );
+  }
+
+  // No website - just show the author name without link
+  return (
+    <div className="group relative inline-block">
+      {authorElement}
+
+      {/* Hover Popup - CSS based */}
+      {hasDetails && (
+        <div className="absolute left-0 top-full mt-2 z-50 w-80 bg-white rounded-lg shadow-lg border border-[rgba(26,58,82,0.12)] p-4 hidden group-hover:block">
           <div className="flex gap-3">
             {image?.asset?.url && (
               <img
@@ -64,19 +129,8 @@ export default function AuthorByline({
             <div className="flex-1">
               <h3 className="font-semibold text-[#1a3a52]">{name}</h3>
               {bio && <p className="text-xs text-[#605A57] mt-1 line-clamp-2">{bio}</p>}
-              {(website || email || (socialLinks && socialLinks.length > 0)) && (
+              {(email || (socialLinks && socialLinks.length > 0)) && (
                 <div className="flex flex-wrap gap-2 mt-2">
-                  {website && (
-                    <a
-                      href={website}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="inline-flex items-center gap-1 text-xs text-[#1877f2] hover:underline px-2 py-1 bg-[#f7f5f3] rounded transition-colors hover:bg-[#e8e6e3]"
-                    >
-                      Visit
-                      <ExternalLink className="w-3 h-3" />
-                    </a>
-                  )}
                   {email && (
                     <a
                       href={`mailto:${email}`}
