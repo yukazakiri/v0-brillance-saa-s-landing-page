@@ -58,51 +58,68 @@ export default function AuthorByline({
       >
         {authorElement}
 
-        {/* Hover Popup - CSS based */}
+        {/* Hover Popup - CSS based - Redesigned */}
         {hasDetails && (
-          <div className="absolute left-0 top-full mt-2 z-50 w-80 bg-white rounded-lg shadow-lg border border-[rgba(26,58,82,0.12)] p-4 hidden group-hover:block pointer-events-none group-hover:pointer-events-auto">
-            <div className="flex gap-3">
-              {image?.asset?.url && (
-                <img
-                  src={image.asset.url}
-                  alt={name}
-                  className="w-14 h-14 rounded-full object-cover flex-shrink-0"
-                />
-              )}
-              <div className="flex-1">
-                <h3 className="font-semibold text-[#1a3a52]">{name}</h3>
-                {bio && <p className="text-xs text-[#605A57] mt-1 line-clamp-2">{bio}</p>}
-                {(website || email || (socialLinks && socialLinks.length > 0)) && (
-                  <div className="flex flex-wrap gap-2 mt-2">
-                    {website && (
-                      <span className="inline-flex items-center gap-1 text-xs text-[#1877f2] px-2 py-1 bg-[#f7f5f3] rounded">
-                        Visit Site
-                        <ExternalLink className="w-3 h-3" />
-                      </span>
-                    )}
-                    {email && (
-                      <a
-                        href={`mailto:${email}`}
-                        className="inline-flex items-center gap-1 text-xs text-[#1877f2] hover:underline px-2 py-1 bg-[#f7f5f3] rounded transition-colors hover:bg-[#e8e6e3]"
-                      >
-                        Email
-                      </a>
-                    )}
-                    {socialLinks?.map((social, idx) => (
-                      <a
-                        key={idx}
-                        href={social.url}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="inline-flex items-center gap-1 text-xs text-[#1877f2] hover:underline px-2 py-1 bg-[#f7f5f3] rounded transition-colors hover:bg-[#e8e6e3] capitalize"
-                      >
-                        {social.platform || social.handle}
-                        <ExternalLink className="w-3 h-3" />
-                      </a>
-                    ))}
-                  </div>
+          <div className="absolute left-0 top-full mt-3 z-50 w-96 bg-white rounded-xl shadow-xl border border-[rgba(26,58,82,0.12)] hidden group-hover:block pointer-events-none group-hover:pointer-events-auto">
+            {/* Top accent bar */}
+            <div className="h-1 bg-gradient-to-r from-[#1877f2] to-[#0b5bb8] rounded-t-xl"></div>
+            
+            <div className="p-5">
+              {/* Header with image and name */}
+              <div className="flex gap-4 items-start mb-4">
+                {image?.asset?.url && (
+                  <img
+                    src={image.asset.url}
+                    alt={name}
+                    className="w-16 h-16 rounded-full object-cover flex-shrink-0 border-2 border-[#f7f5f3]"
+                  />
                 )}
+                <div className="flex-1">
+                  <h3 className="font-bold text-[#1a3a52] text-lg">{name}</h3>
+                  {website && (
+                    <a
+                      href={website}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-[#1877f2] text-sm font-medium hover:underline inline-flex items-center gap-1 mt-1"
+                    >
+                      {website.replace(/^https?:\/\/(www\.)?/, '').replace(/\/$/, '')}
+                      <ExternalLink className="w-3 h-3" />
+                    </a>
+                  )}
+                </div>
               </div>
+
+              {/* Bio */}
+              {bio && (
+                <p className="text-sm text-[#605A57] mb-4 leading-relaxed">{bio}</p>
+              )}
+
+              {/* Contact and Social Links */}
+              {(email || (socialLinks && socialLinks.length > 0)) && (
+                <div className="flex flex-wrap gap-2 pt-3 border-t border-[#f0f0f0]">
+                  {email && (
+                    <a
+                      href={`mailto:${email}`}
+                      className="inline-flex items-center gap-2 text-xs font-medium text-white bg-[#1877f2] hover:bg-[#0b5bb8] px-3 py-2 rounded-lg transition-colors"
+                    >
+                      Email
+                    </a>
+                  )}
+                  {socialLinks?.map((social, idx) => (
+                    <a
+                      key={idx}
+                      href={social.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center gap-2 text-xs font-medium text-[#1877f2] bg-[#f7f5f3] hover:bg-[#e8e6e3] px-3 py-2 rounded-lg transition-colors capitalize"
+                    >
+                      {social.platform || social.handle}
+                      <ExternalLink className="w-3 h-3" />
+                    </a>
+                  ))}
+                </div>
+              )}
             </div>
           </div>
         )}
@@ -115,45 +132,57 @@ export default function AuthorByline({
     <div className="group relative inline-block">
       {authorElement}
 
-      {/* Hover Popup - CSS based */}
+      {/* Hover Popup - CSS based - Redesigned */}
       {hasDetails && (
-        <div className="absolute left-0 top-full mt-2 z-50 w-80 bg-white rounded-lg shadow-lg border border-[rgba(26,58,82,0.12)] p-4 hidden group-hover:block">
-          <div className="flex gap-3">
-            {image?.asset?.url && (
-              <img
-                src={image.asset.url}
-                alt={name}
-                className="w-14 h-14 rounded-full object-cover flex-shrink-0"
-              />
-            )}
-            <div className="flex-1">
-              <h3 className="font-semibold text-[#1a3a52]">{name}</h3>
-              {bio && <p className="text-xs text-[#605A57] mt-1 line-clamp-2">{bio}</p>}
-              {(email || (socialLinks && socialLinks.length > 0)) && (
-                <div className="flex flex-wrap gap-2 mt-2">
-                  {email && (
-                    <a
-                      href={`mailto:${email}`}
-                      className="inline-flex items-center gap-1 text-xs text-[#1877f2] hover:underline px-2 py-1 bg-[#f7f5f3] rounded transition-colors hover:bg-[#e8e6e3]"
-                    >
-                      Email
-                    </a>
-                  )}
-                  {socialLinks?.map((social, idx) => (
-                    <a
-                      key={idx}
-                      href={social.url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="inline-flex items-center gap-1 text-xs text-[#1877f2] hover:underline px-2 py-1 bg-[#f7f5f3] rounded transition-colors hover:bg-[#e8e6e3] capitalize"
-                    >
-                      {social.platform || social.handle}
-                      <ExternalLink className="w-3 h-3" />
-                    </a>
-                  ))}
-                </div>
+        <div className="absolute left-0 top-full mt-3 z-50 w-96 bg-white rounded-xl shadow-xl border border-[rgba(26,58,82,0.12)] hidden group-hover:block">
+          {/* Top accent bar */}
+          <div className="h-1 bg-gradient-to-r from-[#1877f2] to-[#0b5bb8] rounded-t-xl"></div>
+          
+          <div className="p-5">
+            {/* Header with image and name */}
+            <div className="flex gap-4 items-start mb-4">
+              {image?.asset?.url && (
+                <img
+                  src={image.asset.url}
+                  alt={name}
+                  className="w-16 h-16 rounded-full object-cover flex-shrink-0 border-2 border-[#f7f5f3]"
+                />
               )}
+              <div className="flex-1">
+                <h3 className="font-bold text-[#1a3a52] text-lg">{name}</h3>
+              </div>
             </div>
+
+            {/* Bio */}
+            {bio && (
+              <p className="text-sm text-[#605A57] mb-4 leading-relaxed">{bio}</p>
+            )}
+
+            {/* Contact and Social Links */}
+            {(email || (socialLinks && socialLinks.length > 0)) && (
+              <div className="flex flex-wrap gap-2 pt-3 border-t border-[#f0f0f0]">
+                {email && (
+                  <a
+                    href={`mailto:${email}`}
+                    className="inline-flex items-center gap-2 text-xs font-medium text-white bg-[#1877f2] hover:bg-[#0b5bb8] px-3 py-2 rounded-lg transition-colors"
+                  >
+                    Email
+                  </a>
+                )}
+                {socialLinks?.map((social, idx) => (
+                  <a
+                    key={idx}
+                    href={social.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-2 text-xs font-medium text-[#1877f2] bg-[#f7f5f3] hover:bg-[#e8e6e3] px-3 py-2 rounded-lg transition-colors capitalize"
+                  >
+                    {social.platform || social.handle}
+                    <ExternalLink className="w-3 h-3" />
+                  </a>
+                ))}
+              </div>
+            )}
           </div>
         </div>
       )}
