@@ -43,23 +43,24 @@ export const revalidate = 60;
 const portableTextComponents: PortableTextComponents = {
   types: {
     image: ({ value }) => {
-      const imageUrl = value ? buildImageUrl(value, 900, 600) : null;
+      const dimensions = value?.asset?.metadata?.dimensions;
+      const isPortrait = dimensions ? dimensions.height > dimensions.width : false;
+      
+      const imageUrl = value ? buildImageUrl(value, 1200, isPortrait ? 1600 : 800) : null;
       if (!imageUrl) return null;
+
       return (
-        <figure className="my-6">
+        <figure className={isPortrait ? "my-2" : "my-6"}>
           <img
             src={imageUrl}
             alt={value?.alt || "News article image"}
             className="w-full rounded-2xl shadow-md"
           />
-          {value?.credit && (
+          {(value?.credit || value?.caption) && (
             <figcaption className="text-sm text-muted-foreground italic mt-2 px-2">
-              📷 {value.credit}
-            </figcaption>
-          )}
-          {value?.caption && (
-            <figcaption className="text-sm text-foreground mt-1 px-2">
-              {value.caption}
+              {value.caption && <span>{value.caption}</span>}
+              {value.caption && value.credit && <span> • </span>}
+              {value.credit && <span>📷 {value.credit}</span>}
             </figcaption>
           )}
         </figure>
@@ -624,12 +625,14 @@ export default async function NewsArticlePage({
               </div>
             )}
 
-            <article className="w-full space-y-4 text-[#433C38]">
+            <article className="w-full text-[#433C38]">
               {Array.isArray(post.content) && post.content.length > 0 ? (
-                <PortableText
-                  value={post.content}
-                  components={portableTextComponents}
-                />
+                <div className="[&>figure]:break-inside-avoid">
+                  <PortableText
+                    value={post.content}
+                    components={portableTextComponents}
+                  />
+                </div>
               ) : (
                 <p className="text-muted-foreground">Details for this announcement will be available soon.</p>
               )}
