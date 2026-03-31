@@ -15,6 +15,11 @@ import { notFound } from "next/navigation";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import {
+  HoverCard,
+  HoverCardContent,
+  HoverCardTrigger,
+} from "@/components/ui/preview-card";
 
 import CollegeHeader from "@/components/college-header";
 import FooterSection from "@/components/footer-section";
@@ -185,10 +190,6 @@ const portableTextComponents: PortableTextComponents = {
         </figure>
       );
     },
-  },
-  unknownBlockType: ({ value }) => {
-    console.warn(`Unknown block type: ${value._type}`);
-    return null;
   },
   block: {
     normal: ({ children }) => (
@@ -552,10 +553,59 @@ export default async function NewsArticlePage({
                   {summaryText}
                 </p>
 
-              <div className="flex items-center gap-2 text-sm text-muted-foreground pt-2">
-                <User className="w-4 h-4" />
-                <span>{authorName}</span>
-              </div>
+                {post.authors && post.authors.length > 0 ? (
+                  <HoverCard>
+                    <HoverCardTrigger asChild>
+                      <button className="flex items-center gap-2 text-sm text-muted-foreground pt-2 hover:text-foreground transition-colors cursor-pointer">
+                        <User className="w-4 h-4" />
+                        <span className="underline decoration-dotted">
+                          {post.authors[0].preferredName || post.authors[0].fullName}
+                        </span>
+                      </button>
+                    </HoverCardTrigger>
+                    <HoverCardContent align="start" className="w-80">
+                      <div className="flex gap-4">
+                        {post.authors[0].headshot?.asset?.url && (
+                          <img
+                            src={post.authors[0].headshot.asset.url}
+                            alt={post.authors[0].fullName}
+                            className="w-16 h-16 rounded-full object-cover"
+                          />
+                        )}
+                        <div className="flex-1 space-y-1">
+                          <h4 className="text-sm font-semibold">
+                            {post.authors[0].preferredName || post.authors[0].fullName}
+                          </h4>
+                          {post.authors[0].titles && post.authors[0].titles.length > 0 && (
+                            <p className="text-xs text-muted-foreground">
+                              {post.authors[0].titles[0]}
+                            </p>
+                          )}
+                          {post.authors[0].roleType && (
+                            <p className="text-xs text-muted-foreground capitalize">
+                              {post.authors[0].roleType}
+                            </p>
+                          )}
+                          {post.authors[0].contactInfo?.website && (
+                            <a
+                              href={post.authors[0].contactInfo.website}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="text-xs text-primary hover:underline flex items-center gap-1"
+                            >
+                              View Profile <ExternalLink className="w-3 h-3" />
+                            </a>
+                          )}
+                        </div>
+                      </div>
+                    </HoverCardContent>
+                  </HoverCard>
+                ) : (
+                  <div className="flex items-center gap-2 text-sm text-muted-foreground pt-2">
+                    <User className="w-4 h-4" />
+                    <span>{authorName}</span>
+                  </div>
+                )}
             </div>
           </header>
 

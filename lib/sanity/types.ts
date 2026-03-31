@@ -38,7 +38,24 @@ export interface SanityPost {
     publishedAt: string;
     updatedAt?: string;
     author?: string; // Legacy field
-    authors?: Array<{ _id: string; name: string }>; // Author profiles
+    authors?: Array<{
+        _id: string;
+        fullName?: string;
+        preferredName?: string;
+        pronouns?: string;
+        roleType?: string;
+        titles?: string[];
+        headshot?: SanityImage;
+        biography?: any;
+        expertise?: string[];
+        departments?: Array<{ _id: string; title?: string }>;
+        contactInfo?: {
+            email?: string;
+            phone?: string;
+            office?: string;
+            website?: string;
+        };
+    }>; // Author profiles
     featuredImage?: SanityImage;
     featured?: boolean;
     status: "draft" | "scheduled" | "published" | "archived";
