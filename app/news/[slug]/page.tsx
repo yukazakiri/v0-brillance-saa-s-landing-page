@@ -17,6 +17,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 
 import CollegeHeader from "@/components/college-header";
+import AuthorByline from "@/components/author-byline";
 import FooterSection from "@/components/footer-section";
 import { getFacebookConfig, getFacebookPosts } from "@/lib/facebook";
 import type { NormalizedFacebookPost } from "@/lib/facebook/types";
@@ -447,7 +448,11 @@ export default async function NewsArticlePage({
     ? dateFormatter.format(new Date(post.publishedAt))
     : "Coming soon";
   const categoryLabel = formatCategoryLabel(post.category);
-  const authorName = post.author || "Editorial Team";
+  
+  // Get author information from authors array or fallback to legacy author field
+  const authorProfile = post.authors && post.authors.length > 0 ? post.authors[0] : null;
+  const authorName = authorProfile?.name || post.author || "Editorial Team";
+  
   const summaryText =
     post.seo?.metaDescription ??
     post.excerpt ??
@@ -552,10 +557,15 @@ export default async function NewsArticlePage({
                   {summaryText}
                 </p>
 
-              <div className="flex items-center gap-2 text-sm text-muted-foreground pt-2">
-                <User className="w-4 h-4" />
-                <span>{authorName}</span>
-              </div>
+                {/* Author - Minimal Byline with Hover Popup */}
+                <AuthorByline
+                  name={authorName}
+                  image={authorProfile?.image}
+                  bio={authorProfile?.bio}
+                  website={authorProfile?.website}
+                  email={authorProfile?.email}
+                  socialLinks={authorProfile?.socialLinks}
+                />
             </div>
           </header>
 
