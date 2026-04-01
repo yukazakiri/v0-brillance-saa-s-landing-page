@@ -27,6 +27,7 @@ export default function MobileMenu({ isOpen, onClose }: MobileMenuProps) {
     { href: "/#programs", label: "Programs" },
     { href: "/#admissions", label: "Admissions" },
     { href: "/news", label: "News" },
+    { href: "/gallery", label: "Gallery" },
     { href: "/#campus-life", label: "Campus" },
     { href: "/#contact", label: "Contact" },
   ]
@@ -55,7 +56,7 @@ export default function MobileMenu({ isOpen, onClose }: MobileMenuProps) {
       {/* Navigation Links */}
       <nav className="flex-1 flex flex-col justify-center px-6 -mt-8">
         {navLinks.map((link, index) => {
-          const isTransitionLink = link.href === "/" || link.href === "/about"
+          const isTransitionLink = !link.href.startsWith("/#")
           
           if (isTransitionLink) {
             return (

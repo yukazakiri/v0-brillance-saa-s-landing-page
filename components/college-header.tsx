@@ -193,30 +193,20 @@ export default function CollegeHeader({ settings }: CollegeHeaderProps) {
                 { href: "/about", label: "About" },
                 { href: "/academics", label: "Academics" },
                 { href: "/news", label: "News and Announcements" },
-              ].map((link) =>
-                link.href === "/about" ? (
-                  <ViewTransitionLink
-                    key={link.href}
-                    href={link.href}
-                    className={`text-[#1a3a52] hover:text-[#C79244] transition-all duration-300 relative group py-2 font-medium ${scrolled ? "text-xs" : "text-sm"
-                      }`}
-                    transitionType="slide"
-                  >
-                    {link.label}
-                    <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-[#C79244] transition-all duration-300 ease-in-out group-hover:w-full"></span>
-                  </ViewTransitionLink>
-                ) : (
-                  <Link
-                    key={link.href}
-                    href={link.href}
-                    className={`text-[#1a3a52] hover:text-[#C79244] transition-all duration-300 relative group py-2 font-medium ${scrolled ? "text-xs" : "text-sm"
-                      }`}
-                  >
-                    {link.label}
-                    <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-[#C79244] transition-all duration-300 ease-in-out group-hover:w-full"></span>
-                  </Link>
-                ),
-              )}
+                { href: "/gallery", label: "Gallery" },
+              ].map((link) => (
+                <ViewTransitionLink
+                  key={link.href}
+                  href={link.href}
+                  className={`text-[#1a3a52] hover:text-[#C79244] transition-all duration-300 relative group py-2 font-medium ${
+                    scrolled ? "text-xs" : "text-sm"
+                  }`}
+                  transitionType="slide"
+                >
+                  {link.label}
+                  <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-[#C79244] transition-all duration-300 ease-in-out group-hover:w-full" />
+                </ViewTransitionLink>
+              ))}
               <ApplyButton
                 variant="default"
                 size="header"

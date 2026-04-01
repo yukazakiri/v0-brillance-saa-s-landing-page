@@ -23,14 +23,23 @@ import {
 
 import CollegeHeader from "@/components/college-header";
 import FooterSection from "@/components/footer-section";
+import { ImageWithSkeleton } from "@/components/ui/image-with-skeleton";
 import { getFacebookConfig, getFacebookPosts } from "@/lib/facebook";
 import type { NormalizedFacebookPost } from "@/lib/facebook/types";
+import {
+  getCloudinaryPhotoUrl,
+  getFirstGalleryMedia,
+  getFirstGalleryPhoto,
+  isGalleryVideo,
+} from "@/lib/sanity/photo-gallery";
 import { buildImageUrl } from "@/lib/sanity/image";
 import {
+  fetchPhotoGalleriesByPostId,
   fetchPostBySlug,
   fetchPostSlugs,
   fetchSettings,
 } from "@/lib/sanity/queries";
+import { VideoWithSkeleton } from "@/components/ui/video-with-skeleton";
 import type { SanityPost, Settings } from "@/lib/sanity/types";
 const dateFormatter = new Intl.DateTimeFormat("en-US", {
   month: "long",
@@ -44,9 +53,13 @@ const portableTextComponents: PortableTextComponents = {
   types: {
     image: ({ value }) => {
       const dimensions = value?.asset?.metadata?.dimensions;
-      const isPortrait = dimensions ? dimensions.height > dimensions.width : false;
-      
-      const imageUrl = value ? buildImageUrl(value, 1200, isPortrait ? 1600 : 800) : null;
+      const isPortrait = dimensions
+        ? dimensions.height > dimensions.width
+        : false;
+
+      const imageUrl = value
+        ? buildImageUrl(value, 1200, isPortrait ? 1600 : 800)
+        : null;
       if (!imageUrl) return null;
 
       return (
@@ -68,7 +81,7 @@ const portableTextComponents: PortableTextComponents = {
     },
     facebook: ({ value }) => {
       if (!value || !value.url) return null;
-      
+
       return (
         <aside className="my-8 bg-muted border-l-4 border-primary p-6 rounded-r-lg">
           <div className="flex items-center gap-2 mb-4 text-sm font-semibold text-foreground">
@@ -91,9 +104,9 @@ const portableTextComponents: PortableTextComponents = {
               />
             </div>
           </div>
-          <a 
-            href={value.url} 
-            target="_blank" 
+          <a
+            href={value.url}
+            target="_blank"
             rel="noopener noreferrer"
             className="inline-block mt-3 text-sm text-primary hover:underline"
           >
@@ -104,7 +117,7 @@ const portableTextComponents: PortableTextComponents = {
     },
     embed: ({ value }) => {
       if (!value || !value.url) return null;
-      
+
       // Handle Facebook embeds (for generic embed type)
       if (value.url.includes("facebook.com")) {
         return (
@@ -129,9 +142,9 @@ const portableTextComponents: PortableTextComponents = {
                 />
               </div>
             </div>
-            <a 
-              href={value.url} 
-              target="_blank" 
+            <a
+              href={value.url}
+              target="_blank"
               rel="noopener noreferrer"
               className="inline-block mt-3 text-sm text-primary hover:underline"
             >
@@ -140,7 +153,7 @@ const portableTextComponents: PortableTextComponents = {
           </aside>
         );
       }
-      
+
       // Handle YouTube embeds
       if (value.url.includes("youtube.com") || value.url.includes("youtu.be")) {
         let videoId = "";
@@ -149,9 +162,9 @@ const portableTextComponents: PortableTextComponents = {
         } else {
           videoId = value.url.split("/").pop() || "";
         }
-        
+
         if (!videoId) return null;
-        
+
         return (
           <figure className="my-8 bg-card p-4 rounded-lg border border-border">
             <div className="aspect-video w-full rounded-md overflow-hidden shadow-md bg-foreground/10">
@@ -171,7 +184,7 @@ const portableTextComponents: PortableTextComponents = {
           </figure>
         );
       }
-      
+
       // Generic iframe embed
       return (
         <figure className="my-8 bg-card p-4 rounded-lg border border-border">
@@ -219,7 +232,9 @@ const portableTextComponents: PortableTextComponents = {
       <ul className="list-disc list-inside space-y-2 my-4 ml-4">{children}</ul>
     ),
     number: ({ children }) => (
-      <ol className="list-decimal list-inside space-y-2 my-4 ml-4">{children}</ol>
+      <ol className="list-decimal list-inside space-y-2 my-4 ml-4">
+        {children}
+      </ol>
     ),
   },
   listItem: {
@@ -443,6 +458,8 @@ export default async function NewsArticlePage({
     notFound();
   }
 
+  const relatedGalleries = await fetchPhotoGalleriesByPostId(post._id);
+
   const heroImage = buildImageUrl(post.featuredImage);
   const heroMedia = heroImage ?? "/hero-images/maincampus.png";
   const publishedDate = post.publishedAt
@@ -460,8 +477,11 @@ export default async function NewsArticlePage({
     ? `${baseUrl}/news/${post.slug}`
     : `/news/${post.slug}`;
   // Prepare share text with hashtags
-  const hashtagsText = tags.length > 0 ? " " + tags.map(tag => `#${tag.replace(/\s+/g, '')}`).join(" ") : " #DatalCenterCollege #DCCP";
-  const shareText = `${post.title} - ${summaryText.substring(0, 100)}${summaryText.length > 100 ? '...' : ''}${hashtagsText}`;
+  const hashtagsText =
+    tags.length > 0
+      ? " " + tags.map((tag) => `#${tag.replace(/\s+/g, "")}`).join(" ")
+      : " #DatalCenterCollege #DCCP";
+  const shareText = `${post.title} - ${summaryText.substring(0, 100)}${summaryText.length > 100 ? "..." : ""}${hashtagsText}`;
   const linkedinTitle = post.title;
   const linkedinSummary = summaryText.substring(0, 200);
 
@@ -537,76 +557,79 @@ export default async function NewsArticlePage({
               </nav>
 
               <div className="flex items-center gap-3">
-                  <span className="text-xs font-medium tracking-[0.2em] uppercase text-muted-foreground">
-                    {categoryLabel}
-                  </span>
-                  <span className="w-1 h-1 rounded-full bg-muted-foreground/30" />
-                  <span className="text-xs text-muted-foreground">
-                    {publishedDate}
-                  </span>
-                </div>
+                <span className="text-xs font-medium tracking-[0.2em] uppercase text-muted-foreground">
+                  {categoryLabel}
+                </span>
+                <span className="w-1 h-1 rounded-full bg-muted-foreground/30" />
+                <span className="text-xs text-muted-foreground">
+                  {publishedDate}
+                </span>
+              </div>
 
-                <h1 className="text-3xl sm:text-4xl lg:text-5xl font-serif leading-[1.15] tracking-tight text-foreground">
-                  {post.title}
-                </h1>
+              <h1 className="text-3xl sm:text-4xl lg:text-5xl font-serif leading-[1.15] tracking-tight text-foreground">
+                {post.title}
+              </h1>
 
-                <p className="text-lg sm:text-xl text-muted-foreground leading-relaxed max-w-2xl">
-                  {summaryText}
-                </p>
+              <p className="text-lg sm:text-xl text-muted-foreground leading-relaxed max-w-2xl">
+                {summaryText}
+              </p>
 
-                {post.authors && post.authors.length > 0 ? (
-                  <HoverCard>
-                    <HoverCardTrigger asChild>
-                      <button className="flex items-center gap-2 text-sm text-muted-foreground pt-2 hover:text-foreground transition-colors cursor-pointer">
-                        <User className="w-4 h-4" />
-                        <span className="underline decoration-dotted">
-                          {post.authors[0].preferredName || post.authors[0].fullName}
-                        </span>
-                      </button>
-                    </HoverCardTrigger>
-                    <HoverCardContent align="start" className="w-80">
-                      <div className="flex gap-4">
-                        {post.authors[0].headshot?.asset?.url && (
-                          <img
-                            src={post.authors[0].headshot.asset.url}
-                            alt={post.authors[0].fullName}
-                            className="w-16 h-16 rounded-full object-cover"
-                          />
-                        )}
-                        <div className="flex-1 space-y-1">
-                          <h4 className="text-sm font-semibold">
-                            {post.authors[0].preferredName || post.authors[0].fullName}
-                          </h4>
-                          {post.authors[0].titles && post.authors[0].titles.length > 0 && (
+              {post.authors && post.authors.length > 0 ? (
+                <HoverCard>
+                  <HoverCardTrigger asChild>
+                    <button className="flex items-center gap-2 text-sm text-muted-foreground pt-2 hover:text-foreground transition-colors cursor-pointer">
+                      <User className="w-4 h-4" />
+                      <span className="underline decoration-dotted">
+                        {post.authors[0].preferredName ||
+                          post.authors[0].fullName}
+                      </span>
+                    </button>
+                  </HoverCardTrigger>
+                  <HoverCardContent align="start" className="w-80">
+                    <div className="flex gap-4">
+                      {post.authors[0].headshot?.asset?.url && (
+                        <img
+                          src={post.authors[0].headshot.asset.url}
+                          alt={post.authors[0].fullName}
+                          className="w-16 h-16 rounded-full object-cover"
+                        />
+                      )}
+                      <div className="flex-1 space-y-1">
+                        <h4 className="text-sm font-semibold">
+                          {post.authors[0].preferredName ||
+                            post.authors[0].fullName}
+                        </h4>
+                        {post.authors[0].titles &&
+                          post.authors[0].titles.length > 0 && (
                             <p className="text-xs text-muted-foreground">
                               {post.authors[0].titles[0]}
                             </p>
                           )}
-                          {post.authors[0].roleType && (
-                            <p className="text-xs text-muted-foreground capitalize">
-                              {post.authors[0].roleType}
-                            </p>
-                          )}
-                          {post.authors[0].contactInfo?.website && (
-                            <a
-                              href={post.authors[0].contactInfo.website}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="text-xs text-primary hover:underline flex items-center gap-1"
-                            >
-                              View Profile <ExternalLink className="w-3 h-3" />
-                            </a>
-                          )}
-                        </div>
+                        {post.authors[0].roleType && (
+                          <p className="text-xs text-muted-foreground capitalize">
+                            {post.authors[0].roleType}
+                          </p>
+                        )}
+                        {post.authors[0].contactInfo?.website && (
+                          <a
+                            href={post.authors[0].contactInfo.website}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-xs text-primary hover:underline flex items-center gap-1"
+                          >
+                            View Profile <ExternalLink className="w-3 h-3" />
+                          </a>
+                        )}
                       </div>
-                    </HoverCardContent>
-                  </HoverCard>
-                ) : (
-                  <div className="flex items-center gap-2 text-sm text-muted-foreground pt-2">
-                    <User className="w-4 h-4" />
-                    <span>{authorName}</span>
-                  </div>
-                )}
+                    </div>
+                  </HoverCardContent>
+                </HoverCard>
+              ) : (
+                <div className="flex items-center gap-2 text-sm text-muted-foreground pt-2">
+                  <User className="w-4 h-4" />
+                  <span>{authorName}</span>
+                </div>
+              )}
             </div>
           </header>
 
@@ -634,7 +657,9 @@ export default async function NewsArticlePage({
                   />
                 </div>
               ) : (
-                <p className="text-muted-foreground">Details for this announcement will be available soon.</p>
+                <p className="text-muted-foreground">
+                  Details for this announcement will be available soon.
+                </p>
               )}
             </article>
 
@@ -658,6 +683,94 @@ export default async function NewsArticlePage({
                 ))}
               </div>
             </div>
+
+            {relatedGalleries.length > 0 ? (
+              <section className="rounded-[28px] border border-[rgba(55,50,47,0.12)] bg-[#FCFAF7] p-5 sm:p-7">
+                <div className="flex flex-col gap-6">
+                  <div className="flex flex-col gap-2">
+                    <span className="text-xs font-semibold uppercase tracking-[0.28em] text-[#6B635D]">
+                      Related Gallery
+                    </span>
+                    <h2 className="text-2xl font-serif text-[#37322F]">
+                      Photo references for this article
+                    </h2>
+                    <p className="max-w-2xl text-sm leading-6 text-[#6B635D]">
+                      If this article or event has linked albums, you can open
+                      them below to browse the photos and media captured for it.
+                    </p>
+                  </div>
+
+                  <div className="grid gap-4 md:grid-cols-2">
+                    {relatedGalleries.map((gallery) => {
+                      const coverAsset =
+                        getFirstGalleryPhoto(gallery) ||
+                        getFirstGalleryMedia(gallery);
+                      const coverUrl = getCloudinaryPhotoUrl(coverAsset);
+                      const coverIsVideo = isGalleryVideo(coverAsset);
+                      const itemCount = Array.isArray(gallery.photos)
+                        ? gallery.photos.length
+                        : 0;
+
+                      return (
+                        <Link
+                          key={gallery._id}
+                          href={`/gallery/${gallery.slug.current}`}
+                          className="group overflow-hidden rounded-[24px] border border-[rgba(55,50,47,0.12)] bg-white transition-transform duration-300 hover:-translate-y-1"
+                        >
+                          <div className="relative aspect-[16/10] overflow-hidden bg-stone-100">
+                            {coverUrl ? (
+                              coverIsVideo ? (
+                                <VideoWithSkeleton
+                                  src={coverUrl}
+                                  aria-label={gallery.title}
+                                  className="transition-transform duration-500 group-hover:scale-105"
+                                  fallbackLabel="No preview"
+                                />
+                              ) : (
+                                <ImageWithSkeleton
+                                  src={coverUrl}
+                                  alt={gallery.title}
+                                  className="transition-transform duration-500 group-hover:scale-105"
+                                  fallbackLabel="No cover"
+                                />
+                              )
+                            ) : (
+                              <div className="flex h-full items-center justify-center bg-stone-100 text-xs font-semibold uppercase tracking-[0.24em] text-[#6B635D]">
+                                No cover
+                              </div>
+                            )}
+                            <div className="absolute inset-0 bg-gradient-to-t from-black/55 via-black/10 to-transparent" />
+                            <div className="absolute bottom-4 left-4 right-4 flex items-end justify-between gap-4 text-white">
+                              <div>
+                                <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-white/80">
+                                  {itemCount} item{itemCount === 1 ? "" : "s"}
+                                </p>
+                                <h3 className="mt-1 text-xl font-serif leading-tight">
+                                  {gallery.title}
+                                </h3>
+                              </div>
+                              <span className="rounded-full border border-white/25 bg-white/10 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.22em] backdrop-blur-sm">
+                                Open
+                              </span>
+                            </div>
+                          </div>
+
+                          <div className="flex flex-col gap-4 p-5">
+                            <p className="text-sm leading-6 text-[#6B635D]">
+                              {gallery.summary ||
+                                "Open this gallery to browse the media captured for this event."}
+                            </p>
+                            <div className="text-xs font-semibold uppercase tracking-[0.24em] text-[#6B635D]">
+                              View photo album
+                            </div>
+                          </div>
+                        </Link>
+                      );
+                    })}
+                  </div>
+                </div>
+              </section>
+            ) : null}
           </div>
         </div>
       </div>
@@ -688,7 +801,7 @@ function FacebookPostPage({
   const baseUrl = getSiteBaseUrl();
   const canonicalUrl = baseUrl ? `${baseUrl}/news/${slug}` : `/news/${slug}`;
   const fbShareText = `${post.message?.slice(0, 100) || "Facebook Post"} - From Data Center College of the Philippines #DCCP`;
-  const fbShareEmail = `Check this out from Data Center College:\n\n${post.message || 'A post from Data Center College'}\n\n${canonicalUrl}`;
+  const fbShareEmail = `Check this out from Data Center College:\n\n${post.message || "A post from Data Center College"}\n\n${canonicalUrl}`;
 
   const shareLinks = [
     {
@@ -708,12 +821,12 @@ function FacebookPostPage({
     },
     {
       label: "WhatsApp",
-      href: `https://wa.me/?text=${encodeURIComponent(`${post.message?.slice(0, 100) || 'Check this out'}\n\n${canonicalUrl}`)}`,
+      href: `https://wa.me/?text=${encodeURIComponent(`${post.message?.slice(0, 100) || "Check this out"}\n\n${canonicalUrl}`)}`,
       title: "Share on WhatsApp",
     },
     {
       label: "Email",
-      href: `mailto:?subject=${encodeURIComponent('Check this out from Data Center College')}&body=${encodeURIComponent(fbShareEmail)}`,
+      href: `mailto:?subject=${encodeURIComponent("Check this out from Data Center College")}&body=${encodeURIComponent(fbShareEmail)}`,
       title: "Share via Email",
     },
   ];
@@ -891,27 +1004,27 @@ function FacebookPostPage({
               </div>
             )}
 
-  {/* Share Links */}
-  <div className="border-t border-[rgba(55,50,47,0.12)] pt-6 flex flex-col gap-4">
-    <h3 className="text-sm font-semibold text-[#6B635D] uppercase tracking-[0.3em]">
-      Share this story
-    </h3>
-    <div className="flex flex-wrap gap-3">
-      {shareLinks.map((share) => (
-        <a
-          key={share.label}
-          href={share.href}
-          target="_blank"
-          rel="noreferrer"
-          title={share.title}
-          className="inline-flex items-center gap-2 px-4 py-2 rounded-full border border-[rgba(55,50,47,0.2)] text-sm font-semibold text-[#37322F] hover:bg-[#37322F] hover:text-white transition-colors"
-        >
-          {share.label}
-          <span aria-hidden>↗</span>
-        </a>
-      ))}
-    </div>
-  </div>
+            {/* Share Links */}
+            <div className="border-t border-[rgba(55,50,47,0.12)] pt-6 flex flex-col gap-4">
+              <h3 className="text-sm font-semibold text-[#6B635D] uppercase tracking-[0.3em]">
+                Share this story
+              </h3>
+              <div className="flex flex-wrap gap-3">
+                {shareLinks.map((share) => (
+                  <a
+                    key={share.label}
+                    href={share.href}
+                    target="_blank"
+                    rel="noreferrer"
+                    title={share.title}
+                    className="inline-flex items-center gap-2 px-4 py-2 rounded-full border border-[rgba(55,50,47,0.2)] text-sm font-semibold text-[#37322F] hover:bg-[#37322F] hover:text-white transition-colors"
+                  >
+                    {share.label}
+                    <span aria-hidden>↗</span>
+                  </a>
+                ))}
+              </div>
+            </div>
           </div>
         </div>
       </div>

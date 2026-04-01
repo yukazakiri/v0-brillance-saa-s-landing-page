@@ -202,9 +202,11 @@ export default function AdmissionsContactSection() {
             </p>
           </div>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Link href="/apply"><button className="px-8 py-3 bg-primary text-primary-foreground rounded-full font-semibold text-sm sm:text-base hover:shadow-[0px_4px_12px_rgba(55,50,47,0.3)] transition-all duration-200 hover:scale-105 active:scale-95">
-              Apply Now
-            </button>
+            <Link href="/apply">
+              <button className="px-8 py-3 bg-primary text-primary-foreground rounded-full font-semibold text-sm sm:text-base hover:shadow-[0px_4px_12px_rgba(55,50,47,0.3)] transition-all duration-200 hover:scale-105 active:scale-95">
+                Apply Now
+              </button>
+            </Link>
               <button className="px-8 py-3 border border-primary text-primary rounded-full font-semibold text-sm sm:text-base hover:bg-primary/5 transition-all duration-200 hover:scale-105 active:scale-95">
                 Schedule a Tour
               </button>

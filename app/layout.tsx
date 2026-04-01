@@ -2,6 +2,7 @@ import type React from "react"
 import type { Metadata } from "next"
 import Script from "next/script"
 import { OpenPanelComponent } from "@openpanel/nextjs"
+import BotpressLoader from "@/components/botpress-loader"
 
 import { fetchSettings } from "@/lib/sanity/queries"
 import { buildImageUrl } from "@/lib/sanity/image"
@@ -100,7 +101,7 @@ export default function RootLayout({
     <>
       <OpenPanelComponent
         apiUrl="https://openpanel.dccp.edu.ph/api"
-        clientId={process.env.CLIENT_ID}
+        clientId={process.env.CLIENT_ID || ""}
         trackScreenViews={true}
         trackOutgoingLinks={true}
         trackAttributes={true}
@@ -137,8 +138,7 @@ export default function RootLayout({
             </div>
           </div>
         </div>
-        <Script src="https://cdn.botpress.cloud/webchat/v3.5/inject.js" strategy="afterInteractive" />
-        <Script src="https://files.bpcontent.cloud/2025/03/12/02/20250312025656-J40NI3RT.js" strategy="afterInteractive" />
+        <BotpressLoader />
         <Script 
           defer 
           src="https://cloud.umami.is/script.js" 

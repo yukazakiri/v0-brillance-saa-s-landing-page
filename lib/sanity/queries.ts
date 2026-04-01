@@ -1,14 +1,23 @@
-import { groq } from "next-sanity"
+import { groq } from "next-sanity";
 
-import { client } from "./client"
-import { getImageUrl } from "./image"
-import type { Article, Course, SanityCourse, SanityFAQ, SanityPost, Settings, StudentPortalPage } from "./types"
+import { client } from "./client";
+import { getImageUrl } from "./image";
+import type {
+  Article,
+  Course,
+  SanityCourse,
+  SanityFAQ,
+  SanityPhotoGallery,
+  SanityPost,
+  Settings,
+  StudentPortalPage,
+} from "./types";
 
 const dateFormatter = new Intl.DateTimeFormat("en-US", {
   month: "long",
   day: "numeric",
   year: "numeric",
-})
+});
 
 const POST_PROJECTION = groq`{
   _id,
@@ -108,36 +117,36 @@ const POST_PROJECTION = groq`{
     },
     canonicalUrl
   }
-}`
+}`;
 
 // Fetch only published posts
 const ALL_POSTS_QUERY = groq`
   *[_type == "post" && status == "published"]
   | order(publishedAt desc)
   ${POST_PROJECTION}
-`
+`;
 
 const LATEST_POSTS_QUERY = groq`
   *[_type == "post" && status == "published"]
   | order(publishedAt desc)[0...$limit]
   ${POST_PROJECTION}
-`
+`;
 
 const POST_BY_SLUG_QUERY = groq`
   *[_type == "post" && status == "published" && slug.current == $slug][0]
   ${POST_PROJECTION}
-`
+`;
 
 const POST_SLUGS_QUERY = groq`
   *[_type == "post" && status == "published" && defined(slug.current)]{
     "slug": slug.current
   }
-`
+`;
 
 function formatCategory(post: SanityPost): string {
   // Priority: primaryCategory -> postKind -> category (legacy) -> "General"
   if (post.primaryCategory?.title) {
-    return post.primaryCategory.title
+    return post.primaryCategory.title;
   }
   if (post.postKind) {
     const kindLabels: Record<string, string> = {
@@ -145,28 +154,31 @@ function formatCategory(post: SanityPost): string {
       story: "Feature Story",
       announcement: "Announcement",
       alert: "Alert",
-    }
-    return kindLabels[post.postKind] || post.postKind
+    };
+    return kindLabels[post.postKind] || post.postKind;
   }
   if (post.category) {
-    return post.category.charAt(0).toUpperCase() + post.category.slice(1)
+    return post.category.charAt(0).toUpperCase() + post.category.slice(1);
   }
-  return "General"
+  return "General";
 }
 
 function formatDate(value?: string | null): string {
-  if (!value) return ""
-  const date = new Date(value)
-  if (Number.isNaN(date.getTime())) return value
-  return dateFormatter.format(date)
+  if (!value) return "";
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return value;
+  return dateFormatter.format(date);
 }
 
 function mapPostToArticle(post: SanityPost): Article {
   // Get author name: prefer authors array, fallback to legacy author field
   const authorName =
     post.authors && post.authors.length > 0
-      ? post.authors.filter((a) => a).map((a) => a.name).join(", ")
-      : (post.author ?? "Editorial Team")
+      ? post.authors
+          .filter((a) => a)
+          .map((a) => a.fullName || a.preferredName)
+          .join(", ")
+      : (post.author ?? "Editorial Team");
 
   return {
     id: post._id,
@@ -182,33 +194,37 @@ function mapPostToArticle(post: SanityPost): Article {
     seo: {
       title: post.seo?.metaTitle,
       description: post.seo?.metaDescription,
-      image: post.seo?.metaImage ? (getImageUrl(post.seo.metaImage, 1200, 630) ?? undefined) : undefined,
+      image: post.seo?.metaImage
+        ? (getImageUrl(post.seo.metaImage, 1200, 630) ?? undefined)
+        : undefined,
     },
-  }
+  };
 }
 
 export async function fetchAllPosts(): Promise<Article[]> {
-  const posts = await client.fetch<SanityPost[]>(ALL_POSTS_QUERY)
-  return (posts || []).map(mapPostToArticle)
+  const posts = await client.fetch<SanityPost[]>(ALL_POSTS_QUERY);
+  return (posts || []).map(mapPostToArticle);
 }
 
 export async function fetchLatestPosts(limit = 4): Promise<Article[]> {
-  const posts = await client.fetch<SanityPost[]>(LATEST_POSTS_QUERY, { limit })
-  return (posts || []).map(mapPostToArticle)
+  const posts = await client.fetch<SanityPost[]>(LATEST_POSTS_QUERY, { limit });
+  return (posts || []).map(mapPostToArticle);
 }
 
-export async function fetchPostBySlug(slug: string): Promise<SanityPost | null> {
-  if (!slug) return null
-  return client.fetch<SanityPost | null>(POST_BY_SLUG_QUERY, { slug })
+export async function fetchPostBySlug(
+  slug: string,
+): Promise<SanityPost | null> {
+  if (!slug) return null;
+  return client.fetch<SanityPost | null>(POST_BY_SLUG_QUERY, { slug });
 }
 
 export async function fetchPostSlugs(): Promise<string[]> {
   try {
-    const results = await client.fetch<{ slug: string }[]>(POST_SLUGS_QUERY)
-    return (results || []).map((result) => result.slug)
+    const results = await client.fetch<{ slug: string }[]>(POST_SLUGS_QUERY);
+    return (results || []).map((result) => result.slug);
   } catch (error) {
-    console.error("Error fetching post slugs:", error)
-    return [] // Return empty array to allow build to proceed
+    console.error("Error fetching post slugs:", error);
+    return []; // Return empty array to allow build to proceed
   }
 }
 
@@ -285,15 +301,15 @@ const SETTINGS_QUERY = groq`
     governance,
     analytics
   }
-`
+`;
 
 export async function fetchSettings(): Promise<Settings | null> {
   try {
-    const settings = await client.fetch<Settings | null>(SETTINGS_QUERY)
-    return settings
+    const settings = await client.fetch<Settings | null>(SETTINGS_QUERY);
+    return settings;
   } catch (error) {
-    console.error("Error fetching settings:", error)
-    return null
+    console.error("Error fetching settings:", error);
+    return null;
   }
 }
 
@@ -322,37 +338,41 @@ const COURSES_QUERY = groq`
     tesdaRegistrationNumber,
     competencies
   }
-`
+`;
 
 function formatDuration(durationYears?: number, category?: string): string {
   if (durationYears) {
     if (durationYears >= 1) {
-      return `${durationYears} Year${durationYears > 1 ? "s" : ""}`
+      return `${durationYears} Year${durationYears > 1 ? "s" : ""}`;
     }
     // Convert to months if less than a year
-    const months = Math.round(durationYears * 12)
-    return `${months} Month${months > 1 ? "s" : ""}`
+    const months = Math.round(durationYears * 12);
+    return `${months} Month${months > 1 ? "s" : ""}`;
   }
 
   // Default fallbacks based on category
-  if (category === "ched") return "4 Years"
-  if (category === "tesda") return "6-9 Months"
-  if (category === "shs") return "2 Years"
+  if (category === "ched") return "4 Years";
+  if (category === "tesda") return "6-9 Months";
+  if (category === "shs") return "2 Years";
 
-  return "Contact for details"
+  return "Contact for details";
 }
 
 function mapCourseToLocalCourse(course: SanityCourse): Course {
-  const highlights: string[] = []
+  const highlights: string[] = [];
 
   // Use careerPaths as highlights if available
   if (course.careerPaths && course.careerPaths.length > 0) {
-    highlights.push(...course.careerPaths.slice(0, 3))
+    highlights.push(...course.careerPaths.slice(0, 3));
   }
 
   // Use competencies as highlights if careerPaths not available
-  if (highlights.length === 0 && course.competencies && course.competencies.length > 0) {
-    highlights.push(...course.competencies.slice(0, 3))
+  if (
+    highlights.length === 0 &&
+    course.competencies &&
+    course.competencies.length > 0
+  ) {
+    highlights.push(...course.competencies.slice(0, 3));
   }
 
   return {
@@ -365,20 +385,22 @@ function mapCourseToLocalCourse(course: SanityCourse): Course {
     highlights,
     credential: course.credential,
     scholarshipsAvailable: course.scholarshipsAvailable,
-  }
+  };
 }
 
 export async function fetchCourses(): Promise<Course[]> {
   try {
-    const courses = await client.fetch<SanityCourse[]>(COURSES_QUERY)
-    return (courses || []).map(mapCourseToLocalCourse)
+    const courses = await client.fetch<SanityCourse[]>(COURSES_QUERY);
+    return (courses || []).map(mapCourseToLocalCourse);
   } catch (error) {
-    console.error("Error fetching courses:", error)
-    return []
+    console.error("Error fetching courses:", error);
+    return [];
   }
 }
 
-export async function fetchCoursesByCategory(category: "ched" | "tesda" | "shs"): Promise<Course[]> {
+export async function fetchCoursesByCategory(
+  category: "ched" | "tesda" | "shs",
+): Promise<Course[]> {
   try {
     const query = groq`
       *[_type == "course" && status == "active" && offeringCategory == $category]
@@ -452,12 +474,12 @@ export async function fetchCoursesByCategory(category: "ched" | "tesda" | "shs")
         },
         status
       }
-    `
-    const courses = await client.fetch<SanityCourse[]>(query, { category })
-    return (courses || []).map(mapCourseToLocalCourse)
+    `;
+    const courses = await client.fetch<SanityCourse[]>(query, { category });
+    return (courses || []).map(mapCourseToLocalCourse);
   } catch (error) {
-    console.error(`Error fetching ${category} courses:`, error)
-    return []
+    console.error(`Error fetching ${category} courses:`, error);
+    return [];
   }
 }
 
@@ -532,31 +554,35 @@ const COURSE_BY_SLUG_QUERY = groq`
     },
     status
   }
-`
+`;
 
 const COURSE_SLUGS_QUERY = groq`
   *[_type == "course" && defined(slug.current)]{
     "slug": slug.current
   }
-`
+`;
 
-export async function fetchCourseBySlug(slug: string): Promise<SanityCourse | null> {
-  if (!slug) return null
+export async function fetchCourseBySlug(
+  slug: string,
+): Promise<SanityCourse | null> {
+  if (!slug) return null;
   try {
-    return await client.fetch<SanityCourse | null>(COURSE_BY_SLUG_QUERY, { slug })
+    return await client.fetch<SanityCourse | null>(COURSE_BY_SLUG_QUERY, {
+      slug,
+    });
   } catch (error) {
-    console.error("Error fetching course by slug:", error)
-    return null
+    console.error("Error fetching course by slug:", error);
+    return null;
   }
 }
 
 export async function fetchCourseSlugs(): Promise<string[]> {
   try {
-    const results = await client.fetch<{ slug: string }[]>(COURSE_SLUGS_QUERY)
-    return (results || []).map((result) => result.slug)
+    const results = await client.fetch<{ slug: string }[]>(COURSE_SLUGS_QUERY);
+    return (results || []).map((result) => result.slug);
   } catch (error) {
-    console.error("Error fetching course slugs:", error)
-    return [] // Return empty array to allow build to proceed
+    console.error("Error fetching course slugs:", error);
+    return []; // Return empty array to allow build to proceed
   }
 }
 
@@ -571,14 +597,14 @@ const FAQS_QUERY = groq`
     answer,
     order
   }
-`
+`;
 
 export async function fetchFAQs(): Promise<SanityFAQ[]> {
   try {
-    return await client.fetch<SanityFAQ[]>(FAQS_QUERY)
+    return await client.fetch<SanityFAQ[]>(FAQS_QUERY);
   } catch (error) {
-    console.error("Error fetching FAQs:", error)
-    return []
+    console.error("Error fetching FAQs:", error);
+    return [];
   }
 }
 
@@ -717,13 +743,157 @@ export const STUDENT_PORTAL_PAGE_QUERY = groq`
     },
     lastUpdated
   }
-`
+`;
 
 export async function fetchStudentPortalPage(): Promise<StudentPortalPage | null> {
   try {
-    return await client.fetch<StudentPortalPage>(STUDENT_PORTAL_PAGE_QUERY)
+    return await client.fetch<StudentPortalPage>(STUDENT_PORTAL_PAGE_QUERY);
   } catch (error) {
-    console.error("Error fetching student portal page:", error)
-    return null
+    console.error("Error fetching student portal page:", error);
+    return null;
+  }
+}
+
+// Photo Galleries Query
+const PHOTO_GALLERIES_QUERY = groq`
+  *[_type == "photoGallery"]
+  | order(publishedAt desc)
+  {
+    _id,
+    _type,
+    _createdAt,
+    _updatedAt,
+    title,
+    slug,
+    summary,
+    intro,
+    photos[] {
+      _type,
+      secure_url,
+      url,
+      format,
+      width,
+      height,
+      public_id
+    },
+    "relatedPosts": relatedPosts[]->{ _id, title, slug },
+    publishedAt,
+    featured
+  }
+`;
+
+const PHOTO_GALLERY_BY_SLUG_QUERY = groq`
+  *[_type == "photoGallery" && slug.current == $slug][0]
+  {
+    _id,
+    _type,
+    _createdAt,
+    _updatedAt,
+    title,
+    slug,
+    summary,
+    intro,
+    photos[] {
+      _type,
+      secure_url,
+      url,
+      format,
+      width,
+      height,
+      public_id
+    },
+    "relatedPosts": relatedPosts[]->{ _id, title, slug },
+    publishedAt,
+    featured
+  }
+`;
+
+const PHOTO_GALLERY_SLUGS_QUERY = groq`
+  *[_type == "photoGallery" && defined(slug.current)]{
+    "slug": slug.current
+  }
+`;
+
+const PHOTO_GALLERIES_BY_POST_ID_QUERY = groq`
+  *[_type == "photoGallery" && references($postId)]
+  | order(featured desc, publishedAt desc)
+  {
+    _id,
+    _type,
+    _createdAt,
+    _updatedAt,
+    title,
+    slug,
+    summary,
+    intro,
+    photos[] {
+      _type,
+      secure_url,
+      url,
+      format,
+      width,
+      height,
+      public_id
+    },
+    "relatedPosts": relatedPosts[]->{ _id, title, slug },
+    publishedAt,
+    featured
+  }
+`;
+
+export async function fetchPhotoGalleries(): Promise<SanityPhotoGallery[]> {
+  try {
+    return (
+      (await client.fetch<SanityPhotoGallery[]>(PHOTO_GALLERIES_QUERY)) || []
+    );
+  } catch (error) {
+    console.error("Error fetching photo galleries:", error);
+    return [];
+  }
+}
+
+export async function fetchPhotoGalleryBySlug(
+  slug: string,
+): Promise<SanityPhotoGallery | null> {
+  if (!slug) return null;
+
+  try {
+    return await client.fetch<SanityPhotoGallery | null>(
+      PHOTO_GALLERY_BY_SLUG_QUERY,
+      { slug },
+    );
+  } catch (error) {
+    console.error("Error fetching photo gallery by slug:", error);
+    return null;
+  }
+}
+
+export async function fetchPhotoGallerySlugs(): Promise<string[]> {
+  try {
+    const results = await client.fetch<Array<{ slug: string }>>(
+      PHOTO_GALLERY_SLUGS_QUERY,
+    );
+    return (results || []).map((result) => result.slug);
+  } catch (error) {
+    console.error("Error fetching photo gallery slugs:", error);
+    return [];
+  }
+}
+
+export async function fetchPhotoGalleriesByPostId(
+  postId: string,
+): Promise<SanityPhotoGallery[]> {
+  if (!postId) return [];
+
+  try {
+    return (
+      (await client.fetch<SanityPhotoGallery[]>(
+        PHOTO_GALLERIES_BY_POST_ID_QUERY,
+        { postId },
+      )) || []
+    );
+  } catch (error) {
+    console.error("Error fetching photo galleries by post id:", error);
+    return [];
   }
 }

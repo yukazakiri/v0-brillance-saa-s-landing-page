@@ -89,6 +89,35 @@ export interface SanityFAQ {
     order?: number;
 }
 
+export interface CloudinaryAsset {
+    _type: "cloudinary.asset";
+    secure_url: string;
+    url?: string;
+    format?: string;
+    width?: number;
+    height?: number;
+    public_id?: string;
+}
+
+export interface SanityPhotoGallery {
+    _id: string;
+    _type: "photoGallery";
+    _createdAt: string;
+    _updatedAt: string;
+    title: string;
+    slug: { current: string };
+    summary: string;
+    intro?: any[];
+    photos: CloudinaryAsset[];
+    relatedPosts?: Array<{
+        _id: string;
+        title: string;
+        slug: { current: string };
+    }>;
+    publishedAt: string;
+    featured?: boolean;
+}
+
 // Local article interface (with processed image URLs)
 export interface Article {
     id: string;
