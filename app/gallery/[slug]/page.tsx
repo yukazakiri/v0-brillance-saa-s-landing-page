@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import Script from "next/script";
 
 import CollegeHeader from "@/components/college-header";
 import FooterSection from "@/components/footer-section";
@@ -11,6 +12,13 @@ import {
 import { Button } from "@/components/ui/button";
 import { ImageWithSkeleton } from "@/components/ui/image-with-skeleton";
 import { VideoWithSkeleton } from "@/components/ui/video-with-skeleton";
+import {
+  getAbsoluteUrl,
+  getSeoDescription,
+  getSeoImage,
+  getSeoKeywords,
+  getTwitterHandle,
+} from "@/lib/seo";
 import {
   getCloudinaryPhotoUrl,
   getFirstGalleryMedia,
@@ -53,29 +61,74 @@ export async function generateMetadata({
       title: `Gallery Album | ${siteName}`,
     };
   }
+  const title = `${gallery.title} | ${siteName}`;
+  const description = getSeoDescription(
+    settings,
+    gallery.summary ||
+      `View photos and event media from ${gallery.title} at ${siteName}.`,
+  );
+  const canonicalUrl = getAbsoluteUrl(`/gallery/${gallery.slug.current}`);
+  const coverUrl =
+    getCloudinaryPhotoUrl(
+      getFirstGalleryPhoto(gallery) || getFirstGalleryMedia(gallery),
+    ) || getSeoImage(settings);
 
   return {
-    title: `${gallery.title} | ${siteName}`,
-    description:
-      gallery.summary || `View photos from ${gallery.title} at ${siteName}.`,
+    title,
+    description,
+    alternates: {
+      canonical: canonicalUrl,
+    },
+    keywords: getSeoKeywords(settings, [
+      gallery.title,
+      "Gallery Album",
+      "Campus Event Photos",
+      "School Album",
+      "DCCP Photos",
+    ]),
+    category: "education",
+    robots: {
+      index: true,
+      follow: true,
+      googleBot: {
+        index: true,
+        follow: true,
+        "max-image-preview": "large",
+        "max-snippet": -1,
+        "max-video-preview": -1,
+      },
+    },
     openGraph: {
-      title: `${gallery.title} | ${siteName}`,
-      description:
-        gallery.summary || `View photos from ${gallery.title} at ${siteName}.`,
-      images: getCloudinaryPhotoUrl(
-        getFirstGalleryPhoto(gallery) || getFirstGalleryMedia(gallery),
-      )
+      type: "website",
+      locale: "en_PH",
+      url: canonicalUrl,
+      title,
+      description,
+      siteName: siteName,
+      images: coverUrl
         ? [
             {
-              url:
-                getCloudinaryPhotoUrl(
-                  getFirstGalleryPhoto(gallery) ||
-                    getFirstGalleryMedia(gallery),
-                ) || "",
+              url: coverUrl,
+              width: 1200,
+              height: 630,
+              alt: gallery.title,
             },
           ]
         : undefined,
     },
+    twitter: {
+      card: "summary_large_image",
+      title,
+      description,
+      images: coverUrl ? [coverUrl] : [],
+      creator: getTwitterHandle(settings),
+    },
+    other: coverUrl
+      ? {
+          "og:image:secure_url": coverUrl,
+          "og:image:alt": gallery.title,
+        }
+      : undefined,
   };
 }
 
@@ -116,10 +169,64 @@ export default async function GalleryAlbumPage({
     getFirstGalleryPhoto(gallery) || getFirstGalleryMedia(gallery);
   const coverUrl = getCloudinaryPhotoUrl(coverAsset);
   const coverIsVideo = isGalleryVideo(coverAsset);
+  const structuredData = {
+    "@context": "https://schema.org",
+    "@type": "ImageGallery",
+    name: gallery.title,
+    description: getSeoDescription(
+      siteSettings,
+      gallery.summary || `View photos and event media from ${gallery.title}.`,
+    ),
+    url: getAbsoluteUrl(`/gallery/${gallery.slug.current}`),
+    isPartOf: {
+      "@type": "CollectionPage",
+      name: `${siteSettings.shortTitle || siteSettings.siteTitle || "DCCP"} Photo Gallery`,
+      url: getAbsoluteUrl("/gallery"),
+    },
+    datePublished: gallery.publishedAt,
+    numberOfItems: images.length,
+    image: images
+      .filter((item) => item.mediaType !== "video")
+      .slice(0, 20)
+      .map((item) => item.src),
+    associatedMedia: images.slice(0, 20).map((item) => ({
+      "@type": item.mediaType === "video" ? "VideoObject" : "ImageObject",
+      contentUrl: item.src,
+      name: item.alt,
+    })),
+    breadcrumb: {
+      "@type": "BreadcrumbList",
+      itemListElement: [
+        {
+          "@type": "ListItem",
+          position: 1,
+          name: "Home",
+          item: getAbsoluteUrl(),
+        },
+        {
+          "@type": "ListItem",
+          position: 2,
+          name: "Gallery",
+          item: getAbsoluteUrl("/gallery"),
+        },
+        {
+          "@type": "ListItem",
+          position: 3,
+          name: gallery.title,
+          item: getAbsoluteUrl(`/gallery/${gallery.slug.current}`),
+        },
+      ],
+    },
+  };
 
   return (
     <>
       <CollegeHeader settings={siteSettings} />
+      <Script
+        id="gallery-album-structured-data"
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}
+      />
 
       <main className="min-h-screen w-full flex flex-col items-center pt-24 pb-0">
         <section className="w-full border-b border-border px-4 sm:px-6 md:px-8 py-16 sm:py-20 flex justify-center">

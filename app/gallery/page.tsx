@@ -1,12 +1,20 @@
 import type React from "react";
 import type { Metadata } from "next";
 import Link from "next/link";
+import Script from "next/script";
 
 import CollegeHeader from "@/components/college-header";
 import FooterSection from "@/components/footer-section";
 import { Button } from "@/components/ui/button";
 import { ImageWithSkeleton } from "@/components/ui/image-with-skeleton";
 import { VideoWithSkeleton } from "@/components/ui/video-with-skeleton";
+import {
+  getAbsoluteUrl,
+  getSeoDescription,
+  getSeoImage,
+  getSeoKeywords,
+  getTwitterHandle,
+} from "@/lib/seo";
 import {
   getCloudinaryPhotoUrl,
   getFirstGalleryMedia,
@@ -21,15 +29,67 @@ export const revalidate = 3600;
 export async function generateMetadata(): Promise<Metadata> {
   const settings = await fetchSettings();
   const siteName = settings?.shortTitle || "DCCP";
+  const title = `Photo Gallery | ${siteName}`;
+  const description = getSeoDescription(
+    settings,
+    "Browse official campus albums from events, student life, ceremonies, and milestones at Data Center College of the Philippines.",
+  );
+  const canonicalUrl = getAbsoluteUrl("/gallery");
+  const imageUrl = getSeoImage(settings);
 
   return {
-    title: `Photo Gallery | ${siteName}`,
-    description:
-      "Browse campus albums from events, student life, and milestones at Data Center College of the Philippines.",
+    title,
+    description,
+    alternates: {
+      canonical: canonicalUrl,
+    },
+    keywords: getSeoKeywords(settings, [
+      "Photo Gallery",
+      "Campus Albums",
+      "School Events",
+      "Student Life",
+      "DCCP Gallery",
+    ]),
+    category: "education",
+    robots: {
+      index: true,
+      follow: true,
+      googleBot: {
+        index: true,
+        follow: true,
+        "max-image-preview": "large",
+        "max-snippet": -1,
+        "max-video-preview": -1,
+      },
+    },
     openGraph: {
-      title: `Photo Gallery | ${siteName}`,
-      description:
-        "Browse campus albums from events, student life, and milestones at Data Center College of the Philippines.",
+      type: "website",
+      locale: "en_PH",
+      url: canonicalUrl,
+      title,
+      description,
+      siteName: siteName,
+      images: imageUrl
+        ? [
+            {
+              url: imageUrl,
+              width: 1200,
+              height: 630,
+              alt: `${siteName} Photo Gallery`,
+            },
+          ]
+        : [],
+    },
+    twitter: {
+      card: "summary_large_image",
+      title,
+      description,
+      images: imageUrl ? [imageUrl] : [],
+      creator: getTwitterHandle(settings),
+    },
+    other: {
+      "og:image:secure_url": imageUrl,
+      "og:image:alt": `${siteName} Photo Gallery`,
     },
   };
 }
@@ -63,10 +123,47 @@ export default async function GalleryPage() {
   const totalPhotos = galleries.reduce((count, gallery) => {
     return count + (Array.isArray(gallery.photos) ? gallery.photos.length : 0);
   }, 0);
+  const structuredData = {
+    "@context": "https://schema.org",
+    "@type": "CollectionPage",
+    name: `${siteSettings.shortTitle || siteSettings.siteTitle || "DCCP"} Photo Gallery`,
+    description: getSeoDescription(
+      siteSettings,
+      "Browse official campus albums from events, student life, ceremonies, and milestones at Data Center College of the Philippines.",
+    ),
+    url: getAbsoluteUrl("/gallery"),
+    isPartOf: {
+      "@type": "WebSite",
+      name: siteSettings.siteTitle || "Data Center College of The Philippines",
+      url: getAbsoluteUrl(),
+    },
+    primaryImageOfPage: getSeoImage(siteSettings),
+    mainEntity: galleries.slice(0, 12).map((gallery) => {
+      const coverAsset =
+        getFirstGalleryPhoto(gallery) || getFirstGalleryMedia(gallery);
+      const coverUrl = getCloudinaryPhotoUrl(coverAsset);
+
+      return {
+        "@type": "ImageGallery",
+        name: gallery.title,
+        description: gallery.summary,
+        url: getAbsoluteUrl(`/gallery/${gallery.slug.current}`),
+        numberOfItems: Array.isArray(gallery.photos)
+          ? gallery.photos.length
+          : 0,
+        image: coverUrl || undefined,
+      };
+    }),
+  };
 
   return (
     <>
       <CollegeHeader settings={siteSettings} />
+      <Script
+        id="gallery-page-structured-data"
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}
+      />
 
       <main className="min-h-screen w-full flex flex-col items-center pt-24 pb-0">
         <section className="w-full border-b border-border px-4 sm:px-6 md:px-8 py-20 sm:py-28 md:py-36 flex justify-center">
