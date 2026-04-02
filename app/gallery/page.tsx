@@ -88,8 +88,21 @@ export async function generateMetadata(): Promise<Metadata> {
       creator: getTwitterHandle(settings),
     },
     other: {
+      "og:url": canonicalUrl,
+      "og:title": title,
+      "og:description": description,
+      "og:type": "website",
+      "og:site_name": siteName,
+      "og:locale": "en_PH",
+      "og:image": imageUrl,
       "og:image:secure_url": imageUrl,
+      "og:image:width": "1200",
+      "og:image:height": "630",
       "og:image:alt": `${siteName} Photo Gallery`,
+      "twitter:title": title,
+      "twitter:description": description,
+      "twitter:image": imageUrl,
+      "twitter:url": canonicalUrl,
     },
   };
 }

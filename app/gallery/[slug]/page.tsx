@@ -125,10 +125,33 @@ export async function generateMetadata({
     },
     other: coverUrl
       ? {
+          "og:url": canonicalUrl,
+          "og:title": title,
+          "og:description": description,
+          "og:type": "website",
+          "og:site_name": siteName,
+          "og:locale": "en_PH",
+          "og:image": coverUrl,
           "og:image:secure_url": coverUrl,
+          "og:image:width": "1200",
+          "og:image:height": "630",
           "og:image:alt": gallery.title,
+          "twitter:title": title,
+          "twitter:description": description,
+          "twitter:image": coverUrl,
+          "twitter:url": canonicalUrl,
         }
-      : undefined,
+      : {
+          "og:url": canonicalUrl,
+          "og:title": title,
+          "og:description": description,
+          "og:type": "website",
+          "og:site_name": siteName,
+          "og:locale": "en_PH",
+          "twitter:title": title,
+          "twitter:description": description,
+          "twitter:url": canonicalUrl,
+        },
   };
 }
 
