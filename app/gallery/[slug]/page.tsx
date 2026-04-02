@@ -13,11 +13,13 @@ import { Button } from "@/components/ui/button";
 import { ImageWithSkeleton } from "@/components/ui/image-with-skeleton";
 import { VideoWithSkeleton } from "@/components/ui/video-with-skeleton";
 import {
+  clampSeoTitle,
   getAbsoluteUrl,
   getSeoDescription,
-  getSeoImage,
   getSeoKeywords,
+  getSocialShareImage,
   getTwitterHandle,
+  normalizeSeoDescription,
 } from "@/lib/seo";
 import {
   getCloudinaryPhotoUrl,
@@ -61,17 +63,21 @@ export async function generateMetadata({
       title: `Gallery Album | ${siteName}`,
     };
   }
-  const title = `${gallery.title} | ${siteName}`;
-  const description = getSeoDescription(
-    settings,
-    gallery.summary ||
-      `View photos and event media from ${gallery.title} at ${siteName}.`,
+  const title = clampSeoTitle(`${gallery.title} | ${siteName}`);
+  const description = normalizeSeoDescription(
+    getSeoDescription(
+      settings,
+      gallery.summary ||
+        `View photos and event media from ${gallery.title} at ${siteName}. Browse the full album for highlights, ceremonies, sports, and campus moments.`,
+    ),
   );
   const canonicalUrl = getAbsoluteUrl(`/gallery/${gallery.slug.current}`);
-  const coverUrl =
+  const coverUrl = getSocialShareImage(
+    settings,
     getCloudinaryPhotoUrl(
       getFirstGalleryPhoto(gallery) || getFirstGalleryMedia(gallery),
-    ) || getSeoImage(settings);
+    ),
+  );
 
   return {
     title,

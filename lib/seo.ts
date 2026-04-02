@@ -1,13 +1,14 @@
-import type { Settings } from "@/lib/sanity/types"
-import { buildImageUrl } from "@/lib/sanity/image"
+import type { Settings } from "@/lib/sanity/types";
+import { buildImageUrl } from "@/lib/sanity/image";
+import { buildSocialShareImageUrl } from "@/lib/media-preview";
 
 export function getSiteBaseUrl() {
-  return process.env.NEXT_PUBLIC_SITE_URL || "https://dccp.edu.ph"
+  return process.env.NEXT_PUBLIC_SITE_URL || "https://dccp.edu.ph";
 }
 
 export function getAbsoluteUrl(path = "") {
-  const baseUrl = getSiteBaseUrl()
-  return path ? `${baseUrl}${path}` : baseUrl
+  const baseUrl = getSiteBaseUrl();
+  return path ? `${baseUrl}${path}` : baseUrl;
 }
 
 export function getSeoDescription(
@@ -19,7 +20,7 @@ export function getSeoDescription(
     settings?.defaultSeo?.metaDescription ||
     settings?.tagline ||
     "Explore official albums, event coverage, campus moments, and student life at Data Center College of the Philippines."
-  )
+  );
 }
 
 export function getSeoKeywords(
@@ -32,9 +33,9 @@ export function getSeoKeywords(
     "Baguio City",
     "Photo Gallery",
     "Campus Events",
-  ]
+  ];
 
-  return Array.from(new Set([...baseKeywords, ...extras]))
+  return Array.from(new Set([...baseKeywords, ...extras]));
 }
 
 export function getSeoImage(
@@ -45,19 +46,47 @@ export function getSeoImage(
     fallback ||
     buildImageUrl(settings?.defaultSeo?.shareImage) ||
     getAbsoluteUrl("/hero-images/maincampus.png")
-  )
+  );
+}
+
+export function getSocialShareImage(
+  settings?: Settings | null,
+  fallback?: string | null,
+) {
+  return buildSocialShareImageUrl(getSeoImage(settings, fallback));
+}
+
+export function clampSeoTitle(title: string, maxLength = 60) {
+  if (title.length <= maxLength) return title;
+  return `${title.slice(0, maxLength - 1).trim()}…`;
+}
+
+export function normalizeSeoDescription(
+  description: string,
+  minLength = 110,
+  maxLength = 160,
+) {
+  const normalized = description.replace(/\s+/g, " ").trim();
+  if (normalized.length <= maxLength && normalized.length >= minLength)
+    return normalized;
+  if (normalized.length > maxLength) {
+    return `${normalized.slice(0, maxLength - 1).trim()}…`;
+  }
+  return normalized;
 }
 
 export function getTwitterHandle(settings?: Settings | null) {
   const twitterLink = settings?.socialLinks?.find(
-    (link) => link.platform?.toLowerCase() === "twitter" || link.platform?.toLowerCase() === "x",
-  )
+    (link) =>
+      link.platform?.toLowerCase() === "twitter" ||
+      link.platform?.toLowerCase() === "x",
+  );
 
   if (twitterLink?.handle) {
     return twitterLink.handle.startsWith("@")
       ? twitterLink.handle
-      : `@${twitterLink.handle}`
+      : `@${twitterLink.handle}`;
   }
 
-  return "@dccp_official"
+  return "@dccp_official";
 }

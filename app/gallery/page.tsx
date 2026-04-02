@@ -9,11 +9,14 @@ import { Button } from "@/components/ui/button";
 import { ImageWithSkeleton } from "@/components/ui/image-with-skeleton";
 import { VideoWithSkeleton } from "@/components/ui/video-with-skeleton";
 import {
+  clampSeoTitle,
   getAbsoluteUrl,
   getSeoDescription,
   getSeoImage,
   getSeoKeywords,
+  getSocialShareImage,
   getTwitterHandle,
+  normalizeSeoDescription,
 } from "@/lib/seo";
 import {
   getCloudinaryPhotoUrl,
@@ -29,13 +32,15 @@ export const revalidate = 3600;
 export async function generateMetadata(): Promise<Metadata> {
   const settings = await fetchSettings();
   const siteName = settings?.shortTitle || "DCCP";
-  const title = `Photo Gallery | ${siteName}`;
-  const description = getSeoDescription(
-    settings,
-    "Browse official campus albums from events, student life, ceremonies, and milestones at Data Center College of the Philippines.",
+  const title = clampSeoTitle(`${siteName} Photo Gallery`);
+  const description = normalizeSeoDescription(
+    getSeoDescription(
+      settings,
+      "Browse official campus albums featuring events, student life, ceremonies, sports, and campus milestones at Data Center College of the Philippines.",
+    ),
   );
   const canonicalUrl = getAbsoluteUrl("/gallery");
-  const imageUrl = getSeoImage(settings);
+  const imageUrl = getSocialShareImage(settings);
 
   return {
     title,
@@ -94,14 +99,18 @@ export async function generateMetadata(): Promise<Metadata> {
       "og:type": "website",
       "og:site_name": siteName,
       "og:locale": "en_PH",
-      "og:image": imageUrl,
-      "og:image:secure_url": imageUrl,
-      "og:image:width": "1200",
-      "og:image:height": "630",
-      "og:image:alt": `${siteName} Photo Gallery`,
+      ...(imageUrl
+        ? {
+            "og:image": imageUrl,
+            "og:image:secure_url": imageUrl,
+            "og:image:width": "1200",
+            "og:image:height": "630",
+            "og:image:alt": `${siteName} Photo Gallery`,
+            "twitter:image": imageUrl,
+          }
+        : {}),
       "twitter:title": title,
       "twitter:description": description,
-      "twitter:image": imageUrl,
       "twitter:url": canonicalUrl,
     },
   };
