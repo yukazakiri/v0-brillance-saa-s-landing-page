@@ -98,34 +98,25 @@ export default function RootLayout({
   children: React.ReactNode
 }) {
   return (
-    <>
-      <OpenPanelComponent
-        apiUrl="https://openpanel.dccp.edu.ph/api"
-        clientId={process.env.CLIENT_ID || ""}
-        trackScreenViews={true}
-        trackOutgoingLinks={true}
-        trackAttributes={true}
-      />
-      <html lang="en" className={`${inter.variable} ${instrumentSerif.variable} antialiased`}>
+    <html lang="en" className={`${inter.variable} ${instrumentSerif.variable} antialiased`}>
       <head>
-        <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
-        <link
-          rel="stylesheet"
-          href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
-        />
-        <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Instrument+Serif:wght@400&display=swap" />
-        
         {/* Ackee Analytics */}
-        <Script 
-          async 
-          src="https://ackee-analytics.dccp.edu.ph/tracker.js" 
-          data-ackee-server="https://ackee-analytics.dccp.edu.ph" 
+        <Script
+          async
+          src="https://ackee-analytics.dccp.edu.ph/tracker.js"
+          data-ackee-server="https://ackee-analytics.dccp.edu.ph"
           data-ackee-domain-id="873f7388-7480-4607-81b0-3dc491ce9f5a"
           strategy="afterInteractive"
         />
       </head>
       <body className="font-sans antialiased">
+        <OpenPanelComponent
+          apiUrl="https://openpanel.dccp.edu.ph/api"
+          clientId={process.env.CLIENT_ID || ""}
+          trackScreenViews={true}
+          trackOutgoingLinks={true}
+          trackAttributes={true}
+        />
         <div className="w-full min-h-screen relative bg-[#F7F5F3] overflow-x-hidden flex flex-col justify-start items-center">
           <div className="relative flex flex-col justify-start items-center w-full">
             <div className="w-full absolute left-0 top-6 sm:top-7 md:top-8 lg:top-[42px] border-t border-border shadow-[0px_2px_0px_white]" />
@@ -139,14 +130,13 @@ export default function RootLayout({
           </div>
         </div>
         <BotpressLoader />
-        <Script 
-          defer 
-          src="https://cloud.umami.is/script.js" 
-          data-website-id="fdd1a0c6-e79d-4ba5-bdeb-a5bdee72fa09" 
-          strategy="afterInteractive" 
+        <Script
+          defer
+          src="https://cloud.umami.is/script.js"
+          data-website-id="fdd1a0c6-e79d-4ba5-bdeb-a5bdee72fa09"
+          strategy="afterInteractive"
         />
       </body>
     </html>
-    </>
   )
 }
