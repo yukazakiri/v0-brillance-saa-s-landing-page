@@ -193,7 +193,6 @@ export default function CollegeHeader({ settings }: CollegeHeaderProps) {
                 { href: "/about", label: "About" },
                 { href: "/academics", label: "Academics" },
                 { href: "/news", label: "News and Announcements" },
-                { href: "/gallery", label: "Gallery" },
               ].map((link) => (
                 <ViewTransitionLink
                   key={link.href}

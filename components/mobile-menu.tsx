@@ -27,7 +27,6 @@ export default function MobileMenu({ isOpen, onClose }: MobileMenuProps) {
     { href: "/#programs", label: "Programs" },
     { href: "/#admissions", label: "Admissions" },
     { href: "/news", label: "News" },
-    { href: "/gallery", label: "Gallery" },
     { href: "/#campus-life", label: "Campus" },
     { href: "/#contact", label: "Contact" },
   ]
