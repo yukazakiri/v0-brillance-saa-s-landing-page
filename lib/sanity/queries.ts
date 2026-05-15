@@ -82,26 +82,27 @@ const POST_PROJECTION = groq`{
   }
 }`
 
-// Fetch only published posts
+// Fetch all posts regardless of status in development
+// In production, you can add status filter back if needed
 const ALL_POSTS_QUERY = groq`
-  *[_type == "post" && status == "published"]
+  *[_type == "post"]
   | order(publishedAt desc)
   ${POST_PROJECTION}
 `
 
 const LATEST_POSTS_QUERY = groq`
-  *[_type == "post" && status == "published"]
+  *[_type == "post"]
   | order(publishedAt desc)[0...$limit]
   ${POST_PROJECTION}
 `
 
 const POST_BY_SLUG_QUERY = groq`
-  *[_type == "post" && status == "published" && slug.current == $slug][0]
+  *[_type == "post" && slug.current == $slug][0]
   ${POST_PROJECTION}
 `
 
 const POST_SLUGS_QUERY = groq`
-  *[_type == "post" && status == "published" && defined(slug.current)]{
+  *[_type == "post" && defined(slug.current)]{
     "slug": slug.current
   }
 `
@@ -137,7 +138,10 @@ function mapPostToArticle(post: SanityPost): Article {
   // Get author name: prefer authors array, fallback to legacy author field
   const authorName =
     post.authors && post.authors.length > 0
-      ? post.authors.filter((a) => a).map((a) => a.name).join(", ")
+      ? post.authors
+          .filter((a) => a !== null && a !== undefined)
+          .map((a) => a.name)
+          .join(", ")
       : (post.author ?? "Editorial Team")
 
   return {
@@ -669,6 +673,7 @@ export const STUDENT_PORTAL_PAGE_QUERY = groq`
           ...,
           stepImage {
             asset->{ _id, url, metadata { dimensions, lqip } },
+            alt,
             externalUrl
           }
         }
@@ -681,7 +686,11 @@ export const STUDENT_PORTAL_PAGE_QUERY = groq`
       metaTitle,
       metaDescription,
       shareImage {
-        asset->{ _id, url, metadata { dimensions, lqip } },
+        asset->{
+          _id,
+          url,
+          metadata { dimensions, lqip }
+        },
         alt,
         externalUrl
       },

@@ -14,7 +14,7 @@ Next.js 16 application for Data Center College of The Philippines, built with v0
 
 ## Build & Development Commands
 
-```bash
+\`\`\`bash
 # Development server with localStorage support
 npm run dev
 # or for standard dev
@@ -28,7 +28,7 @@ npm run lint
 
 # Start production server
 npm start
-```
+\`\`\`
 
 **Note**: There are no test scripts configured. Tests should be run manually if added.
 
@@ -42,7 +42,7 @@ npm start
 4. Components (`@/components/*`)
 5. Types (use `type` keyword for type-only imports)
 
-```typescript
+\`\`\`typescript
 import type React from "react"
 import type { Metadata } from "next"
 
@@ -51,7 +51,7 @@ import { createClient } from "next-sanity"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import type { Settings } from "@/lib/sanity/types"
-```
+\`\`\`
 
 ### File Naming Conventions
 
@@ -64,7 +64,7 @@ import type { Settings } from "@/lib/sanity/types"
 ### Component Structure
 
 **Client Components**:
-```typescript
+\`\`\`typescript
 'use client'
 import { useState } from 'react'
 import { Button } from '@/components/ui/button'
@@ -73,17 +73,17 @@ export default function MyComponent() {
   const [state, setState] = useState(false)
   return <div>...</div>
 }
-```
+\`\`\`
 
 **Server Components** (default):
-```typescript
+\`\`\`typescript
 import type { Settings } from "@/lib/sanity/types"
 
 export default async function MyPage() {
   const data = await fetchData()
   return <div>...</div>
 }
-```
+\`\`\`
 
 ### TypeScript Guidelines
 
@@ -93,7 +93,7 @@ export default async function MyPage() {
 - Use `React.ComponentProps<"element">` for extending native elements
 - Prefer `type` over `interface` for consistency
 
-```typescript
+\`\`\`typescript
 // Good
 import type React from "react"
 type ButtonProps = React.ComponentProps<"button"> & {
@@ -105,7 +105,7 @@ import React from "react"
 interface ButtonProps extends React.ComponentProps<"button"> {
   variant?: "primary" | "secondary"
 }
-```
+\`\`\`
 
 ### Styling & Tailwind
 
@@ -114,7 +114,7 @@ interface ButtonProps extends React.ComponentProps<"button"> {
 - Use CSS variables for theme colors (defined in globals.css)
 - Follow mobile-first responsive design: `sm:`, `md:`, `lg:`, `xl:`, `2xl:`
 
-```typescript
+\`\`\`typescript
 import { cn } from "@/lib/utils"
 
 <div className={cn(
@@ -122,7 +122,7 @@ import { cn } from "@/lib/utils"
   variant === "primary" && "variant-classes",
   className
 )} />
-```
+\`\`\`
 
 ### Component Patterns
 
@@ -136,7 +136,7 @@ import { cn } from "@/lib/utils"
 - Handle errors gracefully with try-catch
 - Provide fallback data if external services fail
 
-```typescript
+\`\`\`typescript
 export default async function Page() {
   let data = []
   
@@ -149,16 +149,16 @@ export default async function Page() {
   
   return <div>...</div>
 }
-```
+\`\`\`
 
 ### Path Aliases
 
 Use `@/*` alias for all internal imports:
-```typescript
+\`\`\`typescript
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import type { Settings } from "@/lib/sanity/types"
-```
+\`\`\`
 
 ### Error Handling
 
@@ -170,21 +170,21 @@ import type { Settings } from "@/lib/sanity/types"
 ### Naming Conventions
 
 **Variables/Functions**: camelCase
-```typescript
+\`\`\`typescript
 const siteSettings = settings ?? defaultSettings
 const fetchLatestPosts = async () => {}
-```
+\`\`\`
 
 **Components**: PascalCase
-```typescript
+\`\`\`typescript
 export default function HeroSection() {}
-```
+\`\`\`
 
 **Constants**: UPPER_SNAKE_CASE or camelCase
-```typescript
+\`\`\`typescript
 const API_VERSION = "2025-11-16"
 const projectId = process.env.NEXT_PUBLIC_SANITY_PROJECT_ID
-```
+\`\`\`
 
 **CSS Classes**: Follow Tailwind patterns, use descriptive names for custom classes
 
@@ -194,10 +194,10 @@ const projectId = process.env.NEXT_PUBLIC_SANITY_PROJECT_ID
 - Provide fallback values for optional env vars
 - Never commit `.env` files
 
-```typescript
+\`\`\`typescript
 const projectId = process.env.NEXT_PUBLIC_SANITY_PROJECT_ID || "4pzjiopf"
 const hasToken = Boolean(process.env.SANITY_API_TOKEN)
-```
+\`\`\`
 
 ## Best Practices
 

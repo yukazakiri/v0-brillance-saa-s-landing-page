@@ -3,15 +3,15 @@ import type { Metadata } from "next"
 import Script from "next/script"
 
 import { fetchSettings } from "@/lib/sanity/queries"
-import { buildImageUrl } from "@/lib/sanity/image"
+import { getImageUrl } from "@/lib/sanity/image"
 import "./globals.css"
 
 import { Inter, Instrument_Serif, Libre_Baskerville as V0_Font_Libre_Baskerville, IBM_Plex_Mono as V0_Font_IBM_Plex_Mono, Lora as V0_Font_Lora } from 'next/font/google'
 
 // Initialize fonts
-const _libreBaskerville = V0_Font_Libre_Baskerville({ subsets: ['latin'], weight: ["400", "700"] })
-const _ibmPlexMono = V0_Font_IBM_Plex_Mono({ subsets: ['latin'], weight: ["100", "200", "300", "400", "500", "600", "700"] })
-const _lora = V0_Font_Lora({ subsets: ['latin'], weight: ["400", "500", "600", "700"] })
+const _libreBaskerville = V0_Font_Libre_Baskerville({ subsets: ['latin'], weight: ["400","700"] })
+const _ibmPlexMono = V0_Font_IBM_Plex_Mono({ subsets: ['latin'], weight: ["100","200","300","400","500","600","700"] })
+const _lora = V0_Font_Lora({ subsets: ['latin'], weight: ["400","500","600","700"] })
 
 const inter = Inter({
   subsets: ["latin"],
@@ -29,64 +29,79 @@ const instrumentSerif = Instrument_Serif({
 })
 
 export async function generateMetadata(): Promise<Metadata> {
-  const settings = await fetchSettings()
+  try {
+    const settings = await fetchSettings()
 
-  const title = settings?.siteTitle || "Data Center College of The Philippines"
-  const description = settings?.defaultSeo?.metaDescription || 
-    settings?.tagline || 
-    "Empowering the next generation of IT professionals, business leaders, and innovators"
-  const ogImage = buildImageUrl(settings?.defaultSeo?.shareImage) || "/hero-images/maincampus.png"
+    const title = settings?.siteTitle || "Data Center College of The Philippines"
+    const description =
+      settings?.defaultSeo?.metaDescription ||
+      settings?.tagline ||
+      "Empowering the next generation of IT professionals, business leaders, and innovators"
+    const ogImage = getImageUrl(settings?.defaultSeo?.shareImage)
 
-  return {
-    title: {
-      default: title,
-      template: `%s | ${settings?.shortTitle || "DCCP"}`,
-    },
-    description,
-    keywords: settings?.defaultSeo?.keywords || ["Data Center College", "DCCP", "Baguio City", "IT School", "Business School"],
-    authors: [{ name: "Data Center College of The Philippines" }],
-    creator: "Data Center College of The Philippines",
-    metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || "https://dccp.edu.ph"),
-    openGraph: {
-      type: "website",
-      locale: "en_PH",
-      url: process.env.NEXT_PUBLIC_SITE_URL || "https://dccp.edu.ph",
-      title,
+    return {
+      title: {
+        default: title,
+        template: `%s | ${settings?.shortTitle || "DCCP"}`,
+      },
       description,
-      siteName: settings?.shortTitle || "DCCP",
-      images: ogImage ? [
-        {
-          url: ogImage,
-          width: 1200,
-          height: 630,
-          alt: settings?.defaultSeo?.shareImage?.alt || title,
-        },
-      ] : [],
-    },
-    twitter: {
-      card: "summary_large_image",
-      title,
-      description,
-      images: ogImage ? [ogImage] : [],
-      creator: "@dccp_official", // Placeholder if not in settings
-    },
-    icons: {
-      icon: [
-        { url: "/favicon.ico" },
-        { url: "/favicon-16x16.png", sizes: "16x16", type: "image/png" },
-        { url: "/favicon-32x32.png", sizes: "32x32", type: "image/png" },
+      keywords: settings?.defaultSeo?.keywords || [
+        "Data Center College",
+        "DCCP",
+        "Baguio City",
+        "IT School",
+        "Business School",
       ],
-      apple: [
-        { url: "/apple-touch-icon.png" },
-      ],
-      other: [
-        {
-          rel: "mask-icon",
-          url: "/safari-pinned-tab.svg",
-        },
-      ],
-    },
-    manifest: "/site.webmanifest",
+      authors: [{ name: "Data Center College of The Philippines" }],
+      creator: "Data Center College of The Philippines",
+      metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || "https://dccp.edu.ph"),
+      openGraph: {
+        type: "website",
+        locale: "en_PH",
+        url: process.env.NEXT_PUBLIC_SITE_URL || "https://dccp.edu.ph",
+        title,
+        description,
+        siteName: settings?.shortTitle || "DCCP",
+        images: ogImage
+          ? [
+              {
+                url: ogImage,
+                width: 1200,
+                height: 630,
+                alt: settings?.defaultSeo?.shareImage?.alt || title,
+              },
+            ]
+          : [],
+      },
+      twitter: {
+        card: "summary_large_image",
+        title,
+        description,
+        images: ogImage ? [ogImage] : [],
+        creator: "@dccp_official",
+      },
+      icons: {
+        icon: [
+          { url: "/favicon.ico" },
+          { url: "/favicon-16x16.png", sizes: "16x16", type: "image/png" },
+          { url: "/favicon-32x32.png", sizes: "32x32", type: "image/png" },
+        ],
+        apple: [{ url: "/apple-touch-icon.png" }],
+        other: [
+          {
+            rel: "mask-icon",
+            url: "/safari-pinned-tab.svg",
+          },
+        ],
+      },
+      manifest: "/site.webmanifest",
+    }
+  } catch (error) {
+    console.error("Error generating metadata:", error)
+    return {
+      title: "Data Center College of The Philippines",
+      description: "Empowering the next generation of IT professionals, business leaders, and innovators",
+    }
   }
 }
 
@@ -100,11 +115,6 @@ export default function RootLayout({
       <head>
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
-        <link
-          rel="stylesheet"
-          href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
-        />
-        <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Instrument+Serif:wght@400&display=swap" />
       </head>
       <body className="font-sans antialiased">
         <div className="w-full min-h-screen relative bg-[#F7F5F3] overflow-x-hidden flex flex-col justify-start items-center">
@@ -119,13 +129,16 @@ export default function RootLayout({
             </div>
           </div>
         </div>
-        <Script src="https://cdn.botpress.cloud/webchat/v3.5/inject.js" strategy="afterInteractive" />
-        <Script src="https://files.bpcontent.cloud/2025/03/12/02/20250312025656-J40NI3RT.js" strategy="afterInteractive" />
-        <Script 
-          defer 
-          src="https://cloud.umami.is/script.js" 
-          data-website-id="fdd1a0c6-e79d-4ba5-bdeb-a5bdee72fa09" 
-          strategy="afterInteractive" 
+        <Script
+          src="https://cdn.botpress.cloud/webchat/v3.5/inject.js"
+          strategy="afterInteractive"
+          crossOrigin="anonymous"
+          onError={() => console.error("[v0] Failed to load Botpress inject script")}
+        />
+        <Script
+          src="https://files.bpcontent.cloud/2025/03/12/02/20250312025656-J40NI3RT.js"
+          strategy="afterInteractive"
+          onError={() => console.error("[v0] Failed to load Botpress configuration script")}
         />
       </body>
     </html>

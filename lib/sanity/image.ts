@@ -15,19 +15,23 @@ export function buildImageUrl(source?: SanityImage | any, width?: number, height
   }
 
   // Check if we already have a resolved URL from the query
-  if (typeof source === "object" && "asset" in source && source.asset) {
-    if ("url" in source.asset && source.asset.url) {
-      let url = source.asset.url
-      // Add width/height parameters if provided
-      if (width || height) {
-        const params = new URLSearchParams()
-        if (width) params.set("w", width.toString())
-        if (height) params.set("h", height.toString())
-        if (width && height) params.set("fit", "crop")
-        url = `${url}?${params.toString()}`
-      }
-      return url
+  if (
+    typeof source === "object" &&
+    source.asset &&
+    typeof source.asset === "object" &&
+    "url" in source.asset &&
+    source.asset.url
+  ) {
+    let url = source.asset.url
+    // Add width/height parameters if provided
+    if (width || height) {
+      const params = new URLSearchParams()
+      if (width) params.set("w", width.toString())
+      if (height) params.set("h", height.toString())
+      if (width && height) params.set("fit", "crop")
+      url = `${url}?${params.toString()}`
     }
+    return url
   }
 
   // If source is already a string URL

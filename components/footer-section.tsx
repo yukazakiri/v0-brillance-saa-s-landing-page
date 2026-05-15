@@ -136,40 +136,45 @@ export default function FooterSection({ settings }: FooterSectionProps) {
                                 Programs
                             </h4>
                             <ul className="space-y-2.5">
-                                <ul className="space-y-2.5">
-                                    <li>
-                                        <Link
-                                            href="/programs/bsit"
-                                            className="text-sm text-muted-foreground hover:text-primary transition-colors"
-                                        >
-                                            BS Information Technology
-                                        </Link>
-                                    </li>
-                                    <li>
-                                        <Link
-                                            href="/programs/bsba"
-                                            className="text-sm text-muted-foreground hover:text-primary transition-colors"
-                                        >
-                                            BS Business Administration
-                                        </Link>
-                                    </li>
-                                    <li>
-                                        <Link
-                                            href="/programs/bshrm"
-                                            className="text-sm text-muted-foreground hover:text-primary transition-colors"
-                                        >
-                                            BS Hotel & Restaurant Mgt.
-                                        </Link>
-                                    </li>
-                                    <li>
+                                {settings.institutionProfile?.chedPrograms?.slice(0, 5).map((program, idx) => (
+                                    <li key={idx}>
                                         <Link
                                             href="/courses"
-                                            className="text-sm text-primary font-medium hover:underline flex items-center gap-1 mt-2"
+                                            className="text-sm text-muted-foreground hover:text-primary transition-colors line-clamp-1"
                                         >
-                                            View All Programs &rarr;
+                                            {program.name}
                                         </Link>
                                     </li>
-                                </ul>
+                                ))}
+                                {(!settings.institutionProfile?.chedPrograms ||
+                                    settings.institutionProfile.chedPrograms.length === 0) && (
+                                        <>
+                                            <li>
+                                                <Link
+                                                    href="/courses"
+                                                    className="text-sm text-muted-foreground hover:text-primary transition-colors"
+                                                >
+                                                    College Courses
+                                                </Link>
+                                            </li>
+                                            <li>
+                                                <Link
+                                                    href="/courses"
+                                                    className="text-sm text-muted-foreground hover:text-primary transition-colors"
+                                                >
+                                                    Senior High School
+                                                </Link>
+                                            </li>
+                                            <li>
+                                                <Link
+                                                    href="/courses"
+                                                    className="text-sm text-muted-foreground hover:text-primary transition-colors"
+                                                >
+                                                    TVET Programs
+                                                </Link>
+                                            </li>
+                                        </>
+                                    )}
                             </ul>
                         </div>
 

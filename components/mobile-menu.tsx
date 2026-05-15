@@ -25,7 +25,7 @@ export default function MobileMenu({ isOpen, onClose }: MobileMenuProps) {
     { href: "/", label: "Home" },
     { href: "/about", label: "About" },
     { href: "/#programs", label: "Programs" },
-    { href: "/#admissions", label: "Admissions" },
+    { href: "/admissions", label: "Admissions" },
     { href: "/news", label: "News" },
     { href: "/#campus-life", label: "Campus" },
     { href: "/#contact", label: "Contact" },
@@ -33,8 +33,9 @@ export default function MobileMenu({ isOpen, onClose }: MobileMenuProps) {
 
   return (
     <div
-      className={`fixed inset-0 z-[100] md:hidden flex flex-col bg-background transition-all duration-500 ease-out ${isOpen ? "opacity-100 pointer-events-auto translate-x-0" : "opacity-0 pointer-events-none translate-x-full"
-        }`}
+      className={`fixed inset-0 z-[100] md:hidden flex flex-col bg-background transition-all duration-500 ease-out ${
+        isOpen ? "opacity-100 pointer-events-auto translate-x-0" : "opacity-0 pointer-events-none translate-x-full"
+      }`}
     >
       {/* Header with close button */}
       <div className="flex items-center justify-between px-6 py-5 border-b border-border">
@@ -55,16 +56,17 @@ export default function MobileMenu({ isOpen, onClose }: MobileMenuProps) {
       {/* Navigation Links */}
       <nav className="flex-1 flex flex-col justify-center px-6 -mt-8">
         {navLinks.map((link, index) => {
-          const isTransitionLink = link.href === "/" || link.href === "/about"
-          
+          const isTransitionLink = link.href === "/" || link.href === "/about" || link.href === "/admissions"
+
           if (isTransitionLink) {
             return (
               <ViewTransitionLink
                 key={link.href}
                 href={link.href}
                 onClick={onClose}
-                className={`group py-3 border-b border-border/50 transition-all duration-500 ease-out ${isOpen ? "opacity-100 translate-x-0" : "opacity-0 translate-x-8"
-                  }`}
+                className={`group py-3 border-b border-border/50 transition-all duration-500 ease-out ${
+                  isOpen ? "opacity-100 translate-x-0" : "opacity-0 translate-x-8"
+                }`}
                 style={{
                   transitionDelay: isOpen ? `${index * 50 + 100}ms` : "0ms",
                 }}
@@ -87,8 +89,9 @@ export default function MobileMenu({ isOpen, onClose }: MobileMenuProps) {
               key={link.href}
               href={link.href}
               onClick={onClose}
-              className={`group py-3 border-b border-border/50 transition-all duration-500 ease-out ${isOpen ? "opacity-100 translate-x-0" : "opacity-0 translate-x-8"
-                }`}
+              className={`group py-3 border-b border-border/50 transition-all duration-500 ease-out ${
+                isOpen ? "opacity-100 translate-x-0" : "opacity-0 translate-x-8"
+              }`}
               style={{
                 transitionDelay: isOpen ? `${index * 50 + 100}ms` : "0ms",
               }}
@@ -111,15 +114,17 @@ export default function MobileMenu({ isOpen, onClose }: MobileMenuProps) {
         <Link
           href="/apply"
           onClick={onClose}
-          className={`block w-full py-4 bg-primary text-primary-foreground text-center text-base font-semibold rounded-full transition-all duration-500 ease-out hover:bg-primary/90 active:scale-[0.98] ${isOpen ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"
-            }`}
+          className={`block w-full py-4 bg-primary text-primary-foreground text-center text-base font-semibold rounded-full transition-all duration-500 ease-out hover:bg-primary/90 active:scale-[0.98] ${
+            isOpen ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"
+          }`}
           style={{ transitionDelay: isOpen ? "500ms" : "0ms" }}
         >
           Apply Now
         </Link>
         <p
-          className={`text-center text-xs text-muted-foreground mt-4 tracking-wide transition-all duration-500 ${isOpen ? "opacity-100" : "opacity-0"
-            }`}
+          className={`text-center text-xs text-muted-foreground mt-4 tracking-wide transition-all duration-500 ${
+            isOpen ? "opacity-100" : "opacity-0"
+          }`}
           style={{ transitionDelay: isOpen ? "600ms" : "0ms" }}
         >
           Start your journey today
