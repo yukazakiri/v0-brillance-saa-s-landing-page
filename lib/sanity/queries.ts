@@ -128,6 +128,7 @@ const POST_PROJECTION = groq`{
       thumbTime
     }
   },
+  videoCredit,
   "featured": coalesce(featured, false),
   "primaryCategory": primaryCategory->{ _id, title },
   audiences,

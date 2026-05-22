@@ -79,9 +79,11 @@ function isMuxVideoReady(video?: MuxPortableValue | null) {
 function renderMuxVideoFigure(
   value: MuxPortableValue | null | undefined,
   fallbackTitle: string,
+  credit?: string | null,
 ) {
   const asset = getMuxVideoAsset(value);
   const caption = value?.caption;
+  const normalizedCredit = credit?.trim();
   const videoTitle = value?.title || value?.alt || fallbackTitle;
   const status = getMuxStatusValue(asset?.status);
   const isReady = isMuxVideoReady(value);
@@ -101,9 +103,11 @@ function renderMuxVideoFigure(
             </span>
           </div>
         </div>
-        {caption ? (
+        {caption || normalizedCredit ? (
           <figcaption className="px-4 py-3 text-center text-sm italic text-muted-foreground">
-            {caption}
+            {caption ? <span>{caption}</span> : null}
+            {caption && normalizedCredit ? <span> • </span> : null}
+            {normalizedCredit ? <span>🎬 {normalizedCredit}</span> : null}
           </figcaption>
         ) : null}
       </figure>
@@ -119,9 +123,11 @@ function renderMuxVideoFigure(
           videoTitle={videoTitle}
         />
       </div>
-      {caption ? (
+      {caption || normalizedCredit ? (
         <figcaption className="mt-2 px-2 text-center text-sm italic text-muted-foreground">
-          {caption}
+          {caption ? <span>{caption}</span> : null}
+          {caption && normalizedCredit ? <span> • </span> : null}
+          {normalizedCredit ? <span>🎬 {normalizedCredit}</span> : null}
         </figcaption>
       ) : null}
     </figure>
@@ -749,7 +755,9 @@ export default async function NewsArticlePage({
           </header>
 
           <div className="w-full flex flex-col gap-8">
-            {post.video ? renderMuxVideoFigure(post.video, post.title) : null}
+            {post.video
+              ? renderMuxVideoFigure(post.video, post.title, post.videoCredit)
+              : null}
 
             {tags.length > 0 && (
               <div className="flex flex-wrap gap-2 text-xs font-medium text-[#4A403B]">

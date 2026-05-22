@@ -78,6 +78,7 @@ export interface SanityPost {
   }>; // Author profiles
   featuredImage?: SanityImage;
   video?: SanityMuxVideo;
+  videoCredit?: string;
   featured?: boolean;
   status: "draft" | "scheduled" | "published" | "archived";
   primaryCategory?: {
