@@ -7,6 +7,7 @@ import type {
   Course,
   SanityCourse,
   SanityFAQ,
+  SanityMuxVideoAsset,
   SanityPhotoGallery,
   SanityPost,
   Settings,
@@ -40,6 +41,28 @@ const POST_PROJECTION = groq`{
         }
       },
       externalUrl
+    },
+    _type in ["mux.video", "muxVideo", "video"] => {
+      ...,
+      asset-> {
+        _id,
+        playbackId,
+        assetId,
+        filename,
+        status,
+        thumbTime
+      },
+      video {
+        ...,
+        asset-> {
+          _id,
+          playbackId,
+          assetId,
+          filename,
+          status,
+          thumbTime
+        }
+      }
     }
   },
   postKind,
@@ -94,6 +117,17 @@ const POST_PROJECTION = groq`{
     credit,
     externalUrl
   },
+  video {
+    ...,
+    asset-> {
+      _id,
+      playbackId,
+      assetId,
+      filename,
+      status,
+      thumbTime
+    }
+  },
   "featured": coalesce(featured, false),
   "primaryCategory": primaryCategory->{ _id, title },
   audiences,
@@ -119,26 +153,32 @@ const POST_PROJECTION = groq`{
   }
 }`;
 
-// Fetch only published posts
+// Fetch posts that are publicly visible:
+// - published
+// - scheduled posts whose publish date has already started
+// - legacy posts with no status
+const PUBLISHED_POST_FILTER =
+  '_type == "post" && (status == "published" || !defined(status) || (status == "scheduled" && dateTime(coalesce(publishedAt, _createdAt)) <= now()))';
+
 const ALL_POSTS_QUERY = groq`
-  *[_type == "post" && status == "published"]
+  *[${PUBLISHED_POST_FILTER}]
   | order(publishedAt desc)
   ${POST_PROJECTION}
 `;
 
 const LATEST_POSTS_QUERY = groq`
-  *[_type == "post" && status == "published"]
+  *[${PUBLISHED_POST_FILTER}]
   | order(publishedAt desc)[0...$limit]
   ${POST_PROJECTION}
 `;
 
 const POST_BY_SLUG_QUERY = groq`
-  *[_type == "post" && status == "published" && slug.current == $slug][0]
+  *[${PUBLISHED_POST_FILTER} && slug.current == $slug][0]
   ${POST_PROJECTION}
 `;
 
 const POST_SLUGS_QUERY = groq`
-  *[_type == "post" && status == "published" && defined(slug.current)]{
+  *[${PUBLISHED_POST_FILTER} && defined(slug.current)]{
     "slug": slug.current
   }
 `;
@@ -170,6 +210,28 @@ function formatDate(value?: string | null): string {
   return dateFormatter.format(date);
 }
 
+function getMuxStatusValue(status?: SanityMuxVideoAsset["status"]): string {
+  if (!status) return "";
+  if (typeof status === "string") return status;
+  return status.phase ?? status.state ?? "";
+}
+
+function getMuxThumbnailUrl(video?: SanityPost["video"]): string {
+  const asset = video?.asset ?? video?.video?.asset;
+  const playbackId = asset?.playbackId;
+  const status = getMuxStatusValue(asset?.status).toLowerCase();
+
+  if (!playbackId || (status && status !== "ready")) return "";
+
+  const params = new URLSearchParams();
+  if (typeof asset?.thumbTime === "number") {
+    params.set("time", String(asset.thumbTime));
+  }
+
+  const query = params.toString();
+  return `https://image.mux.com/${playbackId}/thumbnail.jpg${query ? `?${query}` : ""}`;
+}
+
 function mapPostToArticle(post: SanityPost): Article {
   // Get author name: prefer authors array, fallback to legacy author field
   const authorName =
@@ -188,7 +250,9 @@ function mapPostToArticle(post: SanityPost): Article {
     excerpt: post.excerpt ?? "",
     date: formatDate(post.publishedAt),
     author: authorName,
-    image: getImageUrl(post.featuredImage, 1200, 800),
+    image:
+      getImageUrl(post.featuredImage, 1200, 800) ??
+      getMuxThumbnailUrl(post.video),
     featured: Boolean(post.featured),
     tags: post.tags ?? [],
     seo: {

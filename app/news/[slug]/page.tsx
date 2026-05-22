@@ -24,6 +24,7 @@ import {
 import CollegeHeader from "@/components/college-header";
 import FooterSection from "@/components/footer-section";
 import { ImageWithSkeleton } from "@/components/ui/image-with-skeleton";
+import { MuxVideoPlayer } from "@/components/ui/mux-video-player";
 import { getFacebookConfig, getFacebookPosts } from "@/lib/facebook";
 import type { NormalizedFacebookPost } from "@/lib/facebook/types";
 import {
@@ -40,7 +41,12 @@ import {
   fetchSettings,
 } from "@/lib/sanity/queries";
 import { VideoWithSkeleton } from "@/components/ui/video-with-skeleton";
-import type { SanityPost, Settings } from "@/lib/sanity/types";
+import type {
+  SanityMuxVideo,
+  SanityMuxVideoAsset,
+  SanityPost,
+  Settings,
+} from "@/lib/sanity/types";
 const dateFormatter = new Intl.DateTimeFormat("en-US", {
   month: "long",
   day: "numeric",
@@ -48,6 +54,79 @@ const dateFormatter = new Intl.DateTimeFormat("en-US", {
 });
 
 export const revalidate = 60;
+
+type MuxPortableValue = SanityMuxVideo & {
+  url?: string;
+};
+
+function getMuxVideoAsset(video?: MuxPortableValue | null) {
+  return video?.asset ?? video?.video?.asset ?? null;
+}
+
+function getMuxStatusValue(status?: SanityMuxVideoAsset["status"]): string {
+  if (!status) return "";
+  if (typeof status === "string") return status;
+  return status.phase ?? status.state ?? "";
+}
+
+function isMuxVideoReady(video?: MuxPortableValue | null) {
+  const asset = getMuxVideoAsset(video);
+  const status = getMuxStatusValue(asset?.status).toLowerCase();
+
+  return Boolean(asset?.playbackId) && (!status || status === "ready");
+}
+
+function renderMuxVideoFigure(
+  value: MuxPortableValue | null | undefined,
+  fallbackTitle: string,
+) {
+  const asset = getMuxVideoAsset(value);
+  const caption = value?.caption;
+  const videoTitle = value?.title || value?.alt || fallbackTitle;
+  const status = getMuxStatusValue(asset?.status);
+  const isReady = isMuxVideoReady(value);
+
+  if (!asset?.playbackId || !isReady) {
+    return (
+      <figure className="my-8 overflow-hidden rounded-2xl border border-border bg-card shadow-sm">
+        <div className="flex aspect-video w-full items-center justify-center bg-stone-100 px-6 text-center">
+          <div className="flex max-w-md flex-col gap-2">
+            <span className="text-sm font-semibold uppercase tracking-[0.22em] text-muted-foreground">
+              Video processing
+            </span>
+            <span className="text-sm text-muted-foreground">
+              {status
+                ? `This Mux video is currently ${status}. Please check back soon.`
+                : "This Mux video is not ready yet. Please check back soon."}
+            </span>
+          </div>
+        </div>
+        {caption ? (
+          <figcaption className="px-4 py-3 text-center text-sm italic text-muted-foreground">
+            {caption}
+          </figcaption>
+        ) : null}
+      </figure>
+    );
+  }
+
+  return (
+    <figure className="my-8">
+      <div className="aspect-video w-full overflow-hidden rounded-2xl bg-black shadow-md">
+        <MuxVideoPlayer
+          playbackId={asset.playbackId}
+          thumbnailTime={asset.thumbTime}
+          videoTitle={videoTitle}
+        />
+      </div>
+      {caption ? (
+        <figcaption className="mt-2 px-2 text-center text-sm italic text-muted-foreground">
+          {caption}
+        </figcaption>
+      ) : null}
+    </figure>
+  );
+}
 
 const portableTextComponents: PortableTextComponents = {
   types: {
@@ -114,6 +193,12 @@ const portableTextComponents: PortableTextComponents = {
           </a>
         </aside>
       );
+    },
+    muxVideo: ({ value }) => renderMuxVideoFigure(value, "News video"),
+    "mux.video": ({ value }) => renderMuxVideoFigure(value, "News video"),
+    video: ({ value }) => {
+      if (!value || !getMuxVideoAsset(value)) return null;
+      return renderMuxVideoFigure(value, "News video");
     },
     embed: ({ value }) => {
       if (!value || !value.url) return null;
@@ -267,6 +352,19 @@ function formatCategoryLabel(category?: string | null) {
   return category.charAt(0).toUpperCase() + category.slice(1);
 }
 
+function formatPostKindLabel(kind?: string | null) {
+  if (!kind) return "News";
+
+  const labels: Record<string, string> = {
+    news: "News",
+    story: "Feature Story",
+    announcement: "Announcement",
+    alert: "Alert",
+  };
+
+  return labels[kind] ?? formatCategoryLabel(kind);
+}
+
 function getSiteBaseUrl() {
   if (process.env.NEXT_PUBLIC_SITE_URL) return process.env.NEXT_PUBLIC_SITE_URL;
   if (process.env.VERCEL_URL) return `https://${process.env.VERCEL_URL}`;
@@ -408,7 +506,14 @@ export async function generateMetadata({
           ]
         : undefined,
       publishedTime: post.publishedAt,
-      authors: post.author ? [post.author] : undefined,
+      authors:
+        post.authors && post.authors.length > 0
+          ? post.authors
+              .map((author) => author.fullName || author.preferredName)
+              .filter((name): name is string => Boolean(name))
+          : post.author
+            ? [post.author]
+            : undefined,
     },
     twitter: {
       card: "summary_large_image",
@@ -465,8 +570,18 @@ export default async function NewsArticlePage({
   const publishedDate = post.publishedAt
     ? dateFormatter.format(new Date(post.publishedAt))
     : "Coming soon";
-  const categoryLabel = formatCategoryLabel(post.category);
-  const authorName = post.author || "Editorial Team";
+  const categoryLabel =
+    post.primaryCategory?.title ||
+    formatPostKindLabel(post.postKind) ||
+    formatCategoryLabel(post.category);
+  const authorName =
+    post.authors && post.authors.length > 0
+      ? post.authors
+          .filter(Boolean)
+          .map((author) => author.preferredName || author.fullName)
+          .filter(Boolean)
+          .join(", ")
+      : post.author || "Editorial Team";
   const summaryText =
     post.seo?.metaDescription ??
     post.excerpt ??
@@ -634,6 +749,8 @@ export default async function NewsArticlePage({
           </header>
 
           <div className="w-full flex flex-col gap-8">
+            {post.video ? renderMuxVideoFigure(post.video, post.title) : null}
+
             {tags.length > 0 && (
               <div className="flex flex-wrap gap-2 text-xs font-medium text-[#4A403B]">
                 {tags.map((tag) => (
