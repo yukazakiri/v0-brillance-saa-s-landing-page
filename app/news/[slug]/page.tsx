@@ -82,7 +82,6 @@ function renderMuxVideoFigure(
   credit?: string | null,
 ) {
   const asset = getMuxVideoAsset(value);
-  const caption = value?.caption;
   const normalizedCredit = credit?.trim();
   const videoTitle = value?.title || value?.alt || fallbackTitle;
   const status = getMuxStatusValue(asset?.status);
@@ -103,11 +102,9 @@ function renderMuxVideoFigure(
             </span>
           </div>
         </div>
-        {caption || normalizedCredit ? (
+        {normalizedCredit ? (
           <figcaption className="px-4 py-3 text-center text-sm italic text-muted-foreground">
-            {caption ? <span>{caption}</span> : null}
-            {caption && normalizedCredit ? <span> • </span> : null}
-            {normalizedCredit ? <span>🎬 {normalizedCredit}</span> : null}
+            <span>🎬 {normalizedCredit}</span>
           </figcaption>
         ) : null}
       </figure>
@@ -123,11 +120,9 @@ function renderMuxVideoFigure(
           videoTitle={videoTitle}
         />
       </div>
-      {caption || normalizedCredit ? (
+      {normalizedCredit ? (
         <figcaption className="mt-2 px-2 text-center text-sm italic text-muted-foreground">
-          {caption ? <span>{caption}</span> : null}
-          {caption && normalizedCredit ? <span> • </span> : null}
-          {normalizedCredit ? <span>🎬 {normalizedCredit}</span> : null}
+          <span>🎬 {normalizedCredit}</span>
         </figcaption>
       ) : null}
     </figure>

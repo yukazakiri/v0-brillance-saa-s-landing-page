@@ -60,13 +60,16 @@ export function MuxVideoPlayer({
   const posterUrl = poster ?? buildMuxPosterUrl(playbackId, thumbnailTime);
 
   return (
-    <div className={cn("h-full w-full overflow-hidden bg-black", wrapperClassName)}>
+    <div
+      className={cn("h-full w-full overflow-hidden bg-black", wrapperClassName)}
+    >
       <MuxPlayer
         {...props}
         playbackId={playbackId}
         poster={posterUrl}
         streamType={streamType ?? "on-demand"}
         accentColor={accentColor ?? "#1a3a52"}
+        defaultHiddenCaptions={true}
         metadata={
           metadata ?? (videoTitle ? { video_title: videoTitle } : undefined)
         }
