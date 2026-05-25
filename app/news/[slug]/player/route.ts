@@ -14,6 +14,13 @@ type NewsPlayerRouteContext = {
   params: Promise<{ slug: string }>;
 };
 
+function getSiteBaseUrl() {
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL;
+  if (siteUrl) return siteUrl.replace(/\/+$/, "");
+  if (process.env.VERCEL_URL) return `https://${process.env.VERCEL_URL}`;
+  return "https://dccp.edu.ph";
+}
+
 function escapeHtml(value: string) {
   return value
     .replace(/&/g, "&amp;")
@@ -35,12 +42,20 @@ export async function GET(
     return new NextResponse("Video not found", { status: 404 });
   }
 
+  const baseUrl = getSiteBaseUrl();
+  const playerUrl = `${baseUrl}/news/${post.slug}/player`;
   const title = escapeHtml(post.video?.title || post.video?.alt || post.title);
+  const description = escapeHtml(
+    post.seo?.metaDescription ??
+      post.excerpt ??
+      "Watch this video from Data Center College of the Philippines.",
+  );
   const playbackId = escapeHtml(asset.playbackId);
   const posterUrl = escapeHtml(
     buildMuxThumbnailUrl(asset.playbackId, asset.thumbTime),
   );
   const streamUrl = escapeHtml(buildMuxStreamUrl(asset.playbackId));
+  const escapedPlayerUrl = escapeHtml(playerUrl);
 
   const html = `<!doctype html>
 <html lang="en">
@@ -49,6 +64,21 @@ export async function GET(
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="robots" content="noindex, follow" />
     <title>${title}</title>
+    <meta name="description" content="${description}" />
+    <meta property="og:title" content="${title}" />
+    <meta property="og:description" content="${description}" />
+    <meta property="og:type" content="video.other" />
+    <meta property="og:url" content="${escapedPlayerUrl}" />
+    <meta property="og:image" content="${posterUrl}" />
+    <meta property="og:video" content="${streamUrl}" />
+    <meta property="og:video:secure_url" content="${streamUrl}" />
+    <meta property="og:video:type" content="application/x-mpegURL" />
+    <meta property="og:video:width" content="1280" />
+    <meta property="og:video:height" content="720" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="${title}" />
+    <meta name="twitter:description" content="${description}" />
+    <meta name="twitter:image" content="${posterUrl}" />
     <script type="module" src="https://cdn.jsdelivr.net/npm/@mux/mux-player@3/dist/mux-player.mjs"></script>
     <style>
       html,

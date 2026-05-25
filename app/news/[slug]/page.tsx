@@ -352,7 +352,7 @@ function getSiteBaseUrl() {
   const siteUrl = process.env.NEXT_PUBLIC_SITE_URL;
   if (siteUrl) return siteUrl.replace(/\/+$/, "");
   if (process.env.VERCEL_URL) return `https://${process.env.VERCEL_URL}`;
-  return "";
+  return "https://dccp.edu.ph";
 }
 
 function getNewsPostUrl(baseUrl: string, slug: string) {
@@ -360,7 +360,7 @@ function getNewsPostUrl(baseUrl: string, slug: string) {
 }
 
 function getNewsPlayerUrl(baseUrl: string, slug: string) {
-  return baseUrl ? `${baseUrl}/news/${slug}/player` : undefined;
+  return `${baseUrl}/news/${slug}/player`;
 }
 
 function getPostVideoSocialData(post: SanityPost, baseUrl: string) {
@@ -371,10 +371,6 @@ function getPostVideoSocialData(post: SanityPost, baseUrl: string) {
   }
 
   const playerUrl = getNewsPlayerUrl(baseUrl, post.slug);
-
-  if (!playerUrl) {
-    return null;
-  }
 
   return {
     playbackId: asset.playbackId,
@@ -531,17 +527,21 @@ export async function generateMetadata({
   if (!post) return {};
 
   const baseUrl = getSiteBaseUrl();
-  const canonicalUrl = baseUrl ? getNewsPostUrl(baseUrl, post.slug) : undefined;
+  const canonicalUrl = getNewsPostUrl(baseUrl, post.slug);
   const videoSocialData = getPostVideoSocialData(post, baseUrl);
   const ogImage = buildImageUrl(post.seo?.metaImage ?? post.featuredImage);
   const socialImage = ogImage ?? videoSocialData?.thumbnailUrl;
   const title = post.seo?.metaTitle ?? post.title;
-  const description = post.seo?.metaDescription ?? post.excerpt ?? undefined;
+  const description =
+    post.seo?.metaDescription ??
+    post.excerpt ??
+    "Read the latest news and updates from Data Center College of the Philippines.";
 
   return {
+    metadataBase: new URL(baseUrl),
     title,
     description,
-    alternates: canonicalUrl ? { canonical: canonicalUrl } : undefined,
+    alternates: { canonical: canonicalUrl },
     openGraph: {
       title,
       description,
@@ -579,46 +579,13 @@ export async function generateMetadata({
             ? [post.author]
             : undefined,
     },
-    twitter: videoSocialData
-      ? {
-          card: "player",
-          title,
-          description,
-          images: [videoSocialData.thumbnailUrl],
-          players: [
-            {
-              playerUrl: videoSocialData.playerUrl,
-              streamUrl: videoSocialData.streamUrl,
-              width: 1280,
-              height: 720,
-            },
-          ],
-          creator: "@dccp_baguio",
-        }
-      : {
-          card: "summary_large_image",
-          title,
-          description,
-          images: socialImage ? [socialImage] : undefined,
-          creator: "@dccp_baguio",
-        },
-    other: videoSocialData
-      ? {
-          "og:video": videoSocialData.playerUrl,
-          "og:video:url": videoSocialData.playerUrl,
-          "og:video:secure_url": videoSocialData.playerUrl,
-          "og:video:type": "text/html",
-          "og:video:width": "1280",
-          "og:video:height": "720",
-          "twitter:card": "player",
-          "twitter:player": videoSocialData.playerUrl,
-          "twitter:player:width": "1280",
-          "twitter:player:height": "720",
-          "twitter:player:stream": videoSocialData.streamUrl,
-          "twitter:player:stream:content_type": "application/x-mpegURL",
-          "twitter:image": videoSocialData.thumbnailUrl,
-        }
-      : undefined,
+    twitter: {
+      card: "summary_large_image",
+      title,
+      description,
+      images: socialImage ? [socialImage] : undefined,
+      creator: "@dccp_baguio",
+    },
   };
 }
 
