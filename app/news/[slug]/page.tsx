@@ -28,6 +28,14 @@ import { MuxVideoPlayer } from "@/components/ui/mux-video-player";
 import { getFacebookConfig, getFacebookPosts } from "@/lib/facebook";
 import type { NormalizedFacebookPost } from "@/lib/facebook/types";
 import {
+  buildMuxStreamUrl,
+  buildMuxThumbnailUrl,
+  getMuxStatusValue,
+  getMuxVideoAsset,
+  isMuxVideoReady,
+  type MuxPortableValue,
+} from "@/lib/mux-video";
+import {
   getCloudinaryPhotoUrl,
   getFirstGalleryMedia,
   getFirstGalleryPhoto,
@@ -41,12 +49,7 @@ import {
   fetchSettings,
 } from "@/lib/sanity/queries";
 import { VideoWithSkeleton } from "@/components/ui/video-with-skeleton";
-import type {
-  SanityMuxVideo,
-  SanityMuxVideoAsset,
-  SanityPost,
-  Settings,
-} from "@/lib/sanity/types";
+import type { SanityPost, Settings } from "@/lib/sanity/types";
 const dateFormatter = new Intl.DateTimeFormat("en-US", {
   month: "long",
   day: "numeric",
@@ -54,27 +57,6 @@ const dateFormatter = new Intl.DateTimeFormat("en-US", {
 });
 
 export const revalidate = 60;
-
-type MuxPortableValue = SanityMuxVideo & {
-  url?: string;
-};
-
-function getMuxVideoAsset(video?: MuxPortableValue | null) {
-  return video?.asset ?? video?.video?.asset ?? null;
-}
-
-function getMuxStatusValue(status?: SanityMuxVideoAsset["status"]): string {
-  if (!status) return "";
-  if (typeof status === "string") return status;
-  return status.phase ?? status.state ?? "";
-}
-
-function isMuxVideoReady(video?: MuxPortableValue | null) {
-  const asset = getMuxVideoAsset(video);
-  const status = getMuxStatusValue(asset?.status).toLowerCase();
-
-  return Boolean(asset?.playbackId) && (!status || status === "ready");
-}
 
 function renderMuxVideoFigure(
   value: MuxPortableValue | null | undefined,
@@ -367,9 +349,75 @@ function formatPostKindLabel(kind?: string | null) {
 }
 
 function getSiteBaseUrl() {
-  if (process.env.NEXT_PUBLIC_SITE_URL) return process.env.NEXT_PUBLIC_SITE_URL;
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL;
+  if (siteUrl) return siteUrl.replace(/\/+$/, "");
   if (process.env.VERCEL_URL) return `https://${process.env.VERCEL_URL}`;
   return "";
+}
+
+function getNewsPostUrl(baseUrl: string, slug: string) {
+  return baseUrl ? `${baseUrl}/news/${slug}` : `/news/${slug}`;
+}
+
+function getNewsPlayerUrl(baseUrl: string, slug: string) {
+  return baseUrl ? `${baseUrl}/news/${slug}/player` : undefined;
+}
+
+function getPostVideoSocialData(post: SanityPost, baseUrl: string) {
+  const asset = getMuxVideoAsset(post.video);
+
+  if (!asset?.playbackId || !isMuxVideoReady(post.video)) {
+    return null;
+  }
+
+  const playerUrl = getNewsPlayerUrl(baseUrl, post.slug);
+
+  if (!playerUrl) {
+    return null;
+  }
+
+  return {
+    playbackId: asset.playbackId,
+    playerUrl,
+    streamUrl: buildMuxStreamUrl(asset.playbackId),
+    thumbnailUrl: buildMuxThumbnailUrl(asset.playbackId, asset.thumbTime),
+  };
+}
+
+function getVideoObjectJsonLd({
+  post,
+  baseUrl,
+  description,
+}: {
+  post: SanityPost;
+  baseUrl: string;
+  description: string;
+}) {
+  const video = getPostVideoSocialData(post, baseUrl);
+
+  if (!video) return null;
+
+  return {
+    "@context": "https://schema.org",
+    "@type": "VideoObject",
+    name: post.video?.title || post.video?.alt || post.title,
+    description,
+    thumbnailUrl: [video.thumbnailUrl],
+    uploadDate: post.publishedAt,
+    embedUrl: video.playerUrl,
+    contentUrl: video.streamUrl,
+    publisher: baseUrl
+      ? {
+          "@type": "Organization",
+          name: "Data Center College of the Philippines",
+          url: baseUrl,
+        }
+      : undefined,
+  };
+}
+
+function getJsonLdMarkup(data: unknown) {
+  return JSON.stringify(data).replace(/</g, "\\u003c");
 }
 
 export async function generateStaticParams() {
@@ -439,7 +487,7 @@ export async function generateMetadata({
     if (!fbPost) return {};
 
     const baseUrl = getSiteBaseUrl();
-    const canonicalUrl = baseUrl ? `${baseUrl}/news/${slug}` : `/news/${slug}`;
+    const canonicalUrl = getNewsPostUrl(baseUrl, slug);
 
     return {
       title: fbPost.message
@@ -483,26 +531,41 @@ export async function generateMetadata({
   if (!post) return {};
 
   const baseUrl = getSiteBaseUrl();
-  const canonicalUrl = baseUrl ? `${baseUrl}/news/${post.slug}` : undefined;
+  const canonicalUrl = baseUrl ? getNewsPostUrl(baseUrl, post.slug) : undefined;
+  const videoSocialData = getPostVideoSocialData(post, baseUrl);
   const ogImage = buildImageUrl(post.seo?.metaImage ?? post.featuredImage);
+  const socialImage = ogImage ?? videoSocialData?.thumbnailUrl;
+  const title = post.seo?.metaTitle ?? post.title;
+  const description = post.seo?.metaDescription ?? post.excerpt ?? undefined;
 
   return {
-    title: post.seo?.metaTitle ?? post.title,
-    description: post.seo?.metaDescription ?? post.excerpt ?? undefined,
+    title,
+    description,
     alternates: canonicalUrl ? { canonical: canonicalUrl } : undefined,
     openGraph: {
-      title: post.seo?.metaTitle ?? post.title,
-      description: post.seo?.metaDescription ?? post.excerpt ?? undefined,
+      title,
+      description,
       url: canonicalUrl,
       type: "article",
       siteName: "Data Center College of the Philippines",
-      images: ogImage
+      images: socialImage
         ? [
             {
-              url: ogImage,
+              url: socialImage,
               width: 1200,
               height: 630,
               alt: post.title,
+            },
+          ]
+        : undefined,
+      videos: videoSocialData
+        ? [
+            {
+              url: videoSocialData.playerUrl,
+              secureUrl: videoSocialData.playerUrl,
+              type: "text/html",
+              width: 1280,
+              height: 720,
             },
           ]
         : undefined,
@@ -516,13 +579,46 @@ export async function generateMetadata({
             ? [post.author]
             : undefined,
     },
-    twitter: {
-      card: "summary_large_image",
-      title: post.seo?.metaTitle ?? post.title,
-      description: post.seo?.metaDescription ?? post.excerpt ?? undefined,
-      images: ogImage ? [ogImage] : undefined,
-      creator: "@dccp_baguio",
-    },
+    twitter: videoSocialData
+      ? {
+          card: "player",
+          title,
+          description,
+          images: [videoSocialData.thumbnailUrl],
+          players: [
+            {
+              playerUrl: videoSocialData.playerUrl,
+              streamUrl: videoSocialData.streamUrl,
+              width: 1280,
+              height: 720,
+            },
+          ],
+          creator: "@dccp_baguio",
+        }
+      : {
+          card: "summary_large_image",
+          title,
+          description,
+          images: socialImage ? [socialImage] : undefined,
+          creator: "@dccp_baguio",
+        },
+    other: videoSocialData
+      ? {
+          "og:video": videoSocialData.playerUrl,
+          "og:video:url": videoSocialData.playerUrl,
+          "og:video:secure_url": videoSocialData.playerUrl,
+          "og:video:type": "text/html",
+          "og:video:width": "1280",
+          "og:video:height": "720",
+          "twitter:card": "player",
+          "twitter:player": videoSocialData.playerUrl,
+          "twitter:player:width": "1280",
+          "twitter:player:height": "720",
+          "twitter:player:stream": videoSocialData.streamUrl,
+          "twitter:player:stream:content_type": "application/x-mpegURL",
+          "twitter:image": videoSocialData.thumbnailUrl,
+        }
+      : undefined,
   };
 }
 
@@ -589,9 +685,12 @@ export default async function NewsArticlePage({
     "Stay informed with the latest updates from Data Center College.";
   const tags = Array.isArray(post.tags) ? post.tags.filter(Boolean) : [];
   const baseUrl = getSiteBaseUrl();
-  const canonicalUrl = baseUrl
-    ? `${baseUrl}/news/${post.slug}`
-    : `/news/${post.slug}`;
+  const canonicalUrl = getNewsPostUrl(baseUrl, post.slug);
+  const videoStructuredData = getVideoObjectJsonLd({
+    post,
+    baseUrl,
+    description: summaryText,
+  });
   // Prepare share text with hashtags
   const hashtagsText =
     tags.length > 0
@@ -631,6 +730,14 @@ export default async function NewsArticlePage({
 
   return (
     <>
+      {videoStructuredData ? (
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: getJsonLdMarkup(videoStructuredData),
+          }}
+        />
+      ) : null}
       <CollegeHeader settings={siteSettings} />
 
       {/* Hero Image Section - Full Width with top margin */}
@@ -919,7 +1026,7 @@ function FacebookPostPage({
       ? `Shared from ${post.sharedFrom.name}`
       : "Facebook";
   const baseUrl = getSiteBaseUrl();
-  const canonicalUrl = baseUrl ? `${baseUrl}/news/${slug}` : `/news/${slug}`;
+  const canonicalUrl = getNewsPostUrl(baseUrl, slug);
   const fbShareText = `${post.message?.slice(0, 100) || "Facebook Post"} - From Data Center College of the Philippines #DCCP`;
   const fbShareEmail = `Check this out from Data Center College:\n\n${post.message || "A post from Data Center College"}\n\n${canonicalUrl}`;
 

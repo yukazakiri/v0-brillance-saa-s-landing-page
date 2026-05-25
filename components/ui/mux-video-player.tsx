@@ -4,6 +4,7 @@ import type React from "react";
 
 import MuxPlayer from "@mux/mux-player-react";
 
+import { buildMuxThumbnailUrl } from "@/lib/mux-video";
 import { cn } from "@/lib/utils";
 
 type MuxVideoPlayerProps = Omit<
@@ -17,17 +18,6 @@ type MuxVideoPlayerProps = Omit<
   wrapperClassName?: string;
   fallbackLabel?: string;
 };
-
-function buildMuxPosterUrl(playbackId: string, thumbnailTime?: number | null) {
-  const params = new URLSearchParams();
-
-  if (typeof thumbnailTime === "number" && Number.isFinite(thumbnailTime)) {
-    params.set("time", String(thumbnailTime));
-  }
-
-  const query = params.toString();
-  return `https://image.mux.com/${playbackId}/thumbnail.jpg${query ? `?${query}` : ""}`;
-}
 
 export function MuxVideoPlayer({
   accentColor,
@@ -57,7 +47,7 @@ export function MuxVideoPlayer({
     );
   }
 
-  const posterUrl = poster ?? buildMuxPosterUrl(playbackId, thumbnailTime);
+  const posterUrl = poster ?? buildMuxThumbnailUrl(playbackId, thumbnailTime);
 
   return (
     <div
