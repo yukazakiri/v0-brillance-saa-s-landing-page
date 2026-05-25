@@ -40,3 +40,7 @@ export function buildMuxThumbnailUrl(
 export function buildMuxStreamUrl(playbackId: string) {
   return `https://stream.mux.com/${playbackId}.m3u8`;
 }
+
+export function buildMuxMp4Url(playbackId: string, rendition = "medium") {
+  return `https://stream.mux.com/${playbackId}/${rendition}.mp4`;
+}

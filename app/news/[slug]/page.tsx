@@ -28,6 +28,7 @@ import { MuxVideoPlayer } from "@/components/ui/mux-video-player";
 import { getFacebookConfig, getFacebookPosts } from "@/lib/facebook";
 import type { NormalizedFacebookPost } from "@/lib/facebook/types";
 import {
+  buildMuxMp4Url,
   buildMuxStreamUrl,
   buildMuxThumbnailUrl,
   getMuxStatusValue,
@@ -374,6 +375,7 @@ function getPostVideoSocialData(post: SanityPost, baseUrl: string) {
 
   return {
     playbackId: asset.playbackId,
+    mp4Url: buildMuxMp4Url(asset.playbackId),
     playerUrl,
     streamUrl: buildMuxStreamUrl(asset.playbackId),
     thumbnailUrl: buildMuxThumbnailUrl(asset.playbackId, asset.thumbTime),
@@ -401,7 +403,7 @@ function getVideoObjectJsonLd({
     thumbnailUrl: [video.thumbnailUrl],
     uploadDate: post.publishedAt,
     embedUrl: video.playerUrl,
-    contentUrl: video.streamUrl,
+    contentUrl: video.mp4Url,
     publisher: baseUrl
       ? {
           "@type": "Organization",
@@ -561,9 +563,9 @@ export async function generateMetadata({
       videos: videoSocialData
         ? [
             {
-              url: videoSocialData.playerUrl,
-              secureUrl: videoSocialData.playerUrl,
-              type: "text/html",
+              url: videoSocialData.mp4Url,
+              secureUrl: videoSocialData.mp4Url,
+              type: "video/mp4",
               width: 1280,
               height: 720,
             },
@@ -586,6 +588,16 @@ export async function generateMetadata({
       images: socialImage ? [socialImage] : undefined,
       creator: "@dccp_baguio",
     },
+    other: videoSocialData
+      ? {
+          "og:video": videoSocialData.mp4Url,
+          "og:video:url": videoSocialData.mp4Url,
+          "og:video:secure_url": videoSocialData.mp4Url,
+          "og:video:type": "video/mp4",
+          "og:video:width": "1280",
+          "og:video:height": "720",
+        }
+      : undefined,
   };
 }
 

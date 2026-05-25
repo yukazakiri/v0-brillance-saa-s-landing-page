@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 
 import {
+  buildMuxMp4Url,
   buildMuxStreamUrl,
   buildMuxThumbnailUrl,
   getMuxVideoAsset,
@@ -55,6 +56,7 @@ export async function GET(
     buildMuxThumbnailUrl(asset.playbackId, asset.thumbTime),
   );
   const streamUrl = escapeHtml(buildMuxStreamUrl(asset.playbackId));
+  const mp4Url = escapeHtml(buildMuxMp4Url(asset.playbackId));
   const escapedPlayerUrl = escapeHtml(playerUrl);
 
   const html = `<!doctype html>
@@ -70,9 +72,9 @@ export async function GET(
     <meta property="og:type" content="video.other" />
     <meta property="og:url" content="${escapedPlayerUrl}" />
     <meta property="og:image" content="${posterUrl}" />
-    <meta property="og:video" content="${streamUrl}" />
-    <meta property="og:video:secure_url" content="${streamUrl}" />
-    <meta property="og:video:type" content="application/x-mpegURL" />
+    <meta property="og:video" content="${mp4Url}" />
+    <meta property="og:video:secure_url" content="${mp4Url}" />
+    <meta property="og:video:type" content="video/mp4" />
     <meta property="og:video:width" content="1280" />
     <meta property="og:video:height" content="720" />
     <meta name="twitter:card" content="summary_large_image" />
