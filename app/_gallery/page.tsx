@@ -3,7 +3,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import Script from "next/script";
 
-import CollegeHeader from "@/components/college-header";
+import EditorialSiteHeader from "@/components/editorial-site-header";
 import FooterSection from "@/components/footer-section";
 import { Button } from "@/components/ui/button";
 import { ImageWithSkeleton } from "@/components/ui/image-with-skeleton";
@@ -39,7 +39,7 @@ export async function generateMetadata(): Promise<Metadata> {
       "Browse official campus albums featuring events, student life, ceremonies, sports, and campus milestones at Data Center College of the Philippines.",
     ),
   );
-  const canonicalUrl = getAbsoluteUrl("/gallery");
+  const canonicalUrl = getAbsoluteUrl("/_gallery");
   const imageUrl = getSocialShareImage(settings);
 
   return {
@@ -153,7 +153,7 @@ export default async function GalleryPage() {
       siteSettings,
       "Browse official campus albums from events, student life, ceremonies, and milestones at Data Center College of the Philippines.",
     ),
-    url: getAbsoluteUrl("/gallery"),
+    url: getAbsoluteUrl("/_gallery"),
     isPartOf: {
       "@type": "WebSite",
       name: siteSettings.siteTitle || "Data Center College of The Philippines",
@@ -169,7 +169,7 @@ export default async function GalleryPage() {
         "@type": "ImageGallery",
         name: gallery.title,
         description: gallery.summary,
-        url: getAbsoluteUrl(`/gallery/${gallery.slug.current}`),
+        url: getAbsoluteUrl(`/_gallery/${gallery.slug.current}`),
         numberOfItems: Array.isArray(gallery.photos)
           ? gallery.photos.length
           : 0,
@@ -180,7 +180,7 @@ export default async function GalleryPage() {
 
   return (
     <>
-      <CollegeHeader settings={siteSettings} />
+      <EditorialSiteHeader settings={siteSettings} />
       <Script
         id="gallery-page-structured-data"
         type="application/ld+json"
@@ -280,7 +280,7 @@ export default async function GalleryPage() {
                       className="group overflow-hidden rounded-[28px] border border-border bg-card shadow-sm transition-transform duration-300 hover:-translate-y-1"
                     >
                       <Link
-                        href={`/gallery/${gallery.slug.current}`}
+                        href={`/_gallery/${gallery.slug.current}`}
                         className="block"
                       >
                         <div className="relative aspect-[4/3] overflow-hidden border-b border-border bg-muted">
@@ -358,7 +358,7 @@ export default async function GalleryPage() {
                             variant="outline"
                             className="rounded-full px-4"
                           >
-                            <Link href={`/gallery/${gallery.slug.current}`}>
+                            <Link href={`/_gallery/${gallery.slug.current}`}>
                               Open album
                             </Link>
                           </Button>

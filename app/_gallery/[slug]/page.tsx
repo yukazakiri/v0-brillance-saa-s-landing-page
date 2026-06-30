@@ -3,7 +3,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import Script from "next/script";
 
-import CollegeHeader from "@/components/college-header";
+import EditorialSiteHeader from "@/components/editorial-site-header";
 import FooterSection from "@/components/footer-section";
 import {
   ImageGallery,
@@ -71,7 +71,7 @@ export async function generateMetadata({
         `View photos and event media from ${gallery.title} at ${siteName}. Browse the full album for highlights, ceremonies, sports, and campus moments.`,
     ),
   );
-  const canonicalUrl = getAbsoluteUrl(`/gallery/${gallery.slug.current}`);
+  const canonicalUrl = getAbsoluteUrl(`/_gallery/${gallery.slug.current}`);
   const coverUrl = getSocialShareImage(
     settings,
     getCloudinaryPhotoUrl(
@@ -206,11 +206,11 @@ export default async function GalleryAlbumPage({
       siteSettings,
       gallery.summary || `View photos and event media from ${gallery.title}.`,
     ),
-    url: getAbsoluteUrl(`/gallery/${gallery.slug.current}`),
+    url: getAbsoluteUrl(`/_gallery/${gallery.slug.current}`),
     isPartOf: {
       "@type": "CollectionPage",
       name: `${siteSettings.shortTitle || siteSettings.siteTitle || "DCCP"} Photo Gallery`,
-      url: getAbsoluteUrl("/gallery"),
+      url: getAbsoluteUrl("/_gallery"),
     },
     datePublished: gallery.publishedAt,
     numberOfItems: images.length,
@@ -236,13 +236,13 @@ export default async function GalleryAlbumPage({
           "@type": "ListItem",
           position: 2,
           name: "Gallery",
-          item: getAbsoluteUrl("/gallery"),
+          item: getAbsoluteUrl("/_gallery"),
         },
         {
           "@type": "ListItem",
           position: 3,
           name: gallery.title,
-          item: getAbsoluteUrl(`/gallery/${gallery.slug.current}`),
+          item: getAbsoluteUrl(`/_gallery/${gallery.slug.current}`),
         },
       ],
     },
@@ -250,7 +250,7 @@ export default async function GalleryAlbumPage({
 
   return (
     <>
-      <CollegeHeader settings={siteSettings} />
+      <EditorialSiteHeader settings={siteSettings} />
       <Script
         id="gallery-album-structured-data"
         type="application/ld+json"
@@ -263,7 +263,7 @@ export default async function GalleryAlbumPage({
             <div className="flex flex-col gap-6">
               <div className="flex flex-wrap items-center gap-3 text-xs font-sans font-semibold uppercase tracking-[0.2em] text-muted-foreground">
                 <Link
-                  href="/gallery"
+                  href="/_gallery"
                   className="transition-colors hover:text-foreground"
                 >
                   Gallery
@@ -287,7 +287,7 @@ export default async function GalleryAlbumPage({
                   {images.length} item{images.length === 1 ? "" : "s"}
                 </div>
                 <Button asChild variant="outline" className="rounded-full">
-                  <Link href="/gallery">Back to albums</Link>
+                  <Link href="/_gallery">Back to albums</Link>
                 </Button>
               </div>
             </div>

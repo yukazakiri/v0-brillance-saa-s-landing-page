@@ -322,4 +322,123 @@ html[data-reverse="true"]::view-transition-new(root) {
   ::view-transition-group(root) {
     animation-duration: 0.1s;
   }
+
+  .motion-3d,
+  .motion-parallax,
+  .tilt-card,
+  .auto-rotate {
+    transform: none !important;
+    animation: none !important;
+  }
+}
+
+/* ===== Portal showcase: 3D + motion utilities ===== */
+.perspective-near {
+  perspective: 800px;
+}
+.perspective-distant {
+  perspective: 1600px;
+}
+.preserve-3d {
+  transform-style: preserve-3d;
+}
+.transform-style-3d {
+  transform-style: preserve-3d;
+}
+.backface-hidden {
+  backface-visibility: hidden;
+}
+
+/* Brand shadows */
+.shadow-gold-soft {
+  box-shadow: 0 30px 80px -20px rgb(199 146 68 / 0.35);
+}
+.shadow-navy-deep {
+  box-shadow: 0 40px 100px -30px rgb(26 58 82 / 0.55);
+}
+
+/* Blueprint grid used behind floating portal mockups */
+.blueprint-grid {
+  background-image:
+    linear-gradient(to right, var(--grid-line, rgb(26 58 82 / 0.08)) 1px, transparent 1px),
+    linear-gradient(to bottom, var(--grid-line, rgb(26 58 82 / 0.08)) 1px, transparent 1px);
+  background-size: 48px 48px;
+}
+
+/* Film grain overlay */
+.grain {
+  position: relative;
+}
+.grain::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background-image: url("/textures/grain.svg");
+  background-size: 200px 200px;
+  opacity: 0.08;
+  mix-blend-mode: overlay;
+}
+
+/* Scroll-progress rail */
+.rail-progress {
+  background: linear-gradient(180deg, var(--primary), var(--secondary));
+}
+
+/* Breathing glow used on primary CTA */
+@keyframes portal-breathe {
+  0%, 100% {
+    box-shadow: 0 0 0 0 rgb(199 146 68 / 0.45);
+  }
+  50% {
+    box-shadow: 0 0 0 12px rgb(199 146 68 / 0);
+  }
+}
+.portal-breathe {
+  animation: portal-breathe 2.8s ease-out infinite;
+}
+
+/* Slow auto-rotation for idle hero mockups */
+@keyframes portal-auto-rotate {
+  0%, 100% {
+    transform: rotateY(-3deg) rotateX(6deg);
+  }
+  50% {
+    transform: rotateY(3deg) rotateX(6deg);
+  }
+}
+.auto-rotate {
+  animation: portal-auto-rotate 9s ease-in-out infinite;
+}
+
+/* Marquee for testimonial strip */
+@keyframes portal-marquee {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-50%);
+  }
+}
+.portal-marquee {
+  animation: portal-marquee 40s linear infinite;
+}
+.portal-marquee:hover {
+  animation-play-state: paused;
+}
+
+/* Annotation pin pulse */
+@keyframes pin-pulse {
+  0% {
+    box-shadow: 0 0 0 0 rgb(199 146 68 / 0.55);
+  }
+  70% {
+    box-shadow: 0 0 0 10px rgb(199 146 68 / 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgb(199 146 68 / 0);
+  }
+}
+.pin-pulse {
+  animation: pin-pulse 2.4s ease-out infinite;
 }

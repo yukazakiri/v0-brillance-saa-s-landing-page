@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 
-import CollegeHeader from "@/components/college-header";
+import EditorialSiteHeader from "@/components/editorial-site-header";
 import FooterSection from "@/components/footer-section";
 import NewsPageContent from "@/components/news-page-content";
 import { getFacebookPosts } from "@/lib/facebook";
@@ -16,7 +16,7 @@ import { buildImageUrl } from "@/lib/sanity/image";
 import { fetchAllPosts, fetchSettings } from "@/lib/sanity/queries";
 import type { Article, Settings } from "@/lib/sanity/types";
 
-// Revalidate page every 60 seconds to pick up new Sanity content
+// Revalidate page every 60 seconds to pick up new content
 export const revalidate = 60;
 
 function getSiteBaseUrl() {
@@ -142,7 +142,7 @@ export default async function NewsPage() {
 
   return (
     <>
-      <CollegeHeader settings={siteSettings} />
+      <EditorialSiteHeader settings={siteSettings} />
       <NewsPageContent
         posts={unifiedPosts}
         facebookImages={facebookPostsWithImages}

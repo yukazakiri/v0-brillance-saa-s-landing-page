@@ -21,8 +21,9 @@ import {
   HoverCardTrigger,
 } from "@/components/ui/preview-card";
 
-import CollegeHeader from "@/components/college-header";
+import EditorialSiteHeader from "@/components/editorial-site-header";
 import FooterSection from "@/components/footer-section";
+import GsapEditorialReveal from "@/components/gsap-editorial-reveal";
 import { ImageWithSkeleton } from "@/components/ui/image-with-skeleton";
 import { MuxVideoPlayer } from "@/components/ui/mux-video-player";
 import { getFacebookConfig, getFacebookPosts } from "@/lib/facebook";
@@ -524,7 +525,7 @@ export async function generateMetadata({
     };
   }
 
-  // Handle Sanity posts
+  // Handle CMS posts
   const post = await fetchPostBySlug(slug);
   if (!post) return {};
 
@@ -632,7 +633,7 @@ export default async function NewsArticlePage({
     );
   }
 
-  // Handle Sanity posts
+  // Handle CMS posts
   const post = await getPost(slug);
 
   if (!post) {
@@ -717,269 +718,277 @@ export default async function NewsArticlePage({
           }}
         />
       ) : null}
-      <CollegeHeader settings={siteSettings} />
+      <EditorialSiteHeader settings={siteSettings} />
+      <GsapEditorialReveal>
+        {/* Hero Image Section - Full Width */}
+        <section
+          data-gsap-reveal
+          className="w-full h-[50vh] sm:h-[60vh] lg:h-[70vh] overflow-hidden border-x border-b border-border/70 bg-background"
+        >
+          <div className="relative w-full h-full">
+            <img
+              src={heroMedia}
+              alt={post.featuredImage?.alt || post.title}
+              className="w-full h-full object-cover"
+            />
+            <div className="absolute inset-0 bg-gradient-to-t from-background via-background/40 to-transparent" />
+          </div>
+        </section>
 
-      {/* Hero Image Section - Full Width with top margin */}
-      <section className="w-full h-[50vh] sm:h-[60vh] lg:h-[70vh] overflow-hidden bg-background mt-28 sm:mt-32 lg:mt-40">
-        <div className="relative w-full h-full">
-          <img
-            src={heroMedia}
-            alt={post.featuredImage?.alt || post.title}
-            className="w-full h-full object-cover"
-          />
-          <div className="absolute inset-0 bg-gradient-to-t from-background via-background/40 to-transparent" />
-        </div>
-      </section>
+        {/* Article Header Section - Separate with margin top */}
+        <div
+          data-gsap-reveal
+          className="w-full border-x border-b border-border/70 bg-background py-12 sm:py-16 lg:py-20"
+        >
+          <div className="w-full max-w-[900px] mx-auto px-4 sm:px-6 lg:px-8 flex flex-col gap-10">
+            {/* Article Header */}
+            <header className="border-b border-border/50 pb-10 w-full">
+              <div className="w-full space-y-6">
+                {/* Breadcrumb Navigation */}
+                <nav className="flex items-center gap-2 text-sm text-muted-foreground">
+                  <Link
+                    href="/"
+                    className="hover:text-foreground transition-colors"
+                  >
+                    Home
+                  </Link>
+                  <span className="text-muted-foreground/50">/</span>
+                  <Link
+                    href="/news"
+                    className="hover:text-foreground transition-colors"
+                  >
+                    News
+                  </Link>
+                  <span className="text-muted-foreground/50">/</span>
+                  <span className="text-foreground truncate max-w-[200px]">
+                    {post.title}
+                  </span>
+                </nav>
 
-      {/* Article Header Section - Separate with margin top */}
-      <div className="w-full bg-background py-12 sm:py-16 lg:py-20 mt-12 sm:mt-16">
-        <div className="w-full max-w-[900px] mx-auto px-4 sm:px-6 lg:px-8 flex flex-col gap-10">
-          {/* Article Header */}
-          <header className="border-b border-border/50 pb-10 w-full">
-            <div className="w-full space-y-6">
-              {/* Breadcrumb Navigation */}
-              <nav className="flex items-center gap-2 text-sm text-muted-foreground">
-                <Link
-                  href="/"
-                  className="hover:text-foreground transition-colors"
-                >
-                  Home
-                </Link>
-                <span className="text-muted-foreground/50">/</span>
-                <Link
-                  href="/news"
-                  className="hover:text-foreground transition-colors"
-                >
-                  News
-                </Link>
-                <span className="text-muted-foreground/50">/</span>
-                <span className="text-foreground truncate max-w-[200px]">
+                <div className="flex items-center gap-3">
+                  <span className="text-xs font-medium tracking-[0.2em] uppercase text-muted-foreground">
+                    {categoryLabel}
+                  </span>
+                  <span className="w-1 h-1 rounded-full bg-muted-foreground/30" />
+                  <span className="text-xs text-muted-foreground">
+                    {publishedDate}
+                  </span>
+                </div>
+
+                <h1 className="font-serif text-4xl leading-[1.02] tracking-[-0.055em] text-primary sm:text-5xl lg:text-7xl">
                   {post.title}
-                </span>
-              </nav>
+                </h1>
 
-              <div className="flex items-center gap-3">
-                <span className="text-xs font-medium tracking-[0.2em] uppercase text-muted-foreground">
-                  {categoryLabel}
-                </span>
-                <span className="w-1 h-1 rounded-full bg-muted-foreground/30" />
-                <span className="text-xs text-muted-foreground">
-                  {publishedDate}
-                </span>
-              </div>
+                <p className="text-lg sm:text-xl text-muted-foreground leading-relaxed max-w-2xl">
+                  {summaryText}
+                </p>
 
-              <h1 className="text-3xl sm:text-4xl lg:text-5xl font-serif leading-[1.15] tracking-tight text-foreground">
-                {post.title}
-              </h1>
-
-              <p className="text-lg sm:text-xl text-muted-foreground leading-relaxed max-w-2xl">
-                {summaryText}
-              </p>
-
-              {post.authors && post.authors.length > 0 ? (
-                <HoverCard>
-                  <HoverCardTrigger asChild>
-                    <button className="flex items-center gap-2 text-sm text-muted-foreground pt-2 hover:text-foreground transition-colors cursor-pointer">
-                      <User className="w-4 h-4" />
-                      <span className="underline decoration-dotted">
-                        {post.authors[0].preferredName ||
-                          post.authors[0].fullName}
-                      </span>
-                    </button>
-                  </HoverCardTrigger>
-                  <HoverCardContent align="start" className="w-80">
-                    <div className="flex gap-4">
-                      {post.authors[0].headshot?.asset?.url && (
-                        <img
-                          src={post.authors[0].headshot.asset.url}
-                          alt={post.authors[0].fullName}
-                          className="w-16 h-16 rounded-full object-cover"
-                        />
-                      )}
-                      <div className="flex-1 space-y-1">
-                        <h4 className="text-sm font-semibold">
+                {post.authors && post.authors.length > 0 ? (
+                  <HoverCard>
+                    <HoverCardTrigger asChild>
+                      <button className="flex items-center gap-2 text-sm text-muted-foreground pt-2 hover:text-foreground transition-colors cursor-pointer">
+                        <User className="w-4 h-4" />
+                        <span className="underline decoration-dotted">
                           {post.authors[0].preferredName ||
                             post.authors[0].fullName}
-                        </h4>
-                        {post.authors[0].titles &&
-                          post.authors[0].titles.length > 0 && (
-                            <p className="text-xs text-muted-foreground">
-                              {post.authors[0].titles[0]}
+                        </span>
+                      </button>
+                    </HoverCardTrigger>
+                    <HoverCardContent align="start" className="w-80">
+                      <div className="flex gap-4">
+                        {post.authors[0].headshot?.asset?.url && (
+                          <img
+                            src={post.authors[0].headshot.asset.url}
+                            alt={post.authors[0].fullName}
+                            className="w-16 h-16 rounded-full object-cover"
+                          />
+                        )}
+                        <div className="flex-1 space-y-1">
+                          <h4 className="text-sm font-semibold">
+                            {post.authors[0].preferredName ||
+                              post.authors[0].fullName}
+                          </h4>
+                          {post.authors[0].titles &&
+                            post.authors[0].titles.length > 0 && (
+                              <p className="text-xs text-muted-foreground">
+                                {post.authors[0].titles[0]}
+                              </p>
+                            )}
+                          {post.authors[0].roleType && (
+                            <p className="text-xs text-muted-foreground capitalize">
+                              {post.authors[0].roleType}
                             </p>
                           )}
-                        {post.authors[0].roleType && (
-                          <p className="text-xs text-muted-foreground capitalize">
-                            {post.authors[0].roleType}
-                          </p>
-                        )}
-                        {post.authors[0].contactInfo?.website && (
-                          <a
-                            href={post.authors[0].contactInfo.website}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="text-xs text-primary hover:underline flex items-center gap-1"
-                          >
-                            View Profile <ExternalLink className="w-3 h-3" />
-                          </a>
-                        )}
+                          {post.authors[0].contactInfo?.website && (
+                            <a
+                              href={post.authors[0].contactInfo.website}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="text-xs text-primary hover:underline flex items-center gap-1"
+                            >
+                              View Profile <ExternalLink className="w-3 h-3" />
+                            </a>
+                          )}
+                        </div>
                       </div>
-                    </div>
-                  </HoverCardContent>
-                </HoverCard>
-              ) : (
-                <div className="flex items-center gap-2 text-sm text-muted-foreground pt-2">
-                  <User className="w-4 h-4" />
-                  <span>{authorName}</span>
-                </div>
-              )}
-            </div>
-          </header>
-
-          <div className="w-full flex flex-col gap-8">
-            {post.video
-              ? renderMuxVideoFigure(post.video, post.title, post.videoCredit)
-              : null}
-
-            {tags.length > 0 && (
-              <div className="flex flex-wrap gap-2 text-xs font-medium text-[#4A403B]">
-                {tags.map((tag) => (
-                  <span
-                    key={tag}
-                    className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full border border-[rgba(55,50,47,0.18)] bg-[#FCFAF7]"
-                  >
-                    <Hash className="w-3 h-3" />
-                    {tag}
-                  </span>
-                ))}
+                    </HoverCardContent>
+                  </HoverCard>
+                ) : (
+                  <div className="flex items-center gap-2 text-sm text-muted-foreground pt-2">
+                    <User className="w-4 h-4" />
+                    <span>{authorName}</span>
+                  </div>
+                )}
               </div>
-            )}
+            </header>
 
-            <article className="w-full text-[#433C38]">
-              {Array.isArray(post.content) && post.content.length > 0 ? (
-                <div className="[&>figure]:break-inside-avoid">
-                  <PortableText
-                    value={post.content}
-                    components={portableTextComponents}
-                  />
-                </div>
-              ) : (
-                <p className="text-muted-foreground">
-                  Details for this announcement will be available soon.
-                </p>
-              )}
-            </article>
+            <div className="w-full flex flex-col gap-8">
+              {post.video
+                ? renderMuxVideoFigure(post.video, post.title, post.videoCredit)
+                : null}
 
-            <div className="border-t border-[rgba(55,50,47,0.12)] pt-6 flex flex-col gap-4">
-              <h3 className="text-sm font-semibold text-[#6B635D] uppercase tracking-[0.3em]">
-                Share this story
-              </h3>
-              <div className="flex flex-wrap gap-3">
-                {shareLinks.map((share) => (
-                  <a
-                    key={share.label}
-                    href={share.href}
-                    target="_blank"
-                    rel="noreferrer"
-                    title={share.title}
-                    className="inline-flex items-center gap-2 px-4 py-2 rounded-full border border-[rgba(55,50,47,0.2)] text-sm font-semibold text-[#37322F] hover:bg-[#37322F] hover:text-white transition-colors"
-                  >
-                    {share.label}
-                    <span aria-hidden>↗</span>
-                  </a>
-                ))}
-              </div>
-            </div>
-
-            {relatedGalleries.length > 0 ? (
-              <section className="rounded-[28px] border border-[rgba(55,50,47,0.12)] bg-[#FCFAF7] p-5 sm:p-7">
-                <div className="flex flex-col gap-6">
-                  <div className="flex flex-col gap-2">
-                    <span className="text-xs font-semibold uppercase tracking-[0.28em] text-[#6B635D]">
-                      Related Gallery
+              {tags.length > 0 && (
+                <div className="flex flex-wrap gap-2 text-xs font-medium text-[#4A403B]">
+                  {tags.map((tag) => (
+                    <span
+                      key={tag}
+                      className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full border border-[rgba(55,50,47,0.18)] bg-[#FCFAF7]"
+                    >
+                      <Hash className="w-3 h-3" />
+                      {tag}
                     </span>
-                    <h2 className="text-2xl font-serif text-[#37322F]">
-                      Photo references for this article
-                    </h2>
-                    <p className="max-w-2xl text-sm leading-6 text-[#6B635D]">
-                      If this article or event has linked albums, you can open
-                      them below to browse the photos and media captured for it.
-                    </p>
-                  </div>
-
-                  <div className="grid gap-4 md:grid-cols-2">
-                    {relatedGalleries.map((gallery) => {
-                      const coverAsset =
-                        getFirstGalleryPhoto(gallery) ||
-                        getFirstGalleryMedia(gallery);
-                      const coverUrl = getCloudinaryPhotoUrl(coverAsset);
-                      const coverIsVideo = isGalleryVideo(coverAsset);
-                      const itemCount = Array.isArray(gallery.photos)
-                        ? gallery.photos.length
-                        : 0;
-
-                      return (
-                        <Link
-                          key={gallery._id}
-                          href={`/gallery/${gallery.slug.current}`}
-                          className="group overflow-hidden rounded-[24px] border border-[rgba(55,50,47,0.12)] bg-white transition-transform duration-300 hover:-translate-y-1"
-                        >
-                          <div className="relative aspect-[16/10] overflow-hidden bg-stone-100">
-                            {coverUrl ? (
-                              coverIsVideo ? (
-                                <VideoWithSkeleton
-                                  src={coverUrl}
-                                  aria-label={gallery.title}
-                                  className="transition-transform duration-500 group-hover:scale-105"
-                                  fallbackLabel="No preview"
-                                />
-                              ) : (
-                                <ImageWithSkeleton
-                                  src={coverUrl}
-                                  alt={gallery.title}
-                                  className="transition-transform duration-500 group-hover:scale-105"
-                                  fallbackLabel="No cover"
-                                />
-                              )
-                            ) : (
-                              <div className="flex h-full items-center justify-center bg-stone-100 text-xs font-semibold uppercase tracking-[0.24em] text-[#6B635D]">
-                                No cover
-                              </div>
-                            )}
-                            <div className="absolute inset-0 bg-gradient-to-t from-black/55 via-black/10 to-transparent" />
-                            <div className="absolute bottom-4 left-4 right-4 flex items-end justify-between gap-4 text-white">
-                              <div>
-                                <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-white/80">
-                                  {itemCount} item{itemCount === 1 ? "" : "s"}
-                                </p>
-                                <h3 className="mt-1 text-xl font-serif leading-tight">
-                                  {gallery.title}
-                                </h3>
-                              </div>
-                              <span className="rounded-full border border-white/25 bg-white/10 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.22em] backdrop-blur-sm">
-                                Open
-                              </span>
-                            </div>
-                          </div>
-
-                          <div className="flex flex-col gap-4 p-5">
-                            <p className="text-sm leading-6 text-[#6B635D]">
-                              {gallery.summary ||
-                                "Open this gallery to browse the media captured for this event."}
-                            </p>
-                            <div className="text-xs font-semibold uppercase tracking-[0.24em] text-[#6B635D]">
-                              View photo album
-                            </div>
-                          </div>
-                        </Link>
-                      );
-                    })}
-                  </div>
+                  ))}
                 </div>
-              </section>
-            ) : null}
+              )}
+
+              <article className="w-full text-[#433C38]">
+                {Array.isArray(post.content) && post.content.length > 0 ? (
+                  <div className="[&>figure]:break-inside-avoid">
+                    <PortableText
+                      value={post.content}
+                      components={portableTextComponents}
+                    />
+                  </div>
+                ) : (
+                  <p className="text-muted-foreground">
+                    Details for this announcement will be available soon.
+                  </p>
+                )}
+              </article>
+
+              <div className="border-t border-[rgba(55,50,47,0.12)] pt-6 flex flex-col gap-4">
+                <h3 className="text-sm font-semibold text-[#6B635D] uppercase tracking-[0.3em]">
+                  Share this story
+                </h3>
+                <div className="flex flex-wrap gap-3">
+                  {shareLinks.map((share) => (
+                    <a
+                      key={share.label}
+                      href={share.href}
+                      target="_blank"
+                      rel="noreferrer"
+                      title={share.title}
+                      className="inline-flex items-center gap-2 px-4 py-2 rounded-full border border-[rgba(55,50,47,0.2)] text-sm font-semibold text-[#37322F] hover:bg-[#37322F] hover:text-white transition-colors"
+                    >
+                      {share.label}
+                      <span aria-hidden>↗</span>
+                    </a>
+                  ))}
+                </div>
+              </div>
+
+              {relatedGalleries.length > 0 ? (
+                <section className="rounded-[28px] border border-[rgba(55,50,47,0.12)] bg-[#FCFAF7] p-5 sm:p-7">
+                  <div className="flex flex-col gap-6">
+                    <div className="flex flex-col gap-2">
+                      <span className="text-xs font-semibold uppercase tracking-[0.28em] text-[#6B635D]">
+                        Related Gallery
+                      </span>
+                      <h2 className="text-2xl font-serif text-[#37322F]">
+                        Photo references for this article
+                      </h2>
+                      <p className="max-w-2xl text-sm leading-6 text-[#6B635D]">
+                        If this article or event has linked albums, you can open
+                        them below to browse the photos and media captured for
+                        it.
+                      </p>
+                    </div>
+
+                    <div className="grid gap-4 md:grid-cols-2">
+                      {relatedGalleries.map((gallery) => {
+                        const coverAsset =
+                          getFirstGalleryPhoto(gallery) ||
+                          getFirstGalleryMedia(gallery);
+                        const coverUrl = getCloudinaryPhotoUrl(coverAsset);
+                        const coverIsVideo = isGalleryVideo(coverAsset);
+                        const itemCount = Array.isArray(gallery.photos)
+                          ? gallery.photos.length
+                          : 0;
+
+                        return (
+                          <Link
+                            key={gallery._id}
+                            href={`/_gallery/${gallery.slug.current}`}
+                            className="group overflow-hidden rounded-[24px] border border-[rgba(55,50,47,0.12)] bg-white transition-transform duration-300 hover:-translate-y-1"
+                          >
+                            <div className="relative aspect-[16/10] overflow-hidden bg-stone-100">
+                              {coverUrl ? (
+                                coverIsVideo ? (
+                                  <VideoWithSkeleton
+                                    src={coverUrl}
+                                    aria-label={gallery.title}
+                                    className="transition-transform duration-500 group-hover:scale-105"
+                                    fallbackLabel="No preview"
+                                  />
+                                ) : (
+                                  <ImageWithSkeleton
+                                    src={coverUrl}
+                                    alt={gallery.title}
+                                    className="transition-transform duration-500 group-hover:scale-105"
+                                    fallbackLabel="No cover"
+                                  />
+                                )
+                              ) : (
+                                <div className="flex h-full items-center justify-center bg-stone-100 text-xs font-semibold uppercase tracking-[0.24em] text-[#6B635D]">
+                                  No cover
+                                </div>
+                              )}
+                              <div className="absolute inset-0 bg-gradient-to-t from-black/55 via-black/10 to-transparent" />
+                              <div className="absolute bottom-4 left-4 right-4 flex items-end justify-between gap-4 text-white">
+                                <div>
+                                  <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-white/80">
+                                    {itemCount} item{itemCount === 1 ? "" : "s"}
+                                  </p>
+                                  <h3 className="mt-1 text-xl font-serif leading-tight">
+                                    {gallery.title}
+                                  </h3>
+                                </div>
+                                <span className="rounded-full border border-white/25 bg-white/10 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.22em] backdrop-blur-sm">
+                                  Open
+                                </span>
+                              </div>
+                            </div>
+
+                            <div className="flex flex-col gap-4 p-5">
+                              <p className="text-sm leading-6 text-[#6B635D]">
+                                {gallery.summary ||
+                                  "Open this gallery to browse the media captured for this event."}
+                              </p>
+                              <div className="text-xs font-semibold uppercase tracking-[0.24em] text-[#6B635D]">
+                                View photo album
+                              </div>
+                            </div>
+                          </Link>
+                        );
+                      })}
+                    </div>
+                  </div>
+                </section>
+              ) : null}
+            </div>
           </div>
         </div>
-      </div>
+      </GsapEditorialReveal>
 
       <FooterSection settings={siteSettings} />
     </>
@@ -1039,201 +1048,208 @@ function FacebookPostPage({
 
   return (
     <>
-      <CollegeHeader settings={settings} />
+      <EditorialSiteHeader settings={settings} />
+      <GsapEditorialReveal>
+        {/* Hero Image Section */}
+        <div
+          data-gsap-reveal
+          className="relative w-full h-[50vh] sm:h-[60vh] lg:h-[70vh] overflow-hidden border-x border-b border-border/70"
+        >
+          {post.image ? (
+            <img
+              src={post.image}
+              alt={post.message?.slice(0, 60) || "Facebook post"}
+              className="w-full h-full object-cover"
+            />
+          ) : (
+            <div className="w-full h-full bg-gradient-to-br from-[#1877f2] to-[#0d5bbf] flex items-center justify-center">
+              <Facebook className="w-24 h-24 text-white/30" />
+            </div>
+          )}
+          <div className="absolute inset-0 bg-gradient-to-t from-background via-background/40 to-transparent" />
 
-      {/* Hero Image Section */}
-      <div className="relative w-full h-[50vh] sm:h-[60vh] lg:h-[70vh] overflow-hidden mt-16 sm:mt-20">
-        {post.image ? (
-          <img
-            src={post.image}
-            alt={post.message?.slice(0, 60) || "Facebook post"}
-            className="w-full h-full object-cover"
-          />
-        ) : (
-          <div className="w-full h-full bg-gradient-to-br from-[#1877f2] to-[#0d5bbf] flex items-center justify-center">
-            <Facebook className="w-24 h-24 text-white/30" />
-          </div>
-        )}
-        <div className="absolute inset-0 bg-gradient-to-t from-background via-background/40 to-transparent" />
-
-        {/* Facebook Badge */}
-        <div className="absolute top-4 right-4 sm:top-6 sm:right-6">
-          <div className="px-4 py-2 bg-[#1877f2] text-white text-xs font-bold uppercase tracking-wider rounded-full flex items-center gap-2 shadow-lg">
-            <Facebook className="w-4 h-4" />
-            Facebook
+          {/* Facebook Badge */}
+          <div className="absolute top-4 right-4 sm:top-6 sm:right-6">
+            <div className="px-4 py-2 bg-[#1877f2] text-white text-xs font-bold uppercase tracking-wider rounded-full flex items-center gap-2 shadow-lg">
+              <Facebook className="w-4 h-4" />
+              Facebook
+            </div>
           </div>
         </div>
-      </div>
 
-      <div className="w-full px-2 sm:px-4 md:px-8 lg:px-12 py-10">
-        <div className="w-full max-w-[1000px] mx-auto flex flex-col gap-10">
-          {/* Article Header */}
-          <header className="border-b border-border/50 pb-10">
-            <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
-              {/* Breadcrumb Navigation */}
-              <nav className="mb-8 flex items-center gap-2 text-sm text-muted-foreground">
-                <Link
-                  href="/"
-                  className="hover:text-foreground transition-colors"
-                >
-                  Home
-                </Link>
-                <span className="text-muted-foreground/50">/</span>
-                <Link
-                  href="/news"
-                  className="hover:text-foreground transition-colors"
-                >
-                  News
-                </Link>
-                <span className="text-muted-foreground/50">/</span>
-                <span className="text-foreground truncate max-w-[200px]">
-                  {post.message?.slice(0, 50) || "Facebook Post"}
-                </span>
-              </nav>
-
-              <div className="space-y-6">
-                <div className="flex items-center gap-3">
-                  <span className="text-xs font-medium tracking-[0.2em] uppercase text-muted-foreground">
-                    {categoryLabel}
+        <div
+          data-gsap-reveal
+          className="w-full border-x border-b border-border/70 bg-background px-2 py-10 sm:px-4 md:px-8 lg:px-12"
+        >
+          <div className="w-full max-w-[1000px] mx-auto flex flex-col gap-10">
+            {/* Article Header */}
+            <header className="border-b border-border/50 pb-10">
+              <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
+                {/* Breadcrumb Navigation */}
+                <nav className="mb-8 flex items-center gap-2 text-sm text-muted-foreground">
+                  <Link
+                    href="/"
+                    className="hover:text-foreground transition-colors"
+                  >
+                    Home
+                  </Link>
+                  <span className="text-muted-foreground/50">/</span>
+                  <Link
+                    href="/news"
+                    className="hover:text-foreground transition-colors"
+                  >
+                    News
+                  </Link>
+                  <span className="text-muted-foreground/50">/</span>
+                  <span className="text-foreground truncate max-w-[200px]">
+                    {post.message?.slice(0, 50) || "Facebook Post"}
                   </span>
-                  <span className="w-1 h-1 rounded-full bg-muted-foreground/30" />
-                  <span className="text-xs text-muted-foreground">
-                    {publishedDate}
-                  </span>
-                </div>
+                </nav>
 
-                <h1 className="text-3xl sm:text-4xl lg:text-5xl font-serif leading-[1.15] tracking-tight text-foreground">
-                  {post.message
-                    ? post.message.slice(0, 100) +
-                      (post.message.length > 100 ? "..." : "")
-                    : "Facebook Post"}
-                </h1>
-
-                <div className="flex items-center gap-2 text-sm text-muted-foreground pt-2">
-                  <Facebook className="w-4 h-4 text-[#1877f2]" />
-                  <span>{authorName}</span>
-                </div>
-
-                {/* Shared From Info */}
-                {post.isShared && post.sharedFrom?.name && (
-                  <div className="flex items-center gap-3 p-4 bg-[#f7f5f3] rounded-lg border border-[rgba(26,58,82,0.12)]">
-                    <Share2 className="w-5 h-5 text-[#1877f2]" />
-                    <div>
-                      <p className="text-sm font-medium text-[#1a3a52]">
-                        Shared from{" "}
-                        <span className="text-[#1877f2]">
-                          {post.sharedFrom.name}
-                        </span>
-                      </p>
-                      {post.originalPost?.author && (
-                        <p className="text-xs text-[#605A57] mt-1">
-                          Original by {post.originalPost.author.name}
-                        </p>
-                      )}
-                    </div>
+                <div className="space-y-6">
+                  <div className="flex items-center gap-3">
+                    <span className="text-xs font-medium tracking-[0.2em] uppercase text-muted-foreground">
+                      {categoryLabel}
+                    </span>
+                    <span className="w-1 h-1 rounded-full bg-muted-foreground/30" />
+                    <span className="text-xs text-muted-foreground">
+                      {publishedDate}
+                    </span>
                   </div>
-                )}
-              </div>
-            </div>
-          </header>
 
-          <div className="w-full max-w-[820px] mx-auto flex flex-col gap-8">
-            {/* Post Content */}
-            <article className="prose prose-neutral prose-lg max-w-none text-[#433C38]">
-              {post.message ? (
-                <p className="whitespace-pre-wrap">{post.message}</p>
-              ) : (
-                <p className="text-muted-foreground italic">
-                  This post doesn't have text content.
-                </p>
-              )}
-            </article>
+                  <h1 className="font-serif text-4xl leading-[1.02] tracking-[-0.055em] text-primary sm:text-5xl lg:text-7xl">
+                    {post.message
+                      ? post.message.slice(0, 100) +
+                        (post.message.length > 100 ? "..." : "")
+                      : "Facebook Post"}
+                  </h1>
 
-            {/* Original Post (for shared posts) */}
-            {post.isShared && post.originalPost && (
-              <div className="border border-[rgba(26,58,82,0.12)] rounded-lg overflow-hidden bg-[#f7f5f3]">
-                <div className="p-4 bg-[#1a3a52]/5 border-b border-[rgba(26,58,82,0.12)]">
-                  <p className="text-sm font-medium text-[#1a3a52] flex items-center gap-2">
-                    <Share2 className="w-4 h-4" />
-                    Original Post
-                  </p>
+                  <div className="flex items-center gap-2 text-sm text-muted-foreground pt-2">
+                    <Facebook className="w-4 h-4 text-[#1877f2]" />
+                    <span>{authorName}</span>
+                  </div>
+
+                  {/* Shared From Info */}
+                  {post.isShared && post.sharedFrom?.name && (
+                    <div className="flex items-center gap-3 p-4 bg-[#f7f5f3] rounded-lg border border-[rgba(26,58,82,0.12)]">
+                      <Share2 className="w-5 h-5 text-[#1877f2]" />
+                      <div>
+                        <p className="text-sm font-medium text-[#1a3a52]">
+                          Shared from{" "}
+                          <span className="text-[#1877f2]">
+                            {post.sharedFrom.name}
+                          </span>
+                        </p>
+                        {post.originalPost?.author && (
+                          <p className="text-xs text-[#605A57] mt-1">
+                            Original by {post.originalPost.author.name}
+                          </p>
+                        )}
+                      </div>
+                    </div>
+                  )}
                 </div>
-                {post.originalPost.image && (
-                  <img
-                    src={post.originalPost.image}
-                    alt="Original post"
-                    className="w-full max-h-[400px] object-cover"
-                  />
+              </div>
+            </header>
+
+            <div className="w-full max-w-[820px] mx-auto flex flex-col gap-8">
+              {/* Post Content */}
+              <article className="prose prose-neutral prose-lg max-w-none text-[#433C38]">
+                {post.message ? (
+                  <p className="whitespace-pre-wrap">{post.message}</p>
+                ) : (
+                  <p className="text-muted-foreground italic">
+                    This post doesn't have text content.
+                  </p>
                 )}
-                {post.originalPost.message && (
-                  <div className="p-4">
-                    <p className="text-sm text-[#433C38] line-clamp-4">
-                      {post.originalPost.message}
+              </article>
+
+              {/* Original Post (for shared posts) */}
+              {post.isShared && post.originalPost && (
+                <div className="border border-[rgba(26,58,82,0.12)] rounded-lg overflow-hidden bg-[#f7f5f3]">
+                  <div className="p-4 bg-[#1a3a52]/5 border-b border-[rgba(26,58,82,0.12)]">
+                    <p className="text-sm font-medium text-[#1a3a52] flex items-center gap-2">
+                      <Share2 className="w-4 h-4" />
+                      Original Post
                     </p>
                   </div>
+                  {post.originalPost.image && (
+                    <img
+                      src={post.originalPost.image}
+                      alt="Original post"
+                      className="w-full max-h-[400px] object-cover"
+                    />
+                  )}
+                  {post.originalPost.message && (
+                    <div className="p-4">
+                      <p className="text-sm text-[#433C38] line-clamp-4">
+                        {post.originalPost.message}
+                      </p>
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {/* Engagement Stats */}
+              <div className="flex items-center gap-6 py-4 border-y border-[rgba(55,50,47,0.12)]">
+                <span className="text-sm text-[#605A57]">
+                  <strong className="text-[#1a3a52]">{post.likes}</strong> likes
+                </span>
+                {post.comments > 0 && (
+                  <span className="text-sm text-[#605A57]">
+                    <strong className="text-[#1a3a52]">{post.comments}</strong>{" "}
+                    comments
+                  </span>
+                )}
+                {post.shares > 0 && (
+                  <span className="text-sm text-[#605A57]">
+                    <strong className="text-[#1a3a52]">{post.shares}</strong>{" "}
+                    shares
+                  </span>
                 )}
               </div>
-            )}
 
-            {/* Engagement Stats */}
-            <div className="flex items-center gap-6 py-4 border-y border-[rgba(55,50,47,0.12)]">
-              <span className="text-sm text-[#605A57]">
-                <strong className="text-[#1a3a52]">{post.likes}</strong> likes
-              </span>
-              {post.comments > 0 && (
-                <span className="text-sm text-[#605A57]">
-                  <strong className="text-[#1a3a52]">{post.comments}</strong>{" "}
-                  comments
-                </span>
-              )}
-              {post.shares > 0 && (
-                <span className="text-sm text-[#605A57]">
-                  <strong className="text-[#1a3a52]">{post.shares}</strong>{" "}
-                  shares
-                </span>
-              )}
-            </div>
-
-            {/* View on Facebook Button */}
-            {post.permalink && (
-              <div className="flex justify-center">
-                <a
-                  href={post.permalink}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex items-center gap-2 px-6 py-3 bg-[#1877f2] text-white text-sm font-semibold rounded-full hover:bg-[#1877f2]/90 transition-colors"
-                >
-                  <Facebook className="w-4 h-4" />
-                  View on Facebook
-                  <ExternalLink className="w-4 h-4" />
-                </a>
-              </div>
-            )}
-
-            {/* Share Links */}
-            <div className="border-t border-[rgba(55,50,47,0.12)] pt-6 flex flex-col gap-4">
-              <h3 className="text-sm font-semibold text-[#6B635D] uppercase tracking-[0.3em]">
-                Share this story
-              </h3>
-              <div className="flex flex-wrap gap-3">
-                {shareLinks.map((share) => (
+              {/* View on Facebook Button */}
+              {post.permalink && (
+                <div className="flex justify-center">
                   <a
-                    key={share.label}
-                    href={share.href}
+                    href={post.permalink}
                     target="_blank"
-                    rel="noreferrer"
-                    title={share.title}
-                    className="inline-flex items-center gap-2 px-4 py-2 rounded-full border border-[rgba(55,50,47,0.2)] text-sm font-semibold text-[#37322F] hover:bg-[#37322F] hover:text-white transition-colors"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-2 px-6 py-3 bg-[#1877f2] text-white text-sm font-semibold rounded-full hover:bg-[#1877f2]/90 transition-colors"
                   >
-                    {share.label}
-                    <span aria-hidden>↗</span>
+                    <Facebook className="w-4 h-4" />
+                    View on Facebook
+                    <ExternalLink className="w-4 h-4" />
                   </a>
-                ))}
+                </div>
+              )}
+
+              {/* Share Links */}
+              <div className="border-t border-[rgba(55,50,47,0.12)] pt-6 flex flex-col gap-4">
+                <h3 className="text-sm font-semibold text-[#6B635D] uppercase tracking-[0.3em]">
+                  Share this story
+                </h3>
+                <div className="flex flex-wrap gap-3">
+                  {shareLinks.map((share) => (
+                    <a
+                      key={share.label}
+                      href={share.href}
+                      target="_blank"
+                      rel="noreferrer"
+                      title={share.title}
+                      className="inline-flex items-center gap-2 px-4 py-2 rounded-full border border-[rgba(55,50,47,0.2)] text-sm font-semibold text-[#37322F] hover:bg-[#37322F] hover:text-white transition-colors"
+                    >
+                      {share.label}
+                      <span aria-hidden>↗</span>
+                    </a>
+                  ))}
+                </div>
               </div>
             </div>
           </div>
         </div>
-      </div>
+      </GsapEditorialReveal>
 
       <FooterSection settings={settings} />
     </>

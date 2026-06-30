@@ -1,285 +1,190 @@
-import { getImageUrl } from "@/lib/sanity/image";
-import type { Settings } from "@/lib/sanity/types";
-import {
-    ExternalLink,
-    Facebook,
-    Github,
-    Instagram,
-    Linkedin,
-    Mail,
-    MapPin,
-    Phone,
-    Twitter,
-    Youtube,
-} from "lucide-react";
-import Image from "next/image";
 import Link from "next/link";
+import {
+  ExternalLink,
+  Facebook,
+  Github,
+  Instagram,
+  Linkedin,
+  Twitter,
+  Youtube,
+} from "lucide-react";
 
-interface FooterSectionProps {
-    settings: Settings;
+import GsapEditorialReveal from "@/components/gsap-editorial-reveal";
+import type { Settings } from "@/lib/sanity/types";
+
+type FooterSectionProps = {
+  settings: Settings;
+};
+
+const navigateLinks = [
+  { href: "/", label: "Home" },
+  { href: "/programs", label: "Programs" },
+  { href: "/academics", label: "Academics" },
+  { href: "/news", label: "News" },
+  { href: "/portal", label: "Portal" },
+];
+
+const legalLinks = [
+  { href: "/about", label: "Institutional Information" },
+  { href: "/news", label: "Official Updates" },
+];
+
+function getSocialIcon(platform: string) {
+  const normalizedPlatform = platform.toLowerCase();
+
+  if (normalizedPlatform.includes("facebook"))
+    return <Facebook className="size-3.5" />;
+  if (
+    normalizedPlatform.includes("twitter") ||
+    normalizedPlatform.includes("x")
+  )
+    return <Twitter className="size-3.5" />;
+  if (normalizedPlatform.includes("linkedin"))
+    return <Linkedin className="size-3.5" />;
+  if (normalizedPlatform.includes("github"))
+    return <Github className="size-3.5" />;
+  if (normalizedPlatform.includes("instagram"))
+    return <Instagram className="size-3.5" />;
+  if (normalizedPlatform.includes("youtube"))
+    return <Youtube className="size-3.5" />;
+
+  return <ExternalLink className="size-3.5" />;
+}
+
+function getDisplayName(settings: Settings) {
+  const title = settings.siteTitle || "Data Center College of The Philippines";
+
+  return title
+    .replace("of Baguio City, Inc.", "")
+    .replace("Of Baguio City, Inc.", "")
+    .replace(/\s+/g, " ")
+    .trim();
 }
 
 export default function FooterSection({ settings }: FooterSectionProps) {
-    const currentYear = new Date().getFullYear();
-    const socialLinks = settings.socialLinks || [];
+  const currentYear = new Date().getFullYear();
+  const socialLinks = settings.socialLinks || [];
+  const primaryContact = settings.contactDirectory?.[0];
+  const primaryAddress = settings.addresses?.[0];
+  const phone =
+    primaryContact?.phone || primaryAddress?.phone || "(074) 442 4160";
+  const email = primaryContact?.email || "baguio-campus@dccp.edu.ph";
+  const address =
+    primaryAddress?.address ||
+    "118 Upper Bonifacio Street Baguio City 2600, Benguet, Philippines";
+  const legalName =
+    settings.siteTitle || "Data Center College of The Philippines";
+  const displayName = getDisplayName(settings);
 
-    // Extract primary logo URL
-    const logoUrl =
-        getImageUrl(settings.logos?.primary, 192, 192) ||
-        settings.logos?.primary?.externalUrl ||
-        "/android-chrome-192x192.png";
-
-    const logoAlt = settings.logos?.primary?.alt || `${settings.shortTitle || settings.siteTitle} Logo`;
-
-    // Helper to get social icon
-    const getSocialIcon = (platform: string) => {
-        const p = platform.toLowerCase();
-        if (p.includes("facebook")) return <Facebook className="w-4 h-4" />;
-        if (p.includes("twitter") || p.includes("x")) return <Twitter className="w-4 h-4" />;
-        if (p.includes("linkedin")) return <Linkedin className="w-4 h-4" />;
-        if (p.includes("github")) return <Github className="w-4 h-4" />;
-        if (p.includes("instagram")) return <Instagram className="w-4 h-4" />;
-        if (p.includes("youtube")) return <Youtube className="w-4 h-4" />;
-        return <ExternalLink className="w-4 h-4" />;
-    };
-
-    // Extract contact info
-    const primaryAddress = settings.addresses?.[0];
-    const primaryContact = settings.contactDirectory?.[0];
-
-    return (
-        <footer className="w-full relative overflow-hidden bg-gradient-to-b from-transparent to-primary/20">
-            {/* Decorative Pattern Overlay - Scaled down for footer */}
-            <div className="absolute bottom-0 left-1/2 transform -translate-x-1/2 z-0 pointer-events-none opacity-[0.03]">
-                <img
-                    src="/mask-group-pattern.svg"
-                    alt=""
-                    className="w-[1000px] h-auto mix-blend-multiply"
-                    style={{
-                        filter: "hue-rotate(15deg) saturate(0.7) brightness(1.2)",
-                    }}
-                />
+  return (
+    <GsapEditorialReveal>
+      <footer className="relative left-1/2 w-screen -translate-x-1/2 border-t border-border bg-background text-primary">
+        <div className="mx-auto max-w-[1440px] px-6 py-16 sm:px-10 lg:px-20 lg:py-24">
+          <div className="grid gap-12 lg:grid-cols-[1.4fr_0.9fr] lg:items-start">
+            <div data-gsap-reveal className="space-y-4">
+              <p className="text-sm font-bold tracking-tight text-primary">
+                {phone}
+              </p>
+              <a
+                href={`mailto:${email}`}
+                className="block max-w-fit text-3xl font-bold tracking-[-0.045em] text-primary transition-colors hover:text-accent sm:text-4xl lg:text-5xl"
+              >
+                {email}
+              </a>
+              <p className="max-w-xl pt-3 text-sm leading-6 text-muted-foreground">
+                {address}
+              </p>
             </div>
 
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 lg:py-16 relative z-10">
-                <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-8">
-                    {/* Brand Section - Takes up 4 columns on large screens */}
-                    <div className="lg:col-span-4 space-y-6">
-                        <Link href="/" className="flex items-start gap-3 group w-fit">
-                            <Image
-                                src={logoUrl}
-                                className="h-12 w-12 rounded-full bg-white border border-stone-200 shadow-sm mt-1"
-                                alt={logoAlt}
-                                width={48}
-                                height={48}
-                            />
-                            <div className="flex flex-col">
-                                {/* Main Title */}
-                                <span className="text-primary text-xl font-bold leading-tight font-serif tracking-tight">
-                                    Data Center College
-                                </span>
+            <div
+              data-gsap-reveal
+              className="grid grid-cols-2 gap-10 sm:gap-16 lg:justify-self-end"
+            >
+              <nav aria-label="Footer navigation">
+                <h2 className="mb-6 text-sm font-medium text-muted-foreground">
+                  Navigate
+                </h2>
+                <ul className="grid gap-3">
+                  {navigateLinks.map((link) => (
+                    <li key={link.href}>
+                      <Link
+                        href={link.href}
+                        className="text-xl font-bold leading-none tracking-[-0.035em] text-primary transition-colors hover:text-accent"
+                      >
+                        {link.label}
+                      </Link>
+                    </li>
+                  ))}
+                </ul>
+              </nav>
 
-                                {/* Subtitle Lines */}
-                                <span
-                                    className="text-foreground/80 text-lg font-semibold leading-none italic -mt-1"
-                                    style={{
-                                        fontFamily: "'Brush Script MT', cursive",
-                                    }}
-                                >
-                                    of The Philippines
-                                </span>
-                                <span className="text-muted-foreground text-[10px] font-medium leading-tight tracking-wide uppercase mt-0.5">
-                                    of Baguio City, Inc.
-                                </span>
-                            </div>
-                        </Link>
-
-                        <div className="space-y-4 pl-1">
-                            {primaryAddress && (
-                                <div className="flex items-start gap-3 text-sm text-muted-foreground">
-                                    <MapPin className="w-4 h-4 shrink-0 mt-0.5 text-primary/70" />
-                                    <span className="leading-relaxed max-w-xs">{primaryAddress.address}</span>
-                                </div>
-                            )}
-                            <div className="flex flex-col gap-2">
-                                {primaryContact?.phone && (
-                                    <div className="flex items-center gap-3 text-sm text-muted-foreground">
-                                        <Phone className="w-4 h-4 shrink-0 text-primary/70" />
-                                        <a
-                                            href={`tel:${primaryContact.phone}`}
-                                            className="hover:text-primary transition-colors"
-                                        >
-                                            {primaryContact.phone}
-                                        </a>
-                                    </div>
-                                )}
-                                {primaryContact?.email && (
-                                    <div className="flex items-center gap-3 text-sm text-muted-foreground">
-                                        <Mail className="w-4 h-4 shrink-0 text-primary/70" />
-                                        <a
-                                            href={`mailto:${primaryContact.email}`}
-                                            className="hover:text-primary transition-colors"
-                                        >
-                                            {primaryContact.email}
-                                        </a>
-                                    </div>
-                                )}
-                            </div>
-                        </div>
-                    </div>
-
-                    {/* Links Section - Takes up 8 columns on large screens */}
-                    <div className="lg:col-span-8 grid grid-cols-2 md:grid-cols-3 gap-8">
-                        {/* Programs */}
-                        <div>
-                            <h4 className="text-sm font-semibold text-foreground mb-4 uppercase tracking-wider">
-                                Programs
-                            </h4>
-                            <ul className="space-y-2.5">
-                                <ul className="space-y-2.5">
-                                    <li>
-                                        <Link
-                                            href="/programs/bsit"
-                                            className="text-sm text-muted-foreground hover:text-primary transition-colors"
-                                        >
-                                            BS Information Technology
-                                        </Link>
-                                    </li>
-                                    <li>
-                                        <Link
-                                            href="/programs/bsba"
-                                            className="text-sm text-muted-foreground hover:text-primary transition-colors"
-                                        >
-                                            BS Business Administration
-                                        </Link>
-                                    </li>
-                                    <li>
-                                        <Link
-                                            href="/programs/bshrm"
-                                            className="text-sm text-muted-foreground hover:text-primary transition-colors"
-                                        >
-                                            BS Hotel & Restaurant Mgt.
-                                        </Link>
-                                    </li>
-                                    <li>
-                                        <Link
-                                            href="/courses"
-                                            className="text-sm text-primary font-medium hover:underline flex items-center gap-1 mt-2"
-                                        >
-                                            View All Programs &rarr;
-                                        </Link>
-                                    </li>
-                                </ul>
-                            </ul>
-                        </div>
-
-                        {/* Quick Links */}
-                        <div>
-                            <h4 className="text-sm font-semibold text-foreground mb-4 uppercase tracking-wider">
-                                Quick Links
-                            </h4>
-                            <ul className="space-y-2.5">
-                                <li>
-                                    <Link
-                                        href="/about"
-                                        className="text-sm text-muted-foreground hover:text-primary transition-colors"
-                                    >
-                                        About Us
-                                    </Link>
-                                </li>
-                                <li>
-                                    <Link
-                                        href="/news"
-                                        className="text-sm text-muted-foreground hover:text-primary transition-colors"
-                                    >
-                                        News & Updates
-                                    </Link>
-                                </li>
-                                <li>
-                                    <Link
-                                        href="/admissions"
-                                        className="text-sm text-muted-foreground hover:text-primary transition-colors"
-                                    >
-                                        Admissions
-                                    </Link>
-                                </li>
-                                <li>
-                                    <Link
-                                        href="/portal"
-                                        className="text-sm text-muted-foreground hover:text-primary transition-colors"
-                                    >
-                                        Student Portal
-                                    </Link>
-                                </li>
-                                <li>
-                                    <Link
-                                        href="/careers"
-                                        className="text-sm text-muted-foreground hover:text-primary transition-colors"
-                                    >
-                                        Careers
-                                    </Link>
-                                </li>
-                            </ul>
-                        </div>
-
-                        {/* Legal / Resources */}
-                        <div>
-                            <h4 className="text-sm font-semibold text-foreground mb-4 uppercase tracking-wider">
-                                Resources
-                            </h4>
-                            <ul className="space-y-2.5">
-                                <li>
-                                    <Link
-                                        href="/privacy"
-                                        className="text-sm text-muted-foreground hover:text-primary transition-colors"
-                                    >
-                                        Privacy Policy
-                                    </Link>
-                                </li>
-                                <li>
-                                    <Link
-                                        href="/terms"
-                                        className="text-sm text-muted-foreground hover:text-primary transition-colors"
-                                    >
-                                        Terms of Service
-                                    </Link>
-                                </li>
-                                <li>
-                                    <Link
-                                        href="/contact"
-                                        className="text-sm text-muted-foreground hover:text-primary transition-colors"
-                                    >
-                                        Contact Support
-                                    </Link>
-                                </li>
-                            </ul>
-                        </div>
-                    </div>
-                </div>
-
-                {/* Bottom Bar */}
-                <div className="mt-12 pt-8 border-t border-border/50 flex flex-col md:flex-row justify-between items-center gap-4">
-                    <p className="text-sm text-muted-foreground">
-                        &copy; {currentYear} {settings.siteTitle || "Data Center College"}. All rights reserved.
-                    </p>
-
-                    {/* Social Links */}
-                    <div className="flex items-center gap-2">
-                        {socialLinks.map((link, index) => (
-                            <a
-                                key={index}
-                                href={link.url}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="text-muted-foreground hover:text-primary hover:bg-primary/10 p-2 rounded-full transition-all"
-                                aria-label={`Visit our ${link.platform}`}
-                            >
-                                {getSocialIcon(link.platform)}
-                            </a>
-                        ))}
-                    </div>
-                </div>
+              <nav aria-label="Social links">
+                <h2 className="mb-6 text-sm font-medium text-muted-foreground">
+                  Social
+                </h2>
+                <ul className="grid gap-3">
+                  {socialLinks.length > 0 ? (
+                    socialLinks.map((link, index) => (
+                      <li key={`${link.platform}-${index}`}>
+                        <a
+                          href={link.url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="inline-flex items-center gap-2 text-xl font-bold leading-none tracking-[-0.035em] text-primary transition-colors hover:text-accent"
+                        >
+                          {link.platform}
+                          <span className="grid size-4 place-items-center rounded-full border border-border text-muted-foreground transition-colors group-hover:text-accent">
+                            {getSocialIcon(link.platform)}
+                          </span>
+                        </a>
+                      </li>
+                    ))
+                  ) : (
+                    <li className="text-sm leading-6 text-muted-foreground">
+                      Social links coming soon.
+                    </li>
+                  )}
+                </ul>
+              </nav>
             </div>
-        </footer>
-    );
+          </div>
+
+          <div
+            data-gsap-reveal
+            className="flex min-h-[220px] items-end justify-center py-12 sm:min-h-[280px] lg:min-h-[340px]"
+          >
+            <Link
+              href="/"
+              aria-label={`${legalName} homepage`}
+              className="max-w-[1120px] text-center font-sans text-[clamp(3.5rem,10vw,9.5rem)] font-black leading-[0.83] tracking-[-0.1em] text-primary transition-colors hover:text-accent"
+            >
+              {displayName}
+            </Link>
+          </div>
+        </div>
+
+        <div className="bg-primary px-6 py-9 text-primary-foreground/70 sm:px-10 lg:px-20">
+          <div
+            data-gsap-reveal
+            className="mx-auto flex max-w-[1440px] flex-col gap-5 text-sm md:flex-row md:items-center md:justify-between"
+          >
+            <p>
+              ©{currentYear} {legalName}. All rights reserved.
+            </p>
+            <div className="flex flex-wrap gap-8">
+              {legalLinks.map((link) => (
+                <Link
+                  key={link.href}
+                  href={link.href}
+                  className="transition-colors hover:text-accent"
+                >
+                  {link.label}
+                </Link>
+              ))}
+            </div>
+          </div>
+        </div>
+      </footer>
+    </GsapEditorialReveal>
+  );
 }
