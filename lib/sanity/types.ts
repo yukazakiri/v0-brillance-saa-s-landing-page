@@ -401,7 +401,10 @@ export interface Course {
   title: string;
   category: "ched" | "tesda" | "short" | "shs";
   description?: string;
+  heroImage?: SanityImage;
   duration: string;
+  creditHours?: number;
+  trainingHours?: string;
   highlights: string[];
   credential?: string;
   scholarshipsAvailable?: boolean;

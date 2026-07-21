@@ -389,12 +389,28 @@ const COURSES_QUERY = groq`
     _updatedAt,
     title,
     slug,
+    heroImage {
+      asset->{
+        _id,
+        url,
+        metadata {
+          dimensions,
+          lqip
+        }
+      },
+      alt,
+      externalUrl
+    },
     offeringCategory,
     description,
+    summary,
     careerPaths,
     status,
     credential,
+    duration,
     durationYears,
+    creditHours,
+    trainingHours,
     tuitionRange,
     scholarshipsAvailable,
     enrollmentCap,
@@ -445,8 +461,13 @@ function mapCourseToLocalCourse(course: SanityCourse): Course {
     slug: course.slug.current,
     title: course.title,
     category: course.offeringCategory,
-    description: course.description,
-    duration: formatDuration(course.durationYears, course.offeringCategory),
+    description: course.description ?? course.summary,
+    heroImage: course.heroImage,
+    duration:
+      course.duration ??
+      formatDuration(course.durationYears, course.offeringCategory),
+    creditHours: course.creditHours,
+    trainingHours: course.trainingHours,
     highlights,
     credential: course.credential,
     scholarshipsAvailable: course.scholarshipsAvailable,
@@ -622,7 +643,7 @@ const COURSE_BY_SLUG_QUERY = groq`
 `;
 
 const COURSE_SLUGS_QUERY = groq`
-  *[_type == "course" && defined(slug.current)]{
+  *[_type == "course" && status == "active" && defined(slug.current)]{
     "slug": slug.current
   }
 `;

@@ -1,539 +1,576 @@
-import {
-    ArrowLeft,
-    Award,
-    BookOpen,
-    Calendar,
-    CheckCircle2,
-    Clock,
-    DollarSign,
-    Download,
-    FileText,
-    GraduationCap,
-    Mail,
-    MapPin,
-    Phone,
-    Users,
-} from "lucide-react";
+import type { ReactNode } from "react";
 import type { Metadata } from "next";
-import { PortableText } from "next-sanity";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { PortableText } from "next-sanity";
+import {
+  ArrowLeft,
+  ArrowUpRight,
+  ChevronDown,
+  Download,
+  Mail,
+  Phone,
+} from "lucide-react";
 
 import CollegeHeader from "@/components/college-header";
 import FooterSection from "@/components/footer-section";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { buildImageUrl } from "@/lib/sanity/image";
-import { fetchCourseBySlug, fetchCourseSlugs, fetchSettings } from "@/lib/sanity/queries";
+import {
+  fetchCourseBySlug,
+  fetchCourseSlugs,
+  fetchSettings,
+} from "@/lib/sanity/queries";
 import type { Settings } from "@/lib/sanity/types";
 
 export const revalidate = 60;
 
-function getCategoryLabel(category?: string): string {
-    if (!category) return "Program";
-    const labels: Record<string, string> = {
-        ched: "CHED Program",
-        tesda: "TESDA Program",
-        short: "Short Course",
-    };
-    return labels[category] || category.toUpperCase();
+const CATEGORY_LABELS: Record<string, string> = {
+  ched: "College degree",
+  tesda: "TESDA program",
+  shs: "Senior High",
+  short: "Short course",
+};
+
+const DELIVERY_LABELS: Record<string, string> = {
+  "on-campus": "On campus",
+  hybrid: "Hybrid",
+  online: "Online",
+  modular: "Weekend / modular",
+};
+
+type DisclosureProps = {
+  index: string;
+  title: string;
+  description: string;
+  children: ReactNode;
+};
+
+function CourseDetailDisclosure({
+  index,
+  title,
+  description,
+  children,
+}: DisclosureProps) {
+  return (
+    <details className="group border-t border-border">
+      <summary className="grid cursor-pointer list-none gap-4 py-7 outline-none transition-colors hover:text-primary focus-visible:ring-[3px] focus-visible:ring-inset focus-visible:ring-ring/50 sm:grid-cols-[48px_minmax(0,1fr)_auto] sm:items-start sm:px-3 md:gap-8 md:py-9 [&::-webkit-details-marker]:hidden">
+        <span className="pt-1 font-mono text-xs text-muted-foreground">
+          {index}
+        </span>
+        <span>
+          <span className="block font-serif text-2xl font-semibold tracking-tight text-foreground sm:text-3xl">
+            {title}
+          </span>
+          <span className="mt-2 block max-w-[62ch] text-sm leading-relaxed text-muted-foreground">
+            {description}
+          </span>
+        </span>
+        <span className="mt-1 inline-flex size-9 items-center justify-center rounded-full border border-border text-foreground transition-transform duration-300 motion-reduce:transition-none group-open:rotate-180">
+          <ChevronDown aria-hidden="true" className="size-4" />
+        </span>
+      </summary>
+      <div className="pb-10 sm:grid sm:grid-cols-[48px_minmax(0,1fr)_auto] sm:px-3 md:gap-8 md:pb-12">
+        <div aria-hidden="true" />
+        <div className="max-w-[760px]">{children}</div>
+      </div>
+    </details>
+  );
 }
 
-function getDeliveryModeLabel(mode?: string): string {
-    const labels: Record<string, string> = {
-        "on-campus": "On Campus",
-        hybrid: "Hybrid",
-        online: "Online",
-        modular: "Weekend / Modular",
-    };
-    return mode ? labels[mode] || mode : "Contact for details";
-}
-
-function getLevelLabel(level?: string): string {
-    const labels: Record<string, string> = {
-        undergrad: "Undergraduate",
-        graduate: "Graduate",
-        tvet: "Technical / Vocational",
-    };
-    return level ? labels[level] || level : "";
+function NumberedList({ items }: { items: string[] }) {
+  return (
+    <ol className="divide-y divide-border border-y border-border">
+      {items.map((item, index) => (
+        <li
+          key={`${item}-${index}`}
+          className="grid gap-3 py-4 sm:grid-cols-[36px_minmax(0,1fr)] sm:py-5"
+        >
+          <span className="font-mono text-xs text-muted-foreground">
+            {String(index + 1).padStart(2, "0")}
+          </span>
+          <span className="text-sm leading-relaxed text-foreground sm:text-base">
+            {item}
+          </span>
+        </li>
+      ))}
+    </ol>
+  );
 }
 
 export async function generateStaticParams() {
-    const slugs = await fetchCourseSlugs();
-    return slugs.map(slug => ({ slug }));
+  const slugs = await fetchCourseSlugs();
+  return slugs.map((slug) => ({ slug }));
 }
 
-export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
-    const { slug } = await params;
-    const course = await fetchCourseBySlug(slug);
-    if (!course) return {};
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ slug: string }>;
+}): Promise<Metadata> {
+  const { slug } = await params;
+  const course = await fetchCourseBySlug(slug);
+  if (!course) return {};
 
-    const title = course.seo?.metaTitle || `${course.title} - Data Center College`;
-    const description =
-        course.seo?.metaDescription ||
-        course.summary ||
-        `Learn more about ${course.title} at Data Center College of The Philippines`;
-    const ogImage = buildImageUrl(course.seo?.shareImage ?? course.heroImage);
-    const ogAlt = course.seo?.shareImage?.alt ?? course.heroImage?.alt ?? course.title;
+  const title =
+    course.seo?.metaTitle || `${course.title} - Data Center College`;
+  const description =
+    course.seo?.metaDescription ||
+    course.summary ||
+    `Learn more about ${course.title} at Data Center College of The Philippines`;
+  const ogImage = buildImageUrl(course.seo?.shareImage ?? course.heroImage);
+  const ogAlt =
+    course.seo?.shareImage?.alt ?? course.heroImage?.alt ?? course.title;
 
-    return {
-        title,
-        description,
-        openGraph: ogImage
-            ? {
-                  title,
-                  description,
-                  images: [
-                      {
-                          url: ogImage,
-                          width: 1200,
-                          height: 630,
-                          alt: ogAlt,
-                      },
-                  ],
-              }
-            : undefined,
-    };
+  return {
+    title,
+    description,
+    openGraph: ogImage
+      ? {
+          title,
+          description,
+          images: [{ url: ogImage, width: 1200, height: 630, alt: ogAlt }],
+        }
+      : undefined,
+  };
 }
 
-export default async function CoursePage({ params }: { params: Promise<{ slug: string }> }) {
-    const { slug } = await params;
-    const [course, settings] = await Promise.all([fetchCourseBySlug(slug), fetchSettings()]);
+export default async function CoursePage({
+  params,
+}: {
+  params: Promise<{ slug: string }>;
+}) {
+  const { slug } = await params;
+  const [course, settings] = await Promise.all([
+    fetchCourseBySlug(slug),
+    fetchSettings(),
+  ]);
 
-    if (!course) {
-        notFound();
-    }
+  if (!course) notFound();
 
-    const siteSettings: Settings = settings ?? {
-        _id: "default",
-        _type: "settings",
-        siteTitle: "Data Center College of The Philippines of Baguio City, Inc.",
-        shortTitle: "Data Center College",
-        tagline: "Empowering the next generation of IT professionals, business leaders, and innovators",
-    };
+  const siteSettings: Settings = settings ?? {
+    _id: "default",
+    _type: "settings",
+    siteTitle: "Data Center College of The Philippines of Baguio City, Inc.",
+    shortTitle: "Data Center College",
+  };
 
-    const categoryLabel = getCategoryLabel(course.offeringCategory);
-    const deliveryModeLabel = getDeliveryModeLabel(course.deliveryMode);
-    const levelLabel = getLevelLabel(course.level);
+  const primaryContact =
+    siteSettings.contactDirectory?.find((contact) =>
+      Boolean(contact.phone || contact.email),
+    ) ?? siteSettings.contactDirectory?.[0];
+  const admissionsPhone =
+    course.admissionsContact?.phone ?? primaryContact?.phone;
+  const admissionsEmail =
+    course.admissionsContact?.email ?? primaryContact?.email;
+  const categoryLabel =
+    CATEGORY_LABELS[course.offeringCategory] ?? "Academic program";
+  const deliveryLabel = course.deliveryMode
+    ? (DELIVERY_LABELS[course.deliveryMode] ?? course.deliveryMode)
+    : "Contact admissions";
+  const duration =
+    course.duration ?? course.trainingHours ?? "Contact admissions";
+  const isDegree = Boolean(course.creditHours);
+  const studyLoad = isDegree
+    ? `${course.creditHours} units`
+    : (course.trainingHours ?? "Not listed");
+  const studyLoadLabel = isDegree ? "Total units" : "Training hours";
+  const applyHref = course.cta?.url || "/apply";
+  const applyLabel = course.cta?.label || "Apply now";
+  const isExternalApplyLink = /^https?:\/\//.test(applyHref);
 
-    return (
-        <>
-            <CollegeHeader settings={siteSettings} />
+  const hasProgramContent = Boolean(
+    course.highlights?.length || course.learningOutcomes?.length,
+  );
+  const hasCurriculum = Boolean(course.curriculumStructure?.length);
+  const hasCareerContent = Boolean(course.outcomes?.length);
+  const hasAdmissionsContent = Boolean(
+    course.admissionsRequirements?.length ||
+    course.applicationDeadlines?.length ||
+    course.tuition ||
+    course.financialAidHighlight ||
+    admissionsPhone ||
+    admissionsEmail,
+  );
 
-            <div className="w-full mt-10 px-2 sm:px-4 md:px-8 lg:px-12 pt-10 pb-6">
-                <div className="w-full max-w-[1000px] mx-auto flex flex-col gap-10">
-                    <section className="relative overflow-hidden border-y border-border bg-card">
-                        <div className="absolute inset-0 opacity-5">
-                            <div
-                                className="absolute inset-0"
-                                style={{
-                                    backgroundImage:
-                                        "repeating-linear-gradient(135deg, rgba(55,50,47,0.04) 0, rgba(55,50,47,0.04) 1px, transparent 1px, transparent 16px)",
-                                }}
-                            ></div>
-                        </div>
+  return (
+    <>
+      <CollegeHeader settings={siteSettings} />
 
-                        <div className="relative z-10 px-4 sm:px-8 lg:px-12 py-12 flex flex-col gap-8 text-foreground">
-                            <div className="flex flex-wrap items-center justify-between gap-4">
-                                <Button asChild variant="outline">
-                                    <Link href="/#programs" className="flex items-center gap-2">
-                                        <ArrowLeft className="w-4 h-4" />
-                                        Back to Programs
-                                    </Link>
-                                </Button>
-                                <Badge variant="secondary" className="tracking-[0.18em] uppercase text-xs">
-                                    {categoryLabel}
-                                </Badge>
-                            </div>
+      <main className="min-h-screen w-full pt-24">
+        <section className="border-b border-border">
+          <div className="mx-auto w-full max-w-[1200px] px-4 py-12 sm:px-6 sm:py-16 md:px-8 md:py-24">
+            <Link
+              href="/courses"
+              className="inline-flex items-center gap-2 text-sm font-medium text-muted-foreground outline-none transition-colors hover:text-foreground focus-visible:ring-[3px] focus-visible:ring-ring/50"
+            >
+              <ArrowLeft aria-hidden="true" className="size-4" />
+              All programs
+            </Link>
 
-                            <div className="space-y-5 max-w-3xl">
-                                {course.code && (
-                                    <Badge variant="outline" className="tracking-[0.2em] text-xs font-mono">
-                                        {course.code}
-                                    </Badge>
-                                )}
-                                <h1 className="text-[30px] sm:text-[42px] lg:text-[54px] leading-tight font-serif text-foreground">
-                                    {course.title}
-                                </h1>
-                                {course.credential && (
-                                    <p className="text-lg sm:text-xl text-muted-foreground font-semibold">
-                                        {course.credential}
-                                    </p>
-                                )}
-                                {course.summary && (
-                                    <p className="text-base sm:text-lg text-muted-foreground leading-relaxed">
-                                        {course.summary}
-                                    </p>
-                                )}
-                            </div>
+            <div className="mt-12 max-w-[1040px] sm:mt-16">
+              <div className="flex flex-wrap items-center gap-3 text-xs font-medium uppercase tracking-[0.2em] text-muted-foreground">
+                <span>{categoryLabel}</span>
+                {course.code && <Badge variant="outline">{course.code}</Badge>}
+              </div>
 
-                            <div className="flex flex-wrap items-center gap-4 text-sm text-muted-foreground">
-                                {course.duration && (
-                                    <span className="inline-flex items-center gap-2 px-3 py-1.5 bg-muted rounded-full border border-border">
-                                        <Clock className="w-4 h-4" />
-                                        {course.duration}
-                                    </span>
-                                )}
-                                {course.deliveryMode && (
-                                    <span className="inline-flex items-center gap-2 px-3 py-1.5 bg-muted rounded-full border border-border">
-                                        <MapPin className="w-4 h-4" />
-                                        {deliveryModeLabel}
-                                    </span>
-                                )}
-                                {course.department && (
-                                    <span className="inline-flex items-center gap-2 px-3 py-1.5 bg-muted rounded-full border border-border">
-                                        <BookOpen className="w-4 h-4" />
-                                        {course.department.title}
-                                    </span>
-                                )}
-                                {levelLabel && (
-                                    <span className="inline-flex items-center gap-2 px-3 py-1.5 bg-muted rounded-full border border-border">
-                                        <Award className="w-4 h-4" />
-                                        {levelLabel}
-                                    </span>
-                                )}
-                            </div>
-                        </div>
-                    </section>
+              <h1 className="mt-6 max-w-[18ch] text-balance font-serif text-5xl font-semibold leading-[0.94] tracking-tight text-foreground sm:text-6xl md:text-7xl lg:text-8xl">
+                {course.title}
+              </h1>
 
-                    <div className="w-full flex flex-col lg:flex-row gap-8">
-                        <div className="flex-1 flex flex-col gap-8">
-                            {course.overview && course.overview.length > 0 && (
-                                <section className="bg-card border border-border rounded-lg p-6 md:p-8">
-                                    <h2 className="text-2xl font-serif font-semibold text-foreground mb-4">Overview</h2>
-                                    <div className="prose prose-neutral max-w-none text-foreground">
-                                        <PortableText value={course.overview} />
-                                    </div>
-                                </section>
-                            )}
+              {course.summary && (
+                <p className="mt-8 max-w-[66ch] text-pretty text-base leading-relaxed text-muted-foreground sm:text-lg md:text-xl">
+                  {course.summary}
+                </p>
+              )}
 
-                            {course.highlights && course.highlights.length > 0 && course.level !== "undergrad" && (
-                                <section className="bg-card border border-border rounded-lg p-6 md:p-8">
-                                    <h2 className="text-2xl font-serif font-semibold text-foreground mb-4">
-                                        Program Highlights
-                                    </h2>
-                                    <ul className="space-y-3">
-                                        {course.highlights.map((highlight, idx) => (
-                                            <li key={idx} className="flex items-start gap-3 text-foreground">
-                                                <CheckCircle2 className="w-5 h-5 text-primary flex-shrink-0 mt-0.5" />
-                                                <span>{highlight}</span>
-                                            </li>
-                                        ))}
-                                    </ul>
-                                </section>
-                            )}
+              <div className="mt-8 flex flex-wrap gap-3">
+                <Button asChild size="lg">
+                  {isExternalApplyLink ? (
+                    <a
+                      href={applyHref}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      {applyLabel}
+                      <ArrowUpRight aria-hidden="true" />
+                    </a>
+                  ) : (
+                    <Link href={applyHref}>
+                      {applyLabel}
+                      <ArrowUpRight aria-hidden="true" />
+                    </Link>
+                  )}
+                </Button>
+                {admissionsEmail && (
+                  <Button asChild size="lg" variant="outline">
+                    <a href={`mailto:${admissionsEmail}`}>
+                      <Mail aria-hidden="true" />
+                      Ask admissions
+                    </a>
+                  </Button>
+                )}
+              </div>
+            </div>
+          </div>
+        </section>
 
-                            {course.learningOutcomes && course.learningOutcomes.length > 0 && course.level !== "undergrad" && (
-                                <section className="bg-card border border-border rounded-lg p-6 md:p-8">
-                                    <h2 className="text-2xl font-serif font-semibold text-foreground mb-4">
-                                        Learning Outcomes
-                                    </h2>
-                                    <p className="text-muted-foreground mb-4">
-                                        Upon completion of this program, students will be able to:
-                                    </p>
-                                    <ul className="space-y-3">
-                                        {course.learningOutcomes.map((outcome, idx) => (
-                                            <li key={idx} className="flex items-start gap-3 text-foreground">
-                                                <CheckCircle2 className="w-5 h-5 text-primary flex-shrink-0 mt-0.5" />
-                                                <span>{outcome}</span>
-                                            </li>
-                                        ))}
-                                    </ul>
-                                </section>
-                            )}
+        <section aria-label="Program facts" className="border-b border-border">
+          <div className="mx-auto grid w-full max-w-[1200px] grid-cols-2 px-4 sm:px-6 md:grid-cols-4 md:px-8">
+            {[
+              ["Duration", duration],
+              [studyLoadLabel, studyLoad],
+              ["Format", deliveryLabel],
+              ["Credential", course.credential ?? categoryLabel],
+            ].map(([label, value], index) => (
+              <dl
+                key={label}
+                className={`py-6 sm:py-8 md:px-7 ${index % 2 === 1 ? "border-l border-border" : ""} ${index > 1 ? "border-t border-border md:border-t-0" : ""} ${index > 0 ? "md:border-l md:border-border" : ""}`}
+              >
+                <dt className="text-xs font-medium uppercase tracking-[0.16em] text-muted-foreground">
+                  {label}
+                </dt>
+                <dd className="mt-2 text-sm font-medium text-foreground sm:text-base">
+                  {value}
+                </dd>
+              </dl>
+            ))}
+          </div>
+        </section>
 
-                            {course.curriculumStructure && course.curriculumStructure.length > 0 && (
-                                <section className="bg-card border border-border rounded-lg p-6 md:p-8">
-                                    <h2 className="text-2xl font-serif font-semibold text-foreground mb-6">
-                                        Curriculum Structure
-                                    </h2>
-                                    <div className="space-y-4">
-                                        {course.curriculumStructure.map((item, idx) => (
-                                            <div key={idx} className="border-l-2 border-primary pl-4 py-2">
-                                                {item.term && (
-                                                    <h3 className="text-lg font-semibold text-foreground mb-1">
-                                                        {item.term}
-                                                    </h3>
-                                                )}
-                                                {item.description && (
-                                                    <p className="text-sm text-muted-foreground">{item.description}</p>
-                                                )}
-                                            </div>
-                                        ))}
-                                    </div>
-                                </section>
-                            )}
-
-                            {course.outcomes && course.outcomes.length > 0 && (
-                                <section className="bg-card border border-border rounded-lg p-6 md:p-8">
-                                    <h2 className="text-2xl font-serif font-semibold text-foreground mb-4 flex items-center gap-2">
-                                        <GraduationCap className="w-6 h-6 text-primary" />
-                                        Career Opportunities
-                                    </h2>
-                                    <p className="text-muted-foreground mb-6">
-                                        Graduates of this program can pursue careers in:
-                                    </p>
-                                    <ul className="space-y-3">
-                                        {course.outcomes.map((path, idx) => (
-                                            <li key={idx} className="flex items-start gap-3 text-foreground">
-                                                <CheckCircle2 className="w-5 h-5 text-primary flex-shrink-0 mt-0.5" />
-                                                <span>{path}</span>
-                                            </li>
-                                        ))}
-                                    </ul>
-                                </section>
-                            )}
-
-                            {course.admissionsRequirements && course.admissionsRequirements.length > 0 && (
-                                <section className="bg-card border border-border rounded-lg p-6 md:p-8">
-                                    <h2 className="text-2xl font-serif font-semibold text-foreground mb-4">
-                                        Admissions Requirements
-                                    </h2>
-                                    <ul className="space-y-3">
-                                        {course.admissionsRequirements.map((req, idx) => (
-                                            <li key={idx} className="flex items-start gap-3 text-foreground">
-                                                <CheckCircle2 className="w-5 h-5 text-primary flex-shrink-0 mt-0.5" />
-                                                <span>{req}</span>
-                                            </li>
-                                        ))}
-                                    </ul>
-                                </section>
-                            )}
-
-                            {((course.prerequisites && course.prerequisites.length > 0) ||
-                                (course.prerequisiteNotes && course.prerequisiteNotes.length > 0)) && (
-                                <section className="bg-muted/50 border border-border rounded-lg p-6 md:p-8">
-                                    <h3 className="text-lg font-semibold text-foreground mb-4">Prerequisites</h3>
-                                    {course.prerequisites && course.prerequisites.length > 0 && (
-                                        <div className="mb-4">
-                                            <p className="text-sm text-muted-foreground mb-2">Required courses:</p>
-                                            <ul className="space-y-2">
-                                                {course.prerequisites.map(prereq => (
-                                                    <li key={prereq._id}>
-                                                        <Link
-                                                            href={`/courses/${prereq.slug.current}`}
-                                                            className="text-primary hover:underline"
-                                                        >
-                                                            {prereq.title}
-                                                        </Link>
-                                                    </li>
-                                                ))}
-                                            </ul>
-                                        </div>
-                                    )}
-                                    {course.prerequisiteNotes && course.prerequisiteNotes.length > 0 && (
-                                        <ul className="space-y-2 text-sm text-muted-foreground">
-                                            {course.prerequisiteNotes.map((note, idx) => (
-                                                <li key={idx}>• {note}</li>
-                                            ))}
-                                        </ul>
-                                    )}
-                                </section>
-                            )}
-                        </div>
-
-                        <aside className="lg:w-[320px] flex flex-col gap-6">
-                            {/* Quick Info Card */}
-                            <div className="bg-card border border-border rounded-lg p-6 sticky top-4">
-                                <h3 className="text-lg font-serif font-semibold text-foreground mb-6">
-                                    Program Details
-                                </h3>
-                                <div className="space-y-5">
-                                    {course.creditHours && course.level !== "undergrad" && (
-                                        <div>
-                                            <div className="flex items-center gap-2 text-sm text-muted-foreground mb-1">
-                                                <FileText className="w-4 h-4" />
-                                                Credit Hours / Units
-                                            </div>
-                                            <div className="text-base font-medium text-foreground">
-                                                {course.creditHours}
-                                            </div>
-                                        </div>
-                                    )}
-
-                                    {course.trainingHours && (
-                                        <div>
-                                            <div className="flex items-center gap-2 text-sm text-muted-foreground mb-1">
-                                                <Clock className="w-4 h-4" />
-                                                Training Hours
-                                            </div>
-                                            <div className="text-base font-medium text-foreground">
-                                                {course.trainingHours}
-                                            </div>
-                                        </div>
-                                    )}
-
-                                    {(course.tuition || course.level === "undergrad") && (
-                                        <div>
-                                            <div className="flex items-center gap-2 text-sm text-muted-foreground mb-1">
-                                                <DollarSign className="w-4 h-4" />
-                                                Tuition
-                                            </div>
-                                            <div className="text-base font-medium text-foreground">
-                                                {course.level === "undergrad" ? "₱14,000 - ₱20,000" : course.tuition}
-                                            </div>
-                                        </div>
-                                    )}
-
-                                    {course.financialAidHighlight && course.level !== "undergrad" && (
-                                        <div className="bg-green-500/10 border border-green-500/20 rounded-lg p-3">
-                                            <div className="flex items-center gap-2 text-sm font-medium text-green-700 mb-1">
-                                                <Award className="w-4 h-4" />
-                                                Financial Aid
-                                            </div>
-                                            <p className="text-xs text-green-700/80">{course.financialAidHighlight}</p>
-                                        </div>
-                                    )}
-
-                                    {course.semesterAvailability && course.semesterAvailability.length > 0 && (
-                                        <div>
-                                            <div className="flex items-center gap-2 text-sm text-muted-foreground mb-2">
-                                                <Calendar className="w-4 h-4" />
-                                                Offered In
-                                            </div>
-                                            <div className="flex flex-wrap gap-1.5">
-                                                {course.semesterAvailability.map((sem, idx) => (
-                                                    <Badge key={idx} variant="secondary" className="text-xs">
-                                                        {sem}
-                                                    </Badge>
-                                                ))}
-                                            </div>
-                                        </div>
-                                    )}
-
-                                    {course.majors && course.majors.length > 0 && (
-                                        <div>
-                                            <div className="flex items-center gap-2 text-sm text-muted-foreground mb-2">
-                                                <GraduationCap className="w-4 h-4" />
-                                                Available Majors
-                                            </div>
-                                            <div className="flex flex-wrap gap-1.5">
-                                                {course.majors.map((major, idx) => (
-                                                    <Badge key={idx} variant="outline" className="text-xs">
-                                                        {major}
-                                                    </Badge>
-                                                ))}
-                                            </div>
-                                        </div>
-                                    )}
-
-                                    {course.syllabus && (
-                                        <div>
-                                            <Button asChild variant="outline" className="w-full" size="sm">
-                                                <a
-                                                    href={course.syllabus.asset.url}
-                                                    target="_blank"
-                                                    rel="noopener noreferrer"
-                                                >
-                                                    <Download className="w-4 h-4 mr-2" />
-                                                    Download Syllabus
-                                                </a>
-                                            </Button>
-                                        </div>
-                                    )}
-                                </div>
-
-                                <div className="mt-8 space-y-3">
-                                    {course.cta ? (
-                                        <Button asChild className="w-full">
-                                            <a
-                                                href={course.cta.url || "/#contact"}
-                                                target="_blank"
-                                                rel="noopener noreferrer"
-                                            >
-                                                {course.cta.label || "Apply Now"}
-                                            </a>
-                                        </Button>
-                                    ) : (
-                                        <Button asChild className="w-full">
-                                            <Link href="/apply">Apply Now</Link>
-                                        </Button>
-                                    )}
-                                    <Button asChild variant="outline" className="w-full">
-                                        <Link href="/apply">Request Information</Link>
-                                    </Button>
-                                </div>
-
-                                {course.admissionsContact && (
-                                    <div className="mt-6 pt-6 border-t border-border">
-                                        <h4 className="text-sm font-semibold text-foreground mb-3">
-                                            Contact Admissions
-                                        </h4>
-                                        <div className="space-y-2 text-sm text-muted-foreground">
-                                            {course.admissionsContact.name && (
-                                                <div className="flex items-center gap-2">
-                                                    <Users className="w-4 h-4" />
-                                                    {course.admissionsContact.name}
-                                                </div>
-                                            )}
-                                            {course.admissionsContact.email && (
-                                                <div className="flex items-center gap-2">
-                                                    <Mail className="w-4 h-4" />
-                                                    <a
-                                                        href={`mailto:${course.admissionsContact.email}`}
-                                                        className="hover:text-primary"
-                                                    >
-                                                        {course.admissionsContact.email}
-                                                    </a>
-                                                </div>
-                                            )}
-                                            {course.admissionsContact.phone && (
-                                                <div className="flex items-center gap-2">
-                                                    <Phone className="w-4 h-4" />
-                                                    <a
-                                                        href={`tel:${course.admissionsContact.phone}`}
-                                                        className="hover:text-primary"
-                                                    >
-                                                        {course.admissionsContact.phone}
-                                                    </a>
-                                                </div>
-                                            )}
-                                        </div>
-                                    </div>
-                                )}
-
-                                {course.applicationDeadlines && course.applicationDeadlines.length > 0 && (
-                                    <div className="mt-6 pt-6 border-t border-border">
-                                        <h4 className="text-sm font-semibold text-foreground mb-3">
-                                            Application Deadlines
-                                        </h4>
-                                        <ul className="space-y-2 text-sm text-muted-foreground">
-                                            {course.applicationDeadlines.map((deadline, idx) => (
-                                                <li key={idx} className="flex items-start gap-2">
-                                                    <Calendar className="w-4 h-4 mt-0.5 flex-shrink-0" />
-                                                    {deadline}
-                                                </li>
-                                            ))}
-                                        </ul>
-                                    </div>
-                                )}
-                            </div>
-
-                            {/* Related Offerings */}
-                            {course.relatedOfferings && course.relatedOfferings.length > 0 && (
-                                <div className="bg-muted/30 border border-border rounded-lg p-6">
-                                    <h3 className="text-lg font-semibold text-foreground mb-4">Related Programs</h3>
-                                    <div className="space-y-3">
-                                        {course.relatedOfferings.map(related => (
-                                            <Link
-                                                key={related._id}
-                                                href={`/courses/${related.slug.current}`}
-                                                className="block p-3 bg-card border border-border rounded hover:border-primary transition-colors"
-                                            >
-                                                <h4 className="text-sm font-medium text-foreground hover:text-primary">
-                                                    {related.title}
-                                                </h4>
-                                            </Link>
-                                        ))}
-                                    </div>
-                                </div>
-                            )}
-                        </aside>
-                    </div>
+        <section className="mx-auto w-full max-w-[1200px] px-4 py-14 sm:px-6 sm:py-20 md:px-8 md:py-24">
+          <div className="grid gap-12 border-b border-border pb-14 md:grid-cols-[220px_minmax(0,760px)] md:gap-16 md:pb-20">
+            <div>
+              <p className="text-xs font-medium uppercase tracking-[0.2em] text-muted-foreground">
+                Overview
+              </p>
+            </div>
+            <div>
+              {course.overview && course.overview.length > 0 ? (
+                <div className="prose prose-neutral max-w-none text-base leading-relaxed text-foreground sm:text-lg [&_p]:leading-relaxed">
+                  <PortableText value={course.overview} />
                 </div>
+              ) : (
+                <p className="text-base leading-relaxed text-foreground sm:text-lg">
+                  {course.summary ??
+                    "Contact admissions for the full program overview."}
+                </p>
+              )}
+            </div>
+          </div>
+
+          <div className="pt-14 sm:pt-20">
+            <div className="mb-8 max-w-[680px]">
+              <p className="text-xs font-medium uppercase tracking-[0.2em] text-muted-foreground">
+                Explore the program
+              </p>
+              <h2 className="mt-4 font-serif text-4xl font-semibold tracking-tight text-foreground sm:text-5xl">
+                Details, when you need them.
+              </h2>
+              <p className="mt-4 text-sm leading-relaxed text-muted-foreground sm:text-base">
+                Open a section to review the curriculum, learning direction,
+                career paths, or admissions information.
+              </p>
             </div>
 
-            <FooterSection settings={siteSettings} />
-        </>
-    );
+            <div className="border-b border-border">
+              {hasProgramContent && (
+                <CourseDetailDisclosure
+                  index="01"
+                  title="Learning experience"
+                  description="The skills, projects, and outcomes that shape this program."
+                >
+                  <div className="space-y-10">
+                    {course.highlights && course.highlights.length > 0 && (
+                      <div>
+                        <h3 className="mb-4 text-xs font-medium uppercase tracking-[0.16em] text-muted-foreground">
+                          Program highlights
+                        </h3>
+                        <NumberedList items={course.highlights} />
+                      </div>
+                    )}
+                    {course.learningOutcomes &&
+                      course.learningOutcomes.length > 0 && (
+                        <div>
+                          <h3 className="mb-4 text-xs font-medium uppercase tracking-[0.16em] text-muted-foreground">
+                            What you will learn
+                          </h3>
+                          <NumberedList items={course.learningOutcomes} />
+                        </div>
+                      )}
+                  </div>
+                </CourseDetailDisclosure>
+              )}
+
+              {hasCurriculum && (
+                <CourseDetailDisclosure
+                  index="02"
+                  title="Curriculum"
+                  description={`${course.curriculumStructure?.length ?? 0} stages from foundation to completion.`}
+                >
+                  <ol className="divide-y divide-border border-y border-border">
+                    {course.curriculumStructure?.map((item, index) => (
+                      <li
+                        key={`${item.term}-${index}`}
+                        className="grid gap-3 py-5 sm:grid-cols-[150px_minmax(0,1fr)] sm:gap-8"
+                      >
+                        <h3 className="font-serif text-xl font-semibold text-foreground">
+                          {item.term ?? `Stage ${index + 1}`}
+                        </h3>
+                        {item.description && (
+                          <p className="text-sm leading-relaxed text-muted-foreground sm:text-base">
+                            {item.description}
+                          </p>
+                        )}
+                      </li>
+                    ))}
+                  </ol>
+                </CourseDetailDisclosure>
+              )}
+
+              {hasCareerContent && (
+                <CourseDetailDisclosure
+                  index="03"
+                  title="Career direction"
+                  description="Roles and professional paths this program can help you pursue."
+                >
+                  <NumberedList items={course.outcomes ?? []} />
+                </CourseDetailDisclosure>
+              )}
+
+              {hasAdmissionsContent && (
+                <CourseDetailDisclosure
+                  index="04"
+                  title="Admissions & costs"
+                  description="Requirements, tuition, schedules, and the people who can help."
+                >
+                  <div className="grid gap-10 md:grid-cols-2 md:gap-12">
+                    {course.admissionsRequirements &&
+                      course.admissionsRequirements.length > 0 && (
+                        <div>
+                          <h3 className="mb-4 text-xs font-medium uppercase tracking-[0.16em] text-muted-foreground">
+                            Requirements
+                          </h3>
+                          <NumberedList items={course.admissionsRequirements} />
+                        </div>
+                      )}
+                    <div className="space-y-7">
+                      {course.tuition && (
+                        <dl className="border-t border-border pt-4">
+                          <dt className="text-xs uppercase tracking-[0.16em] text-muted-foreground">
+                            Tuition
+                          </dt>
+                          <dd className="mt-2 font-serif text-2xl font-semibold text-foreground">
+                            {course.tuition}
+                          </dd>
+                        </dl>
+                      )}
+                      {course.financialAidHighlight && (
+                        <dl className="border-t border-border pt-4">
+                          <dt className="text-xs uppercase tracking-[0.16em] text-muted-foreground">
+                            Financial aid
+                          </dt>
+                          <dd className="mt-2 text-sm leading-relaxed text-foreground">
+                            {course.financialAidHighlight}
+                          </dd>
+                        </dl>
+                      )}
+                      {course.applicationDeadlines &&
+                        course.applicationDeadlines.length > 0 && (
+                          <dl className="border-t border-border pt-4">
+                            <dt className="text-xs uppercase tracking-[0.16em] text-muted-foreground">
+                              Application schedule
+                            </dt>
+                            <dd className="mt-2 space-y-1 text-sm text-foreground">
+                              {course.applicationDeadlines.map((deadline) => (
+                                <span key={deadline} className="block">
+                                  {deadline}
+                                </span>
+                              ))}
+                            </dd>
+                          </dl>
+                        )}
+                      {(admissionsPhone || admissionsEmail) && (
+                        <div className="border-t border-border pt-4">
+                          <p className="text-xs uppercase tracking-[0.16em] text-muted-foreground">
+                            Admissions contact
+                          </p>
+                          <div className="mt-3 flex flex-col items-start gap-2 text-sm">
+                            {admissionsPhone && (
+                              <a
+                                href={`tel:${admissionsPhone}`}
+                                className="inline-flex items-center gap-2 text-foreground hover:text-primary"
+                              >
+                                <Phone aria-hidden="true" className="size-4" />
+                                {admissionsPhone}
+                              </a>
+                            )}
+                            {admissionsEmail && (
+                              <a
+                                href={`mailto:${admissionsEmail}`}
+                                className="inline-flex items-center gap-2 text-foreground hover:text-primary"
+                              >
+                                <Mail aria-hidden="true" className="size-4" />
+                                {admissionsEmail}
+                              </a>
+                            )}
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </CourseDetailDisclosure>
+              )}
+            </div>
+          </div>
+
+          {(course.majors?.length ||
+            course.semesterAvailability?.length ||
+            course.syllabus) && (
+            <div className="grid gap-8 border-b border-border py-12 sm:grid-cols-2 md:grid-cols-3 md:py-16">
+              {course.majors && course.majors.length > 0 && (
+                <dl>
+                  <dt className="text-xs uppercase tracking-[0.16em] text-muted-foreground">
+                    Available focus
+                  </dt>
+                  <dd className="mt-3 text-sm leading-relaxed text-foreground">
+                    {course.majors.join(", ")}
+                  </dd>
+                </dl>
+              )}
+              {course.semesterAvailability &&
+                course.semesterAvailability.length > 0 && (
+                  <dl>
+                    <dt className="text-xs uppercase tracking-[0.16em] text-muted-foreground">
+                      Offered
+                    </dt>
+                    <dd className="mt-3 text-sm leading-relaxed text-foreground">
+                      {course.semesterAvailability.join(" · ")}
+                    </dd>
+                  </dl>
+                )}
+              {course.syllabus && (
+                <div>
+                  <Button asChild variant="outline">
+                    <a
+                      href={course.syllabus.asset.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      <Download aria-hidden="true" />
+                      Download syllabus
+                    </a>
+                  </Button>
+                </div>
+              )}
+            </div>
+          )}
+
+          {course.relatedOfferings && course.relatedOfferings.length > 0 && (
+            <div className="py-12 md:py-16">
+              <p className="text-xs font-medium uppercase tracking-[0.16em] text-muted-foreground">
+                Related programs
+              </p>
+              <div className="mt-5 flex flex-col divide-y divide-border border-y border-border">
+                {course.relatedOfferings.map((related) => (
+                  <Link
+                    key={related._id}
+                    href={`/courses/${related.slug.current}`}
+                    className="group flex items-center justify-between gap-5 py-5 text-foreground outline-none transition-colors hover:text-primary focus-visible:ring-[3px] focus-visible:ring-inset focus-visible:ring-ring/50"
+                  >
+                    <span className="font-serif text-xl font-semibold sm:text-2xl">
+                      {related.title}
+                    </span>
+                    <ArrowUpRight
+                      aria-hidden="true"
+                      className="size-4 shrink-0"
+                    />
+                  </Link>
+                ))}
+              </div>
+            </div>
+          )}
+        </section>
+
+        <section className="border-t border-border bg-muted/30">
+          <div className="mx-auto flex w-full max-w-[1200px] flex-col gap-7 px-4 py-14 sm:px-6 sm:py-16 md:flex-row md:items-end md:justify-between md:px-8">
+            <div className="max-w-[680px]">
+              <p className="text-xs font-medium uppercase tracking-[0.2em] text-muted-foreground">
+                Your next step
+              </p>
+              <h2 className="mt-4 font-serif text-4xl font-semibold tracking-tight text-foreground sm:text-5xl">
+                Ready to begin?
+              </h2>
+              <p className="mt-3 text-sm leading-relaxed text-muted-foreground sm:text-base">
+                Apply today or speak with admissions if you want help comparing
+                programs.
+              </p>
+            </div>
+            <div className="flex flex-wrap gap-3">
+              <Button asChild size="lg">
+                {isExternalApplyLink ? (
+                  <a href={applyHref} target="_blank" rel="noopener noreferrer">
+                    {applyLabel}
+                  </a>
+                ) : (
+                  <Link href={applyHref}>{applyLabel}</Link>
+                )}
+              </Button>
+              {admissionsPhone && (
+                <Button asChild size="lg" variant="outline">
+                  <a href={`tel:${admissionsPhone}`}>
+                    <Phone aria-hidden="true" />
+                    Call admissions
+                  </a>
+                </Button>
+              )}
+            </div>
+          </div>
+        </section>
+      </main>
+
+      <FooterSection settings={siteSettings} />
+    </>
+  );
 }

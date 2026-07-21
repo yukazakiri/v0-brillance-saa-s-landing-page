@@ -1,77 +1,64 @@
 "use client"
 
-import type { SanityFAQ } from "@/lib/sanity/types"
 import { PortableText } from "next-sanity"
-import { useState } from "react"
 
-function ChevronDownIcon({ className }: { className?: string }) {
-  return (
-    <svg
-      className={className}
-      width="24"
-      height="24"
-      viewBox="0 0 24 24"
-      fill="none"
-      xmlns="http://www.w3.org/2000/svg"
-    >
-      <path d="m6 9 6 6 6-6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-    </svg>
-  )
-}
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui/accordion"
+import type { SanityFAQ } from "@/lib/sanity/types"
 
 interface FAQAccordionProps {
   items: SanityFAQ[]
 }
 
 export default function FAQAccordion({ items }: FAQAccordionProps) {
-  const [openItems, setOpenItems] = useState<number[]>([])
-
-  const toggleItem = (index: number) => {
-    setOpenItems((prev) => (prev.includes(index) ? prev.filter((i) => i !== index) : [...prev, index]))
-  }
-
   const safeItems = items || []
 
+  if (safeItems.length === 0) {
+    return (
+      <p className="border-y border-border py-8 text-sm leading-6 text-muted-foreground">
+        Answers are being updated. Please contact admissions and we will be happy
+        to help.
+      </p>
+    )
+  }
+
   return (
-    <div className="w-full flex flex-col">
-      {safeItems.map((item, index) => {
-        const isOpen = openItems.includes(index)
-
-        return (
-          <div key={item._id} className="w-full border-b border-[rgba(73,66,61,0.16)] overflow-hidden">
-            <button
-              onClick={() => toggleItem(index)}
-              className="w-full px-5 py-[18px] flex justify-between items-center gap-5 text-left hover:bg-[rgba(73,66,61,0.02)] transition-colors duration-200"
-              aria-expanded={isOpen}
-            >
-              <div className="flex-1 text-[#49423D] text-base font-medium leading-6 font-sans">{item.question}</div>
-              <div className="flex justify-center items-center">
-                <ChevronDownIcon
-                  className={`w-6 h-6 text-[rgba(73,66,61,0.60)] transition-transform duration-300 ease-in-out ${
-                    isOpen ? "rotate-180" : "rotate-0"
-                  }`}
-                />
-              </div>
-            </button>
-
-            <div
-              className={`overflow-hidden transition-all duration-300 ease-in-out ${
-                isOpen ? "max-h-96 opacity-100" : "max-h-0 opacity-0"
-              }`}
-            >
-              <div className="px-5 pb-[18px] text-[#605A57] text-sm font-normal leading-6 font-sans">
-                {typeof item.answer === "string" ? (
-                  item.answer
-                ) : (
-                  <div className="prose prose-sm max-w-none text-[#605A57]">
-                    <PortableText value={item.answer} />
-                  </div>
-                )}
-              </div>
+    <Accordion
+      type="single"
+      collapsible
+      defaultValue={safeItems[Math.min(1, safeItems.length - 1)]?._id}
+      className="w-full border-t border-border"
+    >
+      {safeItems.map((item, index) => (
+        <AccordionItem key={item._id} value={item._id}>
+          <AccordionTrigger className="gap-4 py-4 sm:gap-6 sm:py-[1.125rem]">
+            <span className="w-8 shrink-0 font-sans text-sm font-semibold tabular-nums tracking-[0.08em] text-secondary sm:w-10 sm:text-base">
+              {String(index + 1).padStart(2, "0")}
+            </span>
+            <span className="mr-2 h-8 w-px shrink-0 bg-border" aria-hidden="true" />
+            <span className="min-w-0 flex-1 font-serif text-xl leading-snug text-foreground sm:text-2xl">
+              {item.question}
+            </span>
+          </AccordionTrigger>
+          <AccordionContent>
+            <div className="pb-5 pl-[4.5rem] pr-2 sm:pb-6 sm:pl-[6.5rem] sm:pr-14">
+              {typeof item.answer === "string" ? (
+                <p className="max-w-2xl text-[0.95rem] leading-7 text-muted-foreground">
+                  {item.answer}
+                </p>
+              ) : (
+                <div className="prose prose-sm max-w-2xl text-muted-foreground prose-headings:font-serif prose-a:text-primary prose-a:underline prose-a:underline-offset-4 prose-p:leading-7">
+                  <PortableText value={item.answer} />
+                </div>
+              )}
             </div>
-          </div>
-        )
-      })}
-    </div>
+          </AccordionContent>
+        </AccordionItem>
+      ))}
+    </Accordion>
   )
 }

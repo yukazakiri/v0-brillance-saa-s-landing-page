@@ -51,11 +51,23 @@ export default async function LandingPage() {
       <CollegeHero settings={siteSettings} />
       <NewsAnnouncementsSection articles={newsArticles} />
       <AboutSection settings={siteSettings} />
-      <CoursesAndProgramsSection courses={courses} />
+      <CoursesAndProgramsSection
+        courses={courses}
+        contact={{
+          phone:
+            siteSettings.contactDirectory?.find((c) => Boolean(c.phone))?.phone ??
+            siteSettings.contactDirectory?.[0]?.phone,
+          email:
+            siteSettings.contactDirectory?.find((c) => Boolean(c.email))?.email ??
+            siteSettings.contactDirectory?.[0]?.email,
+        }}
+      />
       {/*<FacultyStaffSection />*/}
-      <FAQSection />
-      <CTASection settings={siteSettings} />
-      <FooterSection settings={siteSettings} />
+      <div id="faq-journey" className="w-full">
+        <FAQSection />
+        <CTASection settings={siteSettings} />
+        <FooterSection settings={siteSettings} />
+      </div>
     </>
   );
 }

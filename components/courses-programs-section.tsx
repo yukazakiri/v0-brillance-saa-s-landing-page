@@ -1,203 +1,304 @@
-"use client"
+"use client";
 
-import type React from "react"
-import Link from "next/link"
-import { ArrowRight, Clock } from "lucide-react"
-import type { Course } from "@/lib/sanity/types"
-import { Badge } from "@/components/ui/badge"
+import { ArrowRight, GraduationCap } from "lucide-react";
+import Link from "next/link";
 
-function SectionBadge({ icon, text }: { icon: React.ReactNode; text: string }) {
-  return (
-    <div className="px-[14px] py-[6px] bg-card shadow-[0px_0px_0px_4px_rgba(55,50,47,0.05)] overflow-hidden rounded-[90px] flex justify-start items-center gap-[8px] border border-border shadow-xs">
-      <div className="w-[14px] h-[14px] relative overflow-hidden flex items-center justify-center">{icon}</div>
-      <div className="text-center flex justify-center flex-col text-foreground text-xs font-medium leading-3 font-sans">
-        {text}
-      </div>
-    </div>
-  )
+import ContactCtaBar from "@/components/contact-cta-bar";
+import { Button } from "@/components/ui/button";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import type { Course } from "@/lib/sanity/types";
+import { cn } from "@/lib/utils";
+
+type CoursesAndProgramsSectionProps = {
+  courses?: Course[];
+  contact?: {
+    phone?: string;
+    email?: string;
+  };
+};
+
+type ProgramCategory = {
+  id: Course["category"];
+  label: string;
+  heading: string;
+  description: string;
+  programs: Course[];
+};
+
+const CATEGORY_DETAILS: Array<Omit<ProgramCategory, "programs">> = [
+  {
+    id: "ched",
+    label: "College",
+    heading: "Choose where you want to make an impact.",
+    description:
+      "Three degree pathways. Countless opportunities. One college that helps you go further.",
+  },
+  {
+    id: "tesda",
+    label: "TESDA",
+    heading: "Turn practical skill into opportunity.",
+    description:
+      "Industry-recognized training for students ready to build confidence through hands-on learning.",
+  },
+  {
+    id: "shs",
+    label: "Senior High",
+    heading: "Build a strong foundation for what comes next.",
+    description:
+      "Senior High School pathways designed for college readiness, technical training, and future careers.",
+  },
+  {
+    id: "short",
+    label: "Short Courses",
+    heading: "Learn something useful in less time.",
+    description:
+      "Focused courses for developing practical skills and moving toward a clear next step.",
+  },
+];
+
+const PROGRAM_THEMES = [
+  {
+    pattern: /business|financial|finance/i,
+    statement: "Build businesses.",
+    fallbackAcronym: "BSBA",
+  },
+  {
+    pattern: /hotel|restaurant|hospitality|tourism/i,
+    statement: "Create experiences.",
+    fallbackAcronym: "BSHRM",
+  },
+  {
+    pattern: /information technology|computer|software|digital/i,
+    statement: "Shape technology.",
+    fallbackAcronym: "BSIT",
+  },
+];
+
+const GENERIC_STATEMENTS = [
+  "Build real skill.",
+  "Create new possibilities.",
+  "Shape what comes next.",
+];
+
+function getProgramPresentation(program: Course, index: number) {
+  const match = PROGRAM_THEMES.find((item) => item.pattern.test(program.title));
+  const credential = program.credential?.trim();
+  const usefulCredential =
+    credential &&
+    credential.length <= 12 &&
+    !/degree|certificate|diploma/i.test(credential)
+      ? credential.toUpperCase()
+      : null;
+
+  return {
+    acronym: usefulCredential || match?.fallbackAcronym || "PATH",
+    statement:
+      match?.statement || GENERIC_STATEMENTS[index % GENERIC_STATEMENTS.length],
+  };
 }
 
-interface CoursesAndProgramsSectionProps {
-  courses?: Course[]
-}
-
-export default function CoursesAndProgramsSection({ courses = [] }: CoursesAndProgramsSectionProps) {
-  // Group courses by category
-  const chedCourses = courses.filter(c => c.category === "ched")
-  const tesdaCourses = courses.filter(c => c.category === "tesda")
-  const shsCourses = courses.filter(c => c.category === "shs")
-
-  const programCategories = [
-    {
-      id: "ched",
-      category: "Undergraduate Programs",
-      description: "Professional bachelor's degrees accredited by CHED",
-      programs: chedCourses,
-    },
-    {
-      id: "tesda",
-      category: "TESDA Courses",
-      description: "Industry-recognized technical certifications",
-      programs: tesdaCourses,
-    },
-    {
-      id: "shs",
-      category: "Senior High School",
-      description: "Foundation for college readiness and career preparation",
-      programs: shsCourses,
-    },
-  ].filter(cat => cat.programs.length > 0)
+function ProgramPoster({
+  program,
+  index,
+  highlighted,
+}: {
+  program: Course;
+  index: number;
+  highlighted: boolean;
+}) {
+  const presentation = getProgramPresentation(program, index);
+  const supportingCopy =
+    program.description ||
+    program.highlights?.[0] ||
+    "Explore the program, learning experience, and career direction.";
 
   return (
-    <div id="programs" className="w-full border-b border-border flex flex-col justify-center items-center">
-      {/* Header Section */}
-      <div className="self-stretch px-4 sm:px-6 md:px-8 lg:px-0 py-12 sm:py-16 md:py-24 lg:py-32 border-b border-border flex justify-center items-center">
-        <div className="w-full max-w-[700px] flex flex-col justify-start items-center gap-4 sm:gap-6 md:gap-8">
-          <SectionBadge
-            icon={
-              <svg width="12" height="12" viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path d="M1 11L6 2L11 11" stroke="currentColor" strokeWidth="1" fill="none" />
-                <path d="M3 7H9" stroke="currentColor" strokeWidth="1" />
-              </svg>
-            }
-            text="Academic Programs"
+    <article
+      className={cn(
+        "relative isolate h-full overflow-hidden border-border",
+        index > 0 && "border-t lg:border-l lg:border-t-0",
+        highlighted && "bg-secondary/10",
+      )}
+    >
+      <Link
+        href={"/courses/" + program.slug}
+        className="group relative flex min-h-[410px] h-full flex-col px-5 py-7 outline-none focus-visible:z-10 focus-visible:ring-[3px] focus-visible:ring-inset focus-visible:ring-ring/50 sm:px-7 sm:py-8 lg:min-h-[430px] lg:px-8 lg:py-9"
+      >
+        <div className="relative z-10">
+          <h4 className="max-w-[18ch] text-pretty font-serif text-2xl font-semibold leading-[1.08] tracking-tight text-primary sm:text-3xl">
+            {program.title}
+          </h4>
+          <p className="mt-4 text-sm font-medium text-secondary">
+            {program.duration}
+          </p>
+        </div>
+
+        <div className="relative z-10 mt-5 border-t border-secondary/50 pt-6">
+          <p className="max-w-[11ch] text-pretty font-serif text-5xl font-semibold leading-[0.88] tracking-tight text-primary sm:text-6xl lg:text-[4.25rem]">
+            {presentation.statement}
+          </p>
+          <p className="mt-5 line-clamp-2 max-w-[36ch] text-sm leading-relaxed text-muted-foreground">
+            {supportingCopy}
+          </p>
+        </div>
+
+        <span
+          aria-hidden="true"
+          className="pointer-events-none absolute inset-x-4 bottom-8 z-0 select-none overflow-hidden whitespace-nowrap font-serif text-[8rem] leading-none tracking-[-0.07em] text-secondary/[0.08] sm:text-[10rem] lg:inset-x-5 lg:text-[11rem]"
+        >
+          {presentation.acronym}
+        </span>
+
+        <span className="relative z-10 mt-auto inline-flex w-fit items-center gap-2 border-b border-secondary pb-1 text-sm font-semibold text-primary">
+          Explore program
+          <ArrowRight
+            aria-hidden="true"
+            className="size-4 motion-safe:transition-transform motion-safe:duration-200 group-hover:translate-x-1"
           />
-          <div className="self-stretch text-center flex justify-center flex-col text-foreground text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-semibold leading-tight md:leading-[60px] font-serif tracking-tight">
-            Our Academic Offerings
-          </div>
-          <div className="self-stretch text-center text-muted-foreground text-sm sm:text-base md:text-lg font-normal leading-relaxed md:leading-8 font-sans max-w-[600px]">
-            From Senior High School to specialized TESDA courses and bachelor's degrees, we offer pathways for every
-            student.
-          </div>
-        </div>
-      </div>
+        </span>
+      </Link>
+    </article>
+  );
+}
 
-      {/* Program Categories */}
-      <div className="self-stretch flex justify-center items-start">
-        {/* Left decorative element */}
-        <div className="w-4 sm:w-6 md:w-8 lg:w-12 self-stretch relative overflow-hidden">
-          <div className="w-[120px] sm:w-[140px] md:w-[162px] left-[-40px] sm:left-[-50px] md:left-[-58px] top-[-120px] absolute flex flex-col justify-start items-start">
-            {Array.from({ length: 200 }).map((_, i) => (
-              <div
-                key={i}
-                className="self-stretch h-3 sm:h-4 rotate-[-45deg] origin-top-left outline outline-[0.5px] outline-[rgba(3,7,18,0.08)] outline-offset-[-0.25px]"
-              />
-            ))}
-          </div>
-        </div>
+export default function CoursesAndProgramsSection({
+  courses = [],
+  contact,
+}: CoursesAndProgramsSectionProps) {
+  const programCategories = CATEGORY_DETAILS.map((category) => ({
+    ...category,
+    programs: courses.filter((course) => course.category === category.id),
+  })).filter((category) => category.programs.length > 0);
 
-        {/* Main content */}
-        <div className="flex-1 border-l border-r border-border py-12 sm:py-16 md:py-24 lg:py-32 px-4 sm:px-6 md:px-8">
-          <div className="w-full max-w-[1000px] mx-auto flex flex-col gap-16 md:gap-20">
-            {programCategories.map((categoryData, categoryIndex) => (
-              <div key={categoryData.id} className="flex flex-col gap-6 md:gap-8">
-                {/* Category Header */}
-                <div className="flex flex-col gap-3 pb-4 border-b border-border">
-                  <div className="flex items-center justify-between">
-                    <h2 className="text-2xl md:text-3xl lg:text-4xl font-serif font-semibold text-foreground">
-                      {categoryData.category}
-                    </h2>
-                    <Badge variant="secondary" className="text-xs tracking-[0.2em]">
-                      {categoryData.programs.length} {categoryData.programs.length === 1 ? "PROGRAM" : "PROGRAMS"}
-                    </Badge>
+  const defaultCategory = programCategories[0]?.id;
+
+  return (
+    <section
+      id="programs"
+      aria-labelledby="programs-heading"
+      className="w-full scroll-mt-24 border-y border-border"
+    >
+      <div className="mx-auto w-full max-w-[1320px] px-4 py-10 sm:px-6 sm:py-12 md:px-8 md:py-12">
+        {defaultCategory ? (
+          <Tabs defaultValue={defaultCategory} className="w-full gap-0">
+            <div className="grid gap-5 border-y border-border py-5 lg:grid-cols-[auto_auto_minmax(260px,1fr)_auto] lg:items-center lg:gap-6">
+              <div className="flex items-center gap-3 text-primary">
+                <GraduationCap aria-hidden="true" className="size-5 shrink-0" />
+                <h2
+                  id="programs-heading"
+                  className="font-serif text-2xl font-semibold tracking-tight sm:text-3xl"
+                >
+                  Academic pathways
+                </h2>
+              </div>
+
+              <div className="min-w-0 overflow-x-auto pb-1 lg:pb-0">
+                <TabsList
+                  aria-label="Academic pathways"
+                  className="min-w-0 rounded-none bg-transparent p-0"
+                >
+                  {programCategories.map((category) => (
+                    <TabsTrigger
+                      key={category.id}
+                      value={category.id}
+                      className="flex-none rounded-md border border-border bg-card px-4 data-[state=active]:border-primary data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"
+                    >
+                      {category.label}
+                      <span className="rounded-full bg-background/85 px-1.5 py-0.5 text-[11px] leading-none text-muted-foreground">
+                        {category.programs.length}
+                      </span>
+                    </TabsTrigger>
+                  ))}
+                </TabsList>
+              </div>
+
+              <p className="max-w-[42ch] text-sm leading-relaxed text-muted-foreground">
+                Compare programs by study level, duration, and career
+                direction&mdash;then explore the details together.
+              </p>
+
+              <Button
+                asChild
+                variant="outline"
+                size="lg"
+                className="w-full lg:w-fit"
+              >
+                <Link href="/courses">
+                  Browse all programs
+                  <ArrowRight aria-hidden="true" />
+                </Link>
+              </Button>
+            </div>
+
+            {programCategories.map((category) => (
+              <TabsContent
+                key={category.id}
+                value={category.id}
+                className="mt-0"
+              >
+                <div className="grid gap-6 py-8 sm:py-10 lg:grid-cols-[minmax(0,1.05fr)_minmax(300px,0.95fr)] lg:items-end lg:gap-12">
+                  <h3 className="max-w-[15ch] text-balance font-serif text-5xl font-semibold leading-[0.92] tracking-tight text-primary sm:text-6xl">
+                    {category.heading}
+                  </h3>
+                  <div className="lg:pb-1">
+                    <p className="max-w-[47ch] text-pretty text-base leading-relaxed text-muted-foreground sm:text-lg">
+                      {category.description}
+                    </p>
+                    <Button
+                      asChild
+                      variant="ghost"
+                      className="mt-5 w-fit px-0 text-primary hover:bg-transparent hover:text-primary/80"
+                    >
+                      <Link
+                        href={
+                          "/courses?category=" + category.id + "#" + category.id
+                        }
+                      >
+                        View all {category.label}
+                        <ArrowRight aria-hidden="true" />
+                      </Link>
+                    </Button>
                   </div>
-                  <p className="text-sm md:text-base text-muted-foreground font-sans">
-                    {categoryData.description}
-                  </p>
                 </div>
 
-                {/* Program Cards Grid */}
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 md:gap-6">
-                  {categoryData.programs.map((program) => (
-                    <Link
+                <div className="grid border-y border-border lg:grid-cols-3">
+                  {category.programs.slice(0, 3).map((program, index) => (
+                    <ProgramPoster
                       key={program.id}
-                      href={`/courses/${program.slug}`}
-                      className="group bg-card border border-border rounded-lg overflow-hidden hover:shadow-[0px_8px_24px_rgba(55,50,47,0.12)] hover:border-foreground/20 transition-all duration-300 flex flex-col"
-                    >
-                      {/* Card Content */}
-                      <div className="p-6 md:p-7 flex flex-col gap-4 flex-grow">
-                        {/* Title */}
-                        <h3 className="text-foreground text-lg md:text-xl font-semibold font-serif leading-tight group-hover:text-primary transition-colors min-h-[3.5rem] line-clamp-3">
-                          {program.title}
-                        </h3>
-
-                        {/* Description */}
-                        {program.description && (
-                          <p className="text-sm text-muted-foreground line-clamp-2 leading-relaxed font-sans">
-                            {program.description}
-                          </p>
-                        )}
-
-                        {/* Metadata */}
-                        <div className="flex flex-wrap items-center gap-2 pt-2">
-                          <div className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-muted rounded-full text-xs font-medium text-foreground border border-border">
-                            <Clock className="w-3 h-3" />
-                            {program.duration}
-                          </div>
-                          {program.credential && (
-                            <Badge variant="outline" className="text-xs px-2.5 py-1">
-                              Certified
-                            </Badge>
-                          )}
-                          {program.scholarshipsAvailable && (
-                            <Badge variant="secondary" className="text-xs px-2.5 py-1">
-                              Scholarship
-                            </Badge>
-                          )}
-                        </div>
-
-                        {/* Key Highlights */}
-                        {program.highlights && program.highlights.length > 0 && (
-                          <div className="flex flex-col gap-2 pt-3 border-t border-border">
-                            <div className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
-                              Key Areas
-                            </div>
-                            <div className="flex flex-wrap gap-1.5">
-                              {program.highlights.slice(0, 3).map((highlight, idx) => (
-                                <span
-                                  key={idx}
-                                  className="text-xs px-2.5 py-1 bg-secondary/50 text-secondary-foreground rounded border border-border/50 font-sans"
-                                >
-                                  {highlight}
-                                </span>
-                              ))}
-                            </div>
-                          </div>
-                        )}
-
-                        {/* CTA */}
-                        <div className="pt-4 mt-auto border-t border-border">
-                          <div className="flex items-center gap-2 text-sm font-semibold text-foreground group-hover:text-primary transition-colors">
-                            <span>Learn More</span>
-                            <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform duration-300" />
-                          </div>
-                        </div>
-                      </div>
-                    </Link>
+                      program={program}
+                      index={index}
+                      highlighted={index === 1}
+                    />
                   ))}
                 </div>
-
-                {/* Category divider - not on last item */}
-                {categoryIndex < programCategories.length - 1 && (
-                  <div className="w-full h-px bg-border mt-8"></div>
-                )}
-              </div>
+              </TabsContent>
             ))}
-          </div>
-        </div>
 
-        {/* Right decorative element */}
-        <div className="w-4 sm:w-6 md:w-8 lg:w-12 self-stretch relative overflow-hidden">
-          <div className="w-[120px] sm:w-[140px] md:w-[162px] left-[-40px] sm:left-[-50px] md:left-[-58px] top-[-120px] absolute flex flex-col justify-start items-start">
-            {Array.from({ length: 200 }).map((_, i) => (
-              <div
-                key={i}
-                className="self-stretch h-3 sm:h-4 rotate-[-45deg] origin-top-left outline outline-[0.5px] outline-[rgba(3,7,18,0.08)] outline-offset-[-0.25px]"
-              />
-            ))}
+            <ContactCtaBar
+              dense
+              showSms={false}
+              title="Not sure which path fits?"
+              subtitle="Talk with admissions about interests, requirements, schedules, and next steps."
+              phone={contact?.phone}
+              email={contact?.email}
+              className="mt-10 bg-card"
+            />
+          </Tabs>
+        ) : (
+          <div className="border-y border-border px-1 py-12">
+            <h2
+              id="programs-heading"
+              className="font-serif text-3xl font-semibold text-foreground"
+            >
+              Program information is being updated
+            </h2>
+            <p className="mt-3 max-w-[60ch] text-sm leading-relaxed text-muted-foreground sm:text-base">
+              Admissions can help students and families review the programs
+              currently available.
+            </p>
           </div>
-        </div>
+        )}
       </div>
-    </div>
-  )
+    </section>
+  );
 }
