@@ -1,165 +1,162 @@
-"use client";
-
-import type { Article } from "@/lib/sanity/types";
-import { ArrowRight, Calendar, User } from "lucide-react";
+import { ArrowUpRight } from "lucide-react";
 import Link from "next/link";
-import type React from "react";
 
-function Badge({ icon, text }: { icon: React.ReactNode; text: string }) {
-    return (
-        <div className="px-2 py-1.5 bg-[#f7f5f3] shadow-[0px_0px_0px_4px_rgba(26,58,82,0.05)] overflow-hidden rounded-[90px] flex justify-start items-center gap-2 border border-[rgba(26,58,82,0.12)]">
-            <div className="w-3 h-3 relative overflow-hidden flex items-center justify-center">{icon}</div>
-            <div className="text-center flex justify-center flex-col text-[#1a3a52] text-xs font-medium leading-3 font-sans">
-                {text}
-            </div>
-        </div>
-    );
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import type { Article } from "@/lib/sanity/types";
+
+const dateFormatter = new Intl.DateTimeFormat("en-US", {
+  month: "short",
+  day: "numeric",
+  year: "numeric",
+});
+
+function formatDate(value: string) {
+  const date = new Date(value);
+  return Number.isNaN(date.getTime()) ? value : dateFormatter.format(date);
 }
 
-export default function NewsAnnouncementsSection({ articles }: { articles: Article[] }) {
-    if (!articles.length) return null;
+function StoryMeta({ article }: { article: Article }) {
+  return (
+    <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs font-medium uppercase tracking-[0.16em] text-muted-foreground">
+      <span>{article.category || "Campus news"}</span>
+      <span aria-hidden="true" className="h-1 w-1 rounded-full bg-secondary" />
+      <time dateTime={article.date}>{formatDate(article.date)}</time>
+    </div>
+  );
+}
 
-    const displayArticles = articles.slice(0, 4);
+export default function NewsAnnouncementsSection({
+  articles,
+}: {
+  articles: Article[];
+}) {
+  if (!articles.length) return null;
 
-    return (
-        <section className="w-full  border-b border-t border-[rgba(26,58,82,0.12)] flex flex-col justify-center items-center">
-            <div className="self-stretch flex justify-center items-start">
-                {/* Left Decorative Sidebar */}
-                <div className="w-4 sm:w-6 md:w-8 lg:w-12 self-stretch relative overflow-hidden">
-                    <div className="w-[120px] sm:w-[140px] md:w-[162px] left-[-40px] sm:left-[-50px] md:left-[-58px] top-[-120px] absolute flex flex-col justify-start items-start">
-                        {Array.from({ length: 200 }).map((_, i) => (
-                            <div
-                                key={i}
-                                className="self-stretch h-3 sm:h-4 rotate-[-45deg] origin-top-left outline outline-[0.5px] outline-[rgba(26,58,82,0.08)] outline-offset-[-0.25px]"
-                            />
-                        ))}
-                    </div>
-                </div>
+  const [leadArticle, ...latestArticles] = articles.slice(0, 4);
 
-                {/* Main Content Area with Borders */}
-                <div className="flex-1 border-l border-r border-[rgba(26,58,82,0.12)] py-20 sm:py-28 px-4 sm:px-6 lg:px-8">
-                    <div className="max-w-[1060px] mx-auto">
-                        {/* Header */}
-                        <div className="flex flex-col items-center text-center mb-20 sm:mb-24 gap-6">
-                            <Badge
-                                icon={
-                                    <svg
-                                        width="12"
-                                        height="12"
-                                        viewBox="0 0 12 12"
-                                        fill="none"
-                                        xmlns="http://www.w3.org/2000/svg"
-                                    >
-                                        <circle cx="6" cy="6" r="5" stroke="#1a3a52" strokeWidth="1" fill="none" />
-                                        <path d="M6 3v6M3 6h6" stroke="#1a3a52" strokeWidth="1" />
-                                    </svg>
-                                }
-                                text="Latest Updates"
-                            />
-                            <h2 className="text-4xl sm:text-5xl md:text-6xl font-serif font-medium text-[#1a3a52] tracking-tight leading-[1.1]">
-                                News & Announcements
-                            </h2>
-                            <p className="text-[#605A57] text-lg font-light leading-relaxed max-w-2xl">
-                                Explore the latest stories, academic achievements, and campus events shaping our
-                                community.
-                            </p>
-                        </div>
+  return (
+    <section
+      id="news"
+      aria-labelledby="news-heading"
+      className="w-full scroll-mt-24 border-y border-border"
+    >
+      <div className="mx-auto w-full max-w-[1200px] px-4 py-14 sm:px-6 sm:py-18 md:px-8 md:py-24">
+        <div className="grid gap-8 border-b border-border pb-10 md:grid-cols-[minmax(0,1fr)_minmax(280px,0.56fr)] md:items-end md:gap-16 md:pb-14">
+          <div>
+            <Badge
+              variant="outline"
+              className="bg-card px-3 py-1 text-muted-foreground"
+            >
+              Newsroom
+            </Badge>
+            <h2
+              id="news-heading"
+              className="mt-5 max-w-[13ch] text-balance font-serif text-5xl font-semibold leading-[0.94] tracking-tight text-foreground sm:text-6xl md:text-7xl"
+            >
+              Campus life,{" "}
+              <mark className="box-decoration-clone bg-secondary/15 px-1 text-foreground">
+                in focus.
+              </mark>
+            </h2>
+          </div>
 
-                        {/* Editorial Stream */}
-                        <div className="flex flex-col gap-20 sm:gap-32">
-                            {displayArticles.map((article, index) => {
-                                const isEven = index % 2 === 0;
-                                return (
-                                    <div
-                                        key={article.id}
-                                        className={`flex flex-col ${isEven ? "lg:flex-row" : "lg:flex-row-reverse"} gap-8 lg:gap-16 items-center group`}
-                                    >
-                                        {/* Image Side */}
-                                        <div className="w-full lg:w-1/2 relative">
-                                            {/* Geometric Decoration */}
-                                            <div
-                                                className={`absolute -top-6 -bottom-6 ${isEven ? "-left-6" : "-right-6"} w-full border border-[rgba(26,58,82,0.08)] hidden lg:block transition-transform duration-700 group-hover:scale-[1.02]`}
-                                            />
+          <div>
+            <p className="max-w-[48ch] text-pretty text-base leading-relaxed text-muted-foreground sm:text-lg">
+              Follow the people, achievements, announcements, and moments
+              shaping the DCCP Baguio community.
+            </p>
+            <Button asChild variant="outline" size="lg" className="mt-6">
+              <Link href="/news">
+                View all news
+                <ArrowUpRight aria-hidden="true" />
+              </Link>
+            </Button>
+          </div>
+        </div>
 
-                                            <div className="relative aspect-[4/3] overflow-hidden bg-stone-100">
-                                                <img
-                                                    src={article.image}
-                                                    alt={article.title}
-                                                    className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-105"
-                                                />
-                                                <div className="absolute inset-0 bg-[#1a3a52]/0 group-hover:bg-[#1a3a52]/5 transition-colors duration-500" />
-                                            </div>
-
-                                            {/* Floating Category */}
-                                            <div className={`absolute top-6 ${isEven ? "left-6" : "right-6"}`}>
-                                                <span className="px-3 py-1 bg-white/95 backdrop-blur text-[#1a3a52] text-xs font-bold uppercase tracking-wider border border-[rgba(26,58,82,0.1)]">
-                                                    {article.category}
-                                                </span>
-                                            </div>
-                                        </div>
-
-                                        {/* Content Side */}
-                                        <div className="w-full lg:w-1/2 flex flex-col items-start justify-center">
-                                            <div className="flex items-center gap-4 text-xs font-medium text-[#605A57]/80 mb-6 uppercase tracking-widest">
-                                                <span className="flex items-center gap-2">
-                                                    <Calendar className="w-3.5 h-3.5" />
-                                                    {article.date}
-                                                </span>
-                                                <span className="w-px h-3 bg-[rgba(26,58,82,0.2)]" />
-                                                <span className="flex items-center gap-2">
-                                                    <User className="w-3.5 h-3.5" />
-                                                    {article.author}
-                                                </span>
-                                            </div>
-
-                                            <Link href={`/news/${article.slug}`} className="group/title">
-                                                <h3 className="text-3xl sm:text-4xl md:text-5xl font-serif font-medium text-[#1a3a52] mb-6 leading-tight group-hover/title:text-[#1a3a52]/80 transition-colors">
-                                                    {article.title}
-                                                </h3>
-                                            </Link>
-
-                                            <p className="text-[#605A57] text-lg leading-relaxed mb-8 line-clamp-3 font-light">
-                                                {article.excerpt}
-                                            </p>
-
-                                            <Link
-                                                href={`/news/${article.slug}`}
-                                                className="inline-flex items-center gap-3 text-[#1a3a52] font-semibold uppercase tracking-wider text-sm group/btn hover:opacity-70 transition-opacity"
-                                            >
-                                                <span className="border-b border-[#1a3a52]">Read Article</span>
-                                                <ArrowRight className="w-4 h-4 transition-transform duration-300 group-hover/btn:translate-x-1" />
-                                            </Link>
-                                        </div>
-                                    </div>
-                                );
-                            })}
-                        </div>
-
-                        {/* View All Footer */}
-                        <div className="mt-24 sm:mt-32 flex justify-center">
-                            <Link
-                                href="/news"
-                                className="px-8 py-4 bg-transparent border border-[#1a3a52] text-[#1a3a52] text-sm font-semibold hover:bg-[#1a3a52] hover:text-white transition-all duration-300 flex items-center gap-3 uppercase tracking-wider"
-                            >
-                                <span>View All News</span>
-                                <ArrowRight className="w-4 h-4" />
-                            </Link>
-                        </div>
-                    </div>
-                </div>
-
-                {/* Right Decorative Sidebar */}
-                <div className="w-4 sm:w-6 md:w-8 lg:w-12 self-stretch relative overflow-hidden">
-                    <div className="w-[120px] sm:w-[140px] md:w-[162px] left-[-40px] sm:left-[-50px] md:left-[-58px] top-[-120px] absolute flex flex-col justify-start items-start">
-                        {Array.from({ length: 200 }).map((_, i) => (
-                            <div
-                                key={i}
-                                className="self-stretch h-3 sm:h-4 rotate-[-45deg] origin-top-left outline outline-[0.5px] outline-[rgba(26,58,82,0.08)] outline-offset-[-0.25px]"
-                            />
-                        ))}
-                    </div>
-                </div>
+        <div className="mt-10 grid gap-10 lg:grid-cols-[minmax(0,1.18fr)_minmax(330px,0.82fr)] lg:gap-14">
+          <article className="group">
+            {leadArticle.image ? (
+              <Link
+                href={"/news/" + leadArticle.slug}
+                className="block overflow-hidden bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-4"
+              >
+                <img
+                  src={leadArticle.image}
+                  alt=""
+                  className="aspect-[16/10] w-full object-cover motion-safe:transition-transform motion-safe:duration-500 group-hover:scale-[1.02]"
+                />
+              </Link>
+            ) : null}
+            <div
+              className={
+                leadArticle.image ? "mt-6" : "border-t border-border pt-6"
+              }
+            >
+              <StoryMeta article={leadArticle} />
+              <h3 className="mt-3 max-w-[22ch] text-pretty font-serif text-3xl font-semibold leading-[1.04] tracking-tight text-foreground sm:text-4xl md:text-5xl">
+                <Link
+                  href={"/news/" + leadArticle.slug}
+                  className="decoration-secondary decoration-2 underline-offset-4 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                >
+                  {leadArticle.title}
+                </Link>
+              </h3>
+              {leadArticle.excerpt ? (
+                <p className="mt-4 max-w-[64ch] text-sm leading-relaxed text-muted-foreground sm:text-base">
+                  {leadArticle.excerpt}
+                </p>
+              ) : null}
             </div>
-        </section>
-    );
+          </article>
+
+          <div
+            className="border-b border-border"
+            aria-label="More recent stories"
+          >
+            <div className="flex items-center justify-between border-t border-border py-4">
+              <p className="text-xs font-medium uppercase tracking-[0.2em] text-muted-foreground">
+                Also making news
+              </p>
+              <span className="font-mono text-xs text-muted-foreground">
+                {String(latestArticles.length).padStart(2, "0")}
+              </span>
+            </div>
+
+            {latestArticles.map((article, index) => (
+              <article
+                key={article.id}
+                className="grid grid-cols-[32px_minmax(0,1fr)] gap-3 border-t border-border py-6 sm:grid-cols-[42px_minmax(0,1fr)] sm:gap-5 sm:py-7"
+              >
+                <span className="pt-1 font-mono text-xs text-muted-foreground">
+                  {String(index + 1).padStart(2, "0")}
+                </span>
+                <div>
+                  <StoryMeta article={article} />
+                  <h3 className="mt-3 text-pretty font-serif text-2xl font-semibold leading-tight tracking-tight text-foreground sm:text-3xl">
+                    <Link
+                      href={"/news/" + article.slug}
+                      className="group/link inline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                    >
+                      {article.title}
+                      <ArrowUpRight
+                        aria-hidden="true"
+                        className="ml-2 inline size-4 text-muted-foreground motion-safe:transition-transform group-hover/link:-translate-y-0.5 group-hover/link:translate-x-0.5"
+                      />
+                    </Link>
+                  </h3>
+                  {article.excerpt ? (
+                    <p className="mt-3 line-clamp-2 text-sm leading-relaxed text-muted-foreground">
+                      {article.excerpt}
+                    </p>
+                  ) : null}
+                </div>
+              </article>
+            ))}
+          </div>
+        </div>
+      </div>
+    </section>
+  );
 }

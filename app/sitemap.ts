@@ -1,12 +1,13 @@
 import type { MetadataRoute } from "next";
 
 import { getSiteBaseUrl } from "@/lib/seo";
-import { fetchPostSlugs } from "@/lib/sanity/queries";
+import { fetchCourseSlugs, fetchPostSlugs } from "@/lib/sanity/queries";
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const baseUrl = getSiteBaseUrl();
-  const [postSlugs] = await Promise.all([
+  const [postSlugs, courseSlugs] = await Promise.all([
     fetchPostSlugs(),
+    fetchCourseSlugs(),
   ]);
 
   const staticRoutes: MetadataRoute.Sitemap = [
@@ -20,7 +21,6 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     "/news",
     "/parents",
     "/portal",
-    "/programs",
   ].map((path) => ({
     url: `${baseUrl}${path}`,
     changeFrequency: "weekly",
@@ -33,5 +33,11 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     priority: 0.8,
   }));
 
-  return [...staticRoutes, ...newsRoutes];
+  const courseRoutes: MetadataRoute.Sitemap = courseSlugs.map((slug) => ({
+    url: `${baseUrl}/courses/${slug}`,
+    changeFrequency: "monthly",
+    priority: 0.8,
+  }));
+
+  return [...staticRoutes, ...courseRoutes, ...newsRoutes];
 }

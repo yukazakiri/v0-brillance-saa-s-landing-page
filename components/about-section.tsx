@@ -1,120 +1,174 @@
-"use client";
+import Link from "next/link";
+import { ArrowUpRight } from "lucide-react";
 
+import { Button } from "@/components/ui/button";
 import type { Settings } from "@/lib/sanity/types";
 
 interface AboutSectionProps {
-    settings: Settings;
+  settings: Settings;
 }
 
+const DEFAULT_MISSION =
+  "To provide accessible, relevant education that develops capable, ethical, and innovative professionals ready to serve their communities.";
+
+const DEFAULT_VISION =
+  "To be a trusted leader in tertiary education, preparing globally competitive graduates for meaningful work and lifelong growth.";
+
 export default function AboutSection({ settings }: AboutSectionProps) {
-    return (
-        <div className="w-full border-b border-[rgba(26,58,82,0.12)] flex flex-col justify-center items-center">
-            <div className="self-stretch px-4 sm:px-6 md:px-8 lg:px-0 lg:max-w-[1060px] lg:w-[1060px] py-8 sm:py-12 md:py-16 border-b border-[rgba(26,58,82,0.12)] flex justify-center items-center gap-6">
-                <div className="w-full max-w-[616px] lg:w-[616px] px-4 sm:px-6 py-4 sm:py-5 overflow-hidden rounded-lg flex flex-col justify-start items-center gap-3 sm:gap-4">
-                    <div className="px-[14px] py-[6px] bg-[#f7f5f3] shadow-[0px_0px_0px_4px_rgba(26,58,82,0.05)] overflow-hidden rounded-[90px] flex justify-start items-center gap-[8px] border border-[rgba(26,58,82,0.08)]">
-                        <div className="w-[14px] h-[14px] relative overflow-hidden flex items-center justify-center">
-                            <svg
-                                width="12"
-                                height="12"
-                                viewBox="0 0 12 12"
-                                fill="none"
-                                xmlns="http://www.w3.org/2000/svg"
-                            >
-                                <circle cx="6" cy="6" r="5" stroke="#1a3a52" strokeWidth="1" fill="none" />
-                                <path d="M6 3v6M3 6h6" stroke="#1a3a52" strokeWidth="1" />
-                            </svg>
-                        </div>
-                        <div className="text-center flex justify-center flex-col text-[#1a3a52] text-xs font-medium leading-3 font-sans">
-                            About Us
-                        </div>
-                    </div>
-                    <div className="w-full max-w-[598.06px] lg:w-[598.06px] text-center flex justify-center flex-col text-[#1a3a52] text-xl sm:text-2xl md:text-3xl lg:text-5xl font-semibold leading-tight md:leading-[60px] font-sans tracking-tight">
-                        Empowering Students for Tomorrow
-                    </div>
-                    <div className="self-stretch text-center text-[#605A57] text-sm sm:text-base font-normal leading-6 sm:leading-7 font-sans">
-                        {settings.siteTitle || "Data Center College Of The Philippines"} is committed to providing
-                        quality education that prepares students for success in an increasingly digital world. Located
-                        in the heart of Baguio City, we foster innovation, critical thinking, and professional
-                        excellence.
-                    </div>
-                </div>
-            </div>
+  const mission = settings.institutionProfile?.mission ?? DEFAULT_MISSION;
+  const vision = settings.institutionProfile?.vision ?? DEFAULT_VISION;
 
-            <div className="self-stretch flex justify-center items-start">
-                <div className="w-4 sm:w-6 md:w-8 lg:w-12 self-stretch relative overflow-hidden">
-                    <div className="w-[120px] sm:w-[140px] md:w-[162px] left-[-40px] sm:left-[-50px] md:left-[-58px] top-[-120px] absolute flex flex-col justify-start items-start">
-                        {Array.from({ length: 200 }).map((_, i) => (
-                            <div
-                                key={i}
-                                className="self-stretch h-3 sm:h-4 rotate-[-45deg] origin-top-left outline outline-[0.5px] outline-[rgba(26,58,82,0.08)] outline-offset-[-0.25px]"
-                            />
-                        ))}
-                    </div>
-                </div>
+  return (
+    <section
+      id="about"
+      aria-labelledby="about-heading"
+      className="w-full scroll-mt-24 border-y border-border"
+    >
+      <div className="mx-auto w-full max-w-[1200px] px-4 py-14 sm:px-6 sm:py-18 md:px-8 md:py-24">
+        <div className="grid gap-10 lg:grid-cols-[minmax(0,1.15fr)_minmax(320px,0.85fr)] lg:items-end lg:gap-16">
+          <div>
+            <p className="text-xs font-medium uppercase tracking-[0.22em] text-muted-foreground">
+              About DCCP Baguio
+            </p>
+            <h2
+              id="about-heading"
+              className="mt-5 max-w-[14ch] text-balance font-serif text-5xl font-semibold leading-[0.94] tracking-tight text-foreground sm:text-6xl md:text-7xl"
+            >
+              Rooted in <span className="text-secondary">Baguio.</span>
+              <span className="mt-1 block">
+                Ready for what{" "}
+                <span className="box-decoration-clone bg-secondary/15 px-1 text-foreground">
+                  comes next.
+                </span>
+              </span>
+            </h2>
+          </div>
 
-                <div className="flex-1 grid grid-cols-1 md:grid-cols-2 gap-0 border-l border-r border-[rgba(26,58,82,0.12)]">
-                    <div className="border-b border-r-0 md:border-r border-[rgba(26,58,82,0.12)] p-4 sm:p-6 md:p-8 lg:p-12 flex flex-col justify-start items-start gap-4 sm:gap-6">
-                        <div className="flex flex-col gap-2">
-                            <h3 className="text-[#1a3a52] text-lg sm:text-xl font-semibold leading-tight font-sans">
-                                Our Mission
-                            </h3>
-                            <p className="text-[#605A57] text-sm md:text-base font-normal leading-relaxed font-sans">
-                                To provide accessible, high-quality education that develops competent, ethical, and
-                                innovative professionals ready to contribute to society and lead in their respective
-                                fields.
-                            </p>
-                        </div>
-                    </div>
-
-                    <div className="border-b border-[rgba(26,58,82,0.12)] p-4 sm:p-6 md:p-8 lg:p-12 flex flex-col justify-start items-start gap-4 sm:gap-6">
-                        <div className="flex flex-col gap-2">
-                            <h3 className="text-[#1a3a52] font-semibold leading-tight font-sans text-lg sm:text-xl">
-                                Our Vision
-                            </h3>
-                            <p className="text-[#605A57] text-sm md:text-base font-normal leading-relaxed font-sans">
-                                To be a leading educational institution recognized for academic excellence, innovation,
-                                and the development of globally competitive professionals in technology and business.
-                            </p>
-                        </div>
-                    </div>
-
-                    <div className="border-r-0 md:border-r border-[rgba(26,58,82,0.12)] p-4 sm:p-6 md:p-8 lg:p-12 flex flex-col justify-start items-start gap-4 sm:gap-6 bg-transparent">
-                        <div className="flex flex-col gap-2">
-                            <h3 className="text-[#1a3a52] text-lg sm:text-xl font-semibold leading-tight font-sans">
-                                Core Values
-                            </h3>
-                            <p className="text-[#605A57] text-sm md:text-base font-normal leading-relaxed font-sans">
-                                Excellence, Integrity, Innovation, Inclusivity, and Community Engagement guide
-                                everything we do. We believe in empowering students to achieve their full potential.
-                            </p>
-                        </div>
-                    </div>
-
-                    <div className="p-4 sm:p-6 md:p-8 lg:p-12 flex flex-col justify-start items-start gap-4 sm:gap-6">
-                        <div className="flex flex-col gap-2">
-                            <h3 className="text-[#1a3a52] text-lg sm:text-xl font-semibold leading-tight font-sans">
-                                Location
-                            </h3>
-                            <p className="text-[#605A57] text-sm md:text-base font-normal leading-relaxed font-sans">
-                                Nestled in the cool highlands of Baguio City, our campus provides an ideal environment
-                                for focused learning and personal growth. Easy access to technology hubs and business
-                                centers.
-                            </p>
-                        </div>
-                    </div>
-                </div>
-
-                <div className="w-4 sm:w-6 md:w-8 lg:w-12 self-stretch relative overflow-hidden">
-                    <div className="w-[120px] sm:w-[140px] md:w-[162px] left-[-40px] sm:left-[-50px] md:left-[-58px] top-[-120px] absolute flex flex-col justify-start items-start">
-                        {Array.from({ length: 200 }).map((_, i) => (
-                            <div
-                                key={i}
-                                className="self-stretch h-3 sm:h-4 rotate-[-45deg] origin-top-left outline outline-[0.5px] outline-[rgba(26,58,82,0.08)] outline-offset-[-0.25px]"
-                            />
-                        ))}
-                    </div>
-                </div>
-            </div>
+          <div className="border-t border-border pt-6 lg:border-t-0 lg:pt-0">
+            <p className="max-w-[54ch] text-pretty text-base leading-relaxed text-muted-foreground sm:text-lg">
+              <strong className="font-medium text-foreground">
+                {settings.tagline ||
+                  "Empowering Cordilleran innovators through applied technology."}
+              </strong>{" "}
+              Here, practical learning meets strong values, personal guidance,
+              and pathways connected to the world beyond the classroom.
+            </p>
+            <Button asChild variant="outline" size="lg" className="mt-7">
+              <Link href="/about">
+                Discover our story
+                <ArrowUpRight aria-hidden="true" />
+              </Link>
+            </Button>
+          </div>
         </div>
-    );
+
+        <div className="mt-14 grid gap-8 border-y border-border bg-muted/30 px-5 py-8 sm:px-8 sm:py-10 md:mt-20 md:grid-cols-[180px_minmax(0,1fr)] md:gap-12 md:px-10 md:py-12">
+          <p className="text-xs font-medium uppercase tracking-[0.2em] text-muted-foreground">
+            Our student promise
+          </p>
+          <div>
+            <p className="max-w-[30ch] text-pretty font-serif text-3xl font-semibold leading-tight tracking-tight text-foreground sm:text-4xl md:text-5xl">
+              Learning that stays{" "}
+              <mark className="box-decoration-clone bg-secondary/15 px-1 text-foreground">
+                practical
+              </mark>
+              , feels{" "}
+              <mark className="box-decoration-clone bg-secondary/15 px-1 text-foreground">
+                personal
+              </mark>
+              , and opens real{" "}
+              <mark className="box-decoration-clone bg-secondary/15 px-1 text-foreground">
+                possibility
+              </mark>
+              .
+            </p>
+            <p className="mt-5 max-w-[62ch] text-sm leading-relaxed text-muted-foreground sm:text-base">
+              Students build useful skills, confidence, and character through
+              programs shaped for meaningful work and service to their
+              communities.
+            </p>
+          </div>
+        </div>
+
+        <div className="mt-14 grid border-y border-border sm:grid-cols-3 md:mt-16">
+          {[
+            {
+              value: "Since 1970",
+              label: "A legacy of learning",
+              description:
+                "Decades of helping students turn education into opportunity.",
+            },
+            {
+              value: "CHED + TESDA",
+              label: "Recognized pathways",
+              description:
+                "Degree and skills programs for different goals and stages.",
+            },
+            {
+              value: "Baguio City",
+              label: "Home in the Cordilleras",
+              description:
+                "A learning community grounded in the region it serves.",
+            },
+          ].map((fact, index) => (
+            <dl
+              key={fact.value}
+              className={`flex flex-col py-7 sm:px-6 sm:py-8 md:px-8 ${index > 0 ? "border-t border-border sm:border-l sm:border-t-0" : ""}`}
+            >
+              <dt className="order-2 mt-2 text-xs font-medium uppercase tracking-[0.16em] text-muted-foreground">
+                {fact.label}
+              </dt>
+              <dd className="order-1 font-serif text-3xl font-semibold tracking-tight text-foreground sm:text-4xl">
+                {fact.value}
+              </dd>
+              <dd className="order-3 mt-4 max-w-[30ch] text-sm leading-relaxed text-muted-foreground">
+                {fact.description}
+              </dd>
+            </dl>
+          ))}
+        </div>
+
+        <div className="grid gap-12 pt-14 md:grid-cols-[220px_minmax(0,1fr)] md:gap-16 md:pt-20">
+          <div>
+            <p className="text-xs font-medium uppercase tracking-[0.2em] text-muted-foreground">
+              What guides us
+            </p>
+            <h3 className="mt-4 max-w-[10ch] font-serif text-3xl font-semibold tracking-tight text-foreground sm:text-4xl">
+              Education with purpose.
+            </h3>
+          </div>
+
+          <div className="border-b border-border">
+            <article className="grid gap-4 border-t border-border py-7 sm:grid-cols-[48px_minmax(0,1fr)] sm:px-3 md:gap-8 md:py-9">
+              <span className="pt-1 font-mono text-xs text-muted-foreground">
+                01
+              </span>
+              <div>
+                <h4 className="font-serif text-2xl font-semibold tracking-tight text-foreground sm:text-3xl">
+                  Our mission
+                </h4>
+                <p className="mt-3 max-w-[68ch] text-sm leading-relaxed text-muted-foreground sm:text-base">
+                  {mission}
+                </p>
+              </div>
+            </article>
+
+            <article className="grid gap-4 border-t border-border py-7 sm:grid-cols-[48px_minmax(0,1fr)] sm:px-3 md:gap-8 md:py-9">
+              <span className="pt-1 font-mono text-xs text-muted-foreground">
+                02
+              </span>
+              <div>
+                <h4 className="font-serif text-2xl font-semibold tracking-tight text-foreground sm:text-3xl">
+                  Our vision
+                </h4>
+                <p className="mt-3 max-w-[68ch] text-sm leading-relaxed text-muted-foreground sm:text-base">
+                  {vision}
+                </p>
+              </div>
+            </article>
+          </div>
+        </div>
+      </div>
+    </section>
+  );
 }

@@ -1,18 +1,11 @@
 import type { Metadata } from "next";
-import { notFound } from "next/navigation";
 
 import { fetchStudentPortalPage, fetchSettings } from "@/lib/sanity/queries";
 import { buildImageUrl } from "@/lib/sanity/image";
 import type { Settings } from "@/lib/sanity/types";
 
 import PortalHeader from "@/components/portal/portal-header";
-import FooterSection from "@/components/footer-section";
-import PortalHero from "@/components/portal/portal-hero";
-import OverviewSection from "@/components/portal/overview-section";
-import FeatureSection from "@/components/portal/feature-section";
-import ShowcaseSection from "@/components/portal/showcase-section";
-import GettingStartedSection from "@/components/portal/getting-started-section";
-import SpecsSection from "@/components/portal/specs-section";
+import StudentPortalLanding from "@/components/portal/student-portal-landing";
 
 export async function generateMetadata(): Promise<Metadata> {
   const page = await fetchStudentPortalPage();
@@ -75,42 +68,5 @@ export default async function PortalPage() {
     shortTitle: "DCCPH",
   };
 
-  return (
-    <div className="flex min-h-screen flex-col">
-      <PortalHeader />
-
-      <main className="flex-1">
-        {page.hero && (
-          <PortalHero
-            data={page.hero}
-            softwareName={page.softwareName}
-            softwareVersion={page.softwareVersion}
-          />
-        )}
-
-        {page.overview && <OverviewSection data={page.overview} />}
-
-        {page.sections?.map((section) => {
-          switch (section._type) {
-            case "softwareFeatureSection":
-              return <FeatureSection key={section._key} data={section} />;
-            case "softwareShowcaseSection":
-              return <ShowcaseSection key={section._key} data={section} />;
-            case "studentTestimonialSection":
-              return null;
-            case "gettingStartedSection":
-              return (
-                <GettingStartedSection key={section._key} data={section} />
-              );
-            case "technicalSpecsSection":
-              return <SpecsSection key={section._key} data={section} />;
-            default:
-              return null;
-          }
-        })}
-      </main>
-
-      <FooterSection settings={siteSettings} />
-    </div>
-  );
+  return <StudentPortalLanding page={page} settings={siteSettings} />;
 }
