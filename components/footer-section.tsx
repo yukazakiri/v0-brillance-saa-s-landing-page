@@ -23,7 +23,7 @@ const linkClassName =
 
 const navigationGroups = [
   {
-    title: "Programs",
+    title: "Academic Offerings",
     links: [
       {
         label: "BS Information Technology",
@@ -37,7 +37,7 @@ const navigationGroups = [
         label: "BS Hotel & Restaurant Mgt.",
         href: "/courses/bs-hotel-and-restaurant-management",
       },
-      { label: "View all programs", href: "/courses", emphasized: true },
+      { label: "View all offerings", href: "/courses", emphasized: true },
     ],
   },
   {

@@ -3,6 +3,7 @@
 import Link from "next/link"
 import { useEffect } from "react"
 import ViewTransitionLink from "./view-transition-link"
+import { useViewTransition } from "@/components/view-transitions/view-transition-provider"
 
 interface MobileMenuProps {
   isOpen: boolean
@@ -10,6 +11,7 @@ interface MobileMenuProps {
 }
 
 export default function MobileMenu({ isOpen, onClose }: MobileMenuProps) {
+  const { getDirectionForRoute } = useViewTransition()
   useEffect(() => {
     if (isOpen) {
       document.body.style.overflow = "hidden"
@@ -24,7 +26,7 @@ export default function MobileMenu({ isOpen, onClose }: MobileMenuProps) {
   const navLinks = [
     { href: "/", label: "Home" },
     { href: "/about", label: "About" },
-    { href: "/#programs", label: "Programs" },
+    { href: "/academics", label: "Academics" },
     { href: "/#admissions", label: "Admissions" },
     { href: "/news", label: "News" },
     { href: "/#campus-life", label: "Campus" },
@@ -68,7 +70,7 @@ export default function MobileMenu({ isOpen, onClose }: MobileMenuProps) {
                 style={{
                   transitionDelay: isOpen ? `${index * 50 + 100}ms` : "0ms",
                 }}
-                transitionType={link.href === "/" ? "slide-reverse" : "slide"}
+                transitionType={link.href === "/" ? "slide-reverse" : getDirectionForRoute(link.href) === "back" ? "slide-reverse" : "slide"}
               >
                 <div className="flex items-baseline justify-between">
                   <span className="text-4xl sm:text-5xl font-serif font-medium text-foreground group-hover:text-primary group-active:text-primary transition-colors duration-300">

@@ -4,17 +4,21 @@ import { getImageUrl } from "@/lib/sanity/image";
 import type { Settings } from "@/lib/sanity/types";
 import Image from "next/image";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { useState, useEffect, useRef } from "react";
 import MobileMenu from "./mobile-menu";
 import ViewTransitionLink from "./view-transition-link";
 import ApplicationModal from "./application-modal";
 import { ApplyButton } from "@/components/ui/apply-button";
+import { useViewTransition } from "@/components/view-transitions/view-transition-provider";
 
 interface CollegeHeaderProps {
   settings: Settings;
 }
 
 export default function CollegeHeader({ settings }: CollegeHeaderProps) {
+  const pathname = usePathname();
+  const { getDirectionForRoute } = useViewTransition();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const [applicationModalOpen, setApplicationModalOpen] = useState(false);
@@ -78,6 +82,7 @@ export default function CollegeHeader({ settings }: CollegeHeaderProps) {
         - Full width (no "floating island" width jumps)
       */}
       <header
+        style={{ viewTransitionName: "site-header" }}
         className={`fixed top-0 left-0 w-full z-50 transition-colors duration-500 ease-in-out ${scrolled
             ? "bg-[#F7F5F3]/95 backdrop-blur-md shadow-md border-b border-[rgba(26,58,82,0.06)]"
             : "bg-transparent border-b border-transparent"
@@ -91,30 +96,33 @@ export default function CollegeHeader({ settings }: CollegeHeaderProps) {
         >
           <div className="max-w-[1350px] mx-auto px-4 sm:px-8 py-2 flex justify-between items-center text-[11px] uppercase tracking-widest font-medium text-[#605A57]">
             <div className="flex gap-6">
-              <Link
+              <ViewTransitionLink
                 href="/faculty"
                 className="hover:text-[#1a3a52] transition-colors duration-200"
+                transitionType={getDirectionForRoute("/faculty") === "back" ? "slide-reverse" : "slide"}
               >
                 Faculty
-              </Link>
-              <Link
+              </ViewTransitionLink>
+              <ViewTransitionLink
                 href="/alumni"
                 className="hover:text-[#1a3a52] transition-colors duration-200"
+                transitionType={getDirectionForRoute("/alumni") === "back" ? "slide-reverse" : "slide"}
               >
                 Alumni
-              </Link>
-              <Link
+              </ViewTransitionLink>
+              <ViewTransitionLink
                 href="/parents"
                 className="hover:text-[#1a3a52] transition-colors duration-200"
+                transitionType={getDirectionForRoute("/parents") === "back" ? "slide-reverse" : "slide"}
               >
                 Parents
-              </Link>
+              </ViewTransitionLink>
             </div>
             <div className="flex gap-6">
               <ViewTransitionLink
                 href="/portal"
                 className="flex items-center gap-1 hover:text-[#1a3a52] transition-colors duration-200"
-                transitionType="slide"
+                transitionType={getDirectionForRoute("/portal") === "back" ? "slide-reverse" : "slide"}
               >
                 <svg
                   width="12"
@@ -147,7 +155,7 @@ export default function CollegeHeader({ settings }: CollegeHeaderProps) {
             <ViewTransitionLink
               href="/"
               className="flex items-center gap-3 group"
-              transitionType="slide-reverse"
+              transitionType={pathname === "/" ? "fade" : "slide-reverse"}
             >
               <div className="relative">
                 <Image
@@ -200,7 +208,7 @@ export default function CollegeHeader({ settings }: CollegeHeaderProps) {
                   className={`text-[#1a3a52] hover:text-[#C79244] transition-all duration-300 relative group py-2 font-medium ${
                     scrolled ? "text-xs" : "text-sm"
                   }`}
-                  transitionType="slide"
+                  transitionType={getDirectionForRoute(link.href) === "back" ? "slide-reverse" : "slide"}
                 >
                   {link.label}
                   <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-[#C79244] transition-all duration-300 ease-in-out group-hover:w-full" />

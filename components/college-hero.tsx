@@ -143,10 +143,10 @@ export default function CollegeHero({ settings }: CollegeHeroProps) {
               </svg>
             </Link>
             <Link
-              href="/#programs"
+              href="/academics"
               className="px-8 py-4 bg-white/50 backdrop-blur-sm border border-[rgba(26,58,82,0.2)] text-[#1a3a52] font-medium rounded-md hover:bg-white/80 transition-all hover:shadow-md"
             >
-              Explore Programs
+              Explore Academics
             </Link>
           </div>
         </div>

@@ -1,8 +1,13 @@
 "use client"
 
+import { ReactNode } from "react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
-import { ReactNode } from "react"
+
+import {
+  TransitionDirection,
+  useViewTransition,
+} from "@/components/view-transitions/view-transition-provider"
 
 interface ViewTransitionLinkProps {
   href: string
@@ -11,67 +16,81 @@ interface ViewTransitionLinkProps {
   onClick?: () => void
   style?: React.CSSProperties
   transitionType?: "slide" | "slide-reverse" | "fade" | "none"
+  [key: string]: unknown
 }
 
-export default function ViewTransitionLink({ 
-  href, 
-  children, 
-  className, 
+export default function ViewTransitionLink({
+  href,
+  children,
+  className,
   onClick,
   style,
-  transitionType = "slide"
+  transitionType = "slide",
+  ...props
 }: ViewTransitionLinkProps) {
   const router = useRouter()
+  const { startViewTransition } = useViewTransition()
 
-  const handleClick = async (e: React.MouseEvent<HTMLAnchorElement>) => {
-    e.preventDefault()
-    
-    // Close mobile menu if callback provided
+  const handleClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
     onClick?.()
 
-    // Check if user prefers reduced motion
-    const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches
-    if (prefersReducedMotion || transitionType === "none") {
+    if (
+      e.defaultPrevented ||
+      e.button !== 0 ||
+      e.metaKey ||
+      e.ctrlKey ||
+      e.shiftKey ||
+      e.altKey
+    ) {
+      return
+    }
+
+    if (
+      href.startsWith("http://") ||
+      href.startsWith("https://") ||
+      href.startsWith("mailto:") ||
+      href.startsWith("tel:") ||
+      href.startsWith("#")
+    ) {
+      return
+    }
+
+    e.preventDefault()
+
+    if (transitionType === "none") {
       router.push(href)
       return
     }
 
-    // Fallback for browsers without View Transitions API
-    if (!document.startViewTransition) {
-      router.push(href)
-      return
-    }
+    const direction: TransitionDirection =
+      transitionType === "slide-reverse"
+        ? "back"
+        : transitionType === "fade"
+        ? "fade"
+        : "forward"
 
-    // Set data attribute for reverse transitions
-    if (transitionType === "slide-reverse") {
-      document.documentElement.setAttribute('data-reverse', 'true')
-    } else {
-      document.documentElement.removeAttribute('data-reverse')
-    }
-
-    // Use View Transitions API with different animation types
-    const transition = document.startViewTransition(() => {
-      router.push(href)
-    })
-
-    try {
-      await transition.finished
-    } catch (error) {
-      console.error("View transition failed:", error)
-      // Fallback navigation if transition fails
-      router.push(href)
-    } finally {
-      // Clean up data attribute
-      document.documentElement.removeAttribute('data-reverse')
-    }
+    startViewTransition(
+      () => {
+        router.push(href)
+      },
+      { direction }
+    )
   }
 
   return (
-    <Link 
-      href={href} 
+    <Link
+      href={href}
       onClick={handleClick}
       className={className}
       style={style}
+      data-transition-direction={
+        transitionType === "slide-reverse"
+          ? "back"
+          : transitionType === "fade"
+          ? "fade"
+          : "forward"
+      }
+      {...props}
     >
       {children}
     </Link>

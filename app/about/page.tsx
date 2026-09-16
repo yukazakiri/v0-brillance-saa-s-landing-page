@@ -338,10 +338,10 @@ export default async function AboutPage() {
             </p>
             <div className="flex flex-col sm:flex-row gap-4 pt-4">
               <Link
-                href="/courses"
+                href="/academics"
                 className="px-8 py-4 bg-foreground text-background text-base font-semibold font-sans rounded-full hover:shadow-[0px_8px_24px_rgba(55,50,47,0.2)] transition-all duration-300 active:scale-95"
               >
-                Explore Programs
+                Explore Academics
               </Link>
               <Link
                 href="/#contact"
