@@ -1,4 +1,4 @@
-export const ARTICLE_REACTION_KINDS = ["inspired", "proud", "helpful"] as const;
+export const ARTICLE_REACTION_KINDS = ["like", "clap", "inspired", "proud"] as const;
 
 export type ArticleReactionKind = (typeof ARTICLE_REACTION_KINDS)[number];
 export type ArticleReactionSource = "sanity" | "facebook";

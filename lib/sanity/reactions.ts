@@ -39,9 +39,10 @@ type ReactionVoteDocument = {
 };
 
 const ZERO_COUNTS: ArticleReactionCounts = {
+  like: 0,
+  clap: 0,
   inspired: 0,
   proud: 0,
-  helpful: 0,
 };
 
 const SUMMARY_QUERY = groq`*[_id == $summaryId][0]{
@@ -237,6 +238,14 @@ export async function updateArticleReaction({
   }, {});
 
   const now = new Date().toISOString();
+  const setMissingPayload: Record<string, unknown> = {
+    counts: ZERO_COUNTS,
+    total: 0,
+  };
+  ARTICLE_REACTION_KINDS.forEach((kind) => {
+    setMissingPayload[`counts.${kind}`] = 0;
+  });
+
   let transaction = client
     .transaction()
     .createIfNotExists({
@@ -260,7 +269,7 @@ export async function updateArticleReaction({
           title: identity.title,
           updatedAt: now,
         })
-        .setIfMissing({ counts: ZERO_COUNTS, total: 0 })
+        .setIfMissing(setMissingPayload)
         .inc({ ...inc, total: nextKind ? (currentKind ? 0 : 1) : -1 }),
     );
 

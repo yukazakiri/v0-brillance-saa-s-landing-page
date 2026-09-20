@@ -86,7 +86,7 @@ export async function GET(request: Request) {
     return jsonWithVisitorCookie(
       {
         available: false,
-        counts: { inspired: 0, proud: 0, helpful: 0 },
+        counts: { like: 0, clap: 0, inspired: 0, proud: 0 },
         selected: null,
         total: 0,
         message: "Reactions are temporarily unavailable.",
