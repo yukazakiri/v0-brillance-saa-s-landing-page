@@ -3,6 +3,8 @@ import { groq } from "next-sanity";
 import { client } from "./client";
 import { getImageUrl } from "./image";
 import type {
+  AdjacentPosts,
+  AdjacentPostSummary,
   Article,
   Course,
   SanityCourse,
@@ -310,6 +312,68 @@ export async function fetchPostSlugs(): Promise<string[]> {
   } catch (error) {
     console.error("Error fetching post slugs:", error);
     return []; // Return empty array to allow build to proceed
+  }
+}
+
+const ADJACENT_POSTS_QUERY = groq`{
+  "previous": *[${PUBLISHED_POST_FILTER} && publishedAt < $publishedAt] | order(publishedAt desc)[0] {
+    _id,
+    title,
+    "slug": coalesce(slug.current, _id),
+    publishedAt,
+    excerpt,
+    featuredImage {
+      asset->{
+        _id,
+        url,
+        metadata {
+          dimensions,
+          lqip
+        }
+      },
+      alt,
+      caption,
+      credit,
+      externalUrl
+    }
+  },
+  "next": *[${PUBLISHED_POST_FILTER} && publishedAt > $publishedAt] | order(publishedAt asc)[0] {
+    _id,
+    title,
+    "slug": coalesce(slug.current, _id),
+    publishedAt,
+    excerpt,
+    featuredImage {
+      asset->{
+        _id,
+        url,
+        metadata {
+          dimensions,
+          lqip
+        }
+      },
+      alt,
+      caption,
+      credit,
+      externalUrl
+    }
+  }
+}`;
+
+export async function fetchAdjacentPosts(
+  publishedAt?: string | null,
+): Promise<AdjacentPosts> {
+  if (!publishedAt) {
+    return { previous: null, next: null };
+  }
+  try {
+    const result = await client.fetch<AdjacentPosts>(ADJACENT_POSTS_QUERY, {
+      publishedAt,
+    });
+    return result || { previous: null, next: null };
+  } catch (error) {
+    console.error("Error fetching adjacent posts:", error);
+    return { previous: null, next: null };
   }
 }
 

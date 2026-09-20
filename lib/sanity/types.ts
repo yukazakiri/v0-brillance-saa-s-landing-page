@@ -114,6 +114,20 @@ export interface SanityPost {
   };
 }
 
+export interface AdjacentPostSummary {
+  _id: string;
+  title: string;
+  slug: string;
+  publishedAt: string;
+  excerpt?: string;
+  featuredImage?: SanityImage;
+}
+
+export interface AdjacentPosts {
+  previous: AdjacentPostSummary | null;
+  next: AdjacentPostSummary | null;
+}
+
 export interface SanityFAQ {
   _id: string;
   _type: "faq";

@@ -1,11 +1,8 @@
 import {
-  ArrowLeft,
-  Calendar,
   ExternalLink,
   Facebook,
   Hash,
   Share2,
-  Tag as TagIcon,
   User,
 } from "lucide-react";
 import type { Metadata } from "next";
@@ -13,15 +10,15 @@ import { PortableText, type PortableTextComponents } from "next-sanity";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import {
-  HoverCard,
-  HoverCardContent,
-  HoverCardTrigger,
-} from "@/components/ui/preview-card";
-
 import CollegeHeader from "@/components/college-header";
+import { ArticleAuthorCard } from "@/components/news/article-author-card";
+import { ArticleReadMore } from "@/components/news/article-read-more";
+import { ArticleReactions } from "@/components/news/article-reactions";
+import { ArticleShareActions } from "@/components/news/article-share-actions";
+import {
+  ArticleTableOfContents,
+  type TocItem,
+} from "@/components/news/article-table-of-contents";
 import { EventHighlights } from "@/components/news/event-highlights";
 import FooterSection from "@/components/footer-section";
 import { ImageWithSkeleton } from "@/components/ui/image-with-skeleton";
@@ -45,13 +42,19 @@ import {
 } from "@/lib/sanity/photo-gallery";
 import { buildImageUrl } from "@/lib/sanity/image";
 import {
+  fetchArticleReactionTotals,
+  type ArticleReactionIdentity,
+  type ArticleReactionState,
+} from "@/lib/sanity/reactions";
+import {
+  fetchAdjacentPosts,
   fetchPhotoGalleriesByPostId,
   fetchPostBySlug,
   fetchPostSlugs,
   fetchSettings,
 } from "@/lib/sanity/queries";
 import { VideoWithSkeleton } from "@/components/ui/video-with-skeleton";
-import type { SanityPost, Settings } from "@/lib/sanity/types";
+import type { AdjacentPosts, SanityPost, Settings } from "@/lib/sanity/types";
 const dateFormatter = new Intl.DateTimeFormat("en-US", {
   month: "long",
   day: "numeric",
@@ -113,6 +116,71 @@ function renderMuxVideoFigure(
   );
 }
 
+function getPlainText(children: any): string {
+  if (!children) return "";
+  if (typeof children === "string") return children;
+  if (Array.isArray(children)) {
+    return children
+      .map((c) => (typeof c === "string" ? c : getPlainText(c?.props?.children || c)))
+      .join("");
+  }
+  if (typeof children === "object" && children?.props?.children) {
+    return getPlainText(children.props.children);
+  }
+  return String(children);
+}
+
+function slugifyHeading(text: string): string {
+  return text
+    .toLowerCase()
+    .replace(/[^\w\s-]/g, "")
+    .replace(/\s+/g, "-")
+    .replace(/^-+|-+$/g, "");
+}
+
+function extractTableOfContents(content?: any[]): TocItem[] {
+  if (!Array.isArray(content)) return [];
+  const items: TocItem[] = [];
+  content.forEach((block) => {
+    if (block?._type === "block" && (block.style === "h2" || block.style === "h3")) {
+      const text = (block.children || [])
+        .map((c: any) => c.text || "")
+        .join("")
+        .trim();
+      if (text) {
+        const id = slugifyHeading(text);
+        if (id) {
+          items.push({
+            id,
+            text,
+            level: block.style === "h2" ? 2 : 3,
+          });
+        }
+      }
+    }
+  });
+  return items;
+}
+
+function calculateReadingTime(content?: any[], excerpt?: string): number {
+  let wordCount = 0;
+  if (excerpt) {
+    wordCount += excerpt.split(/\s+/).filter(Boolean).length;
+  }
+  if (Array.isArray(content)) {
+    content.forEach((block) => {
+      if (block?._type === "block" && Array.isArray(block.children)) {
+        block.children.forEach((c: any) => {
+          if (c?.text) {
+            wordCount += c.text.split(/\s+/).filter(Boolean).length;
+          }
+        });
+      }
+    });
+  }
+  return Math.max(1, Math.ceil(wordCount / 180));
+}
+
 const portableTextComponents: PortableTextComponents = {
   types: {
     image: ({ value }) => {
@@ -127,14 +195,14 @@ const portableTextComponents: PortableTextComponents = {
       if (!imageUrl) return null;
 
       return (
-        <figure className={isPortrait ? "my-2" : "my-6"}>
+        <figure className={isPortrait ? "my-5" : "my-10"}>
           <img
             src={imageUrl}
             alt={value?.alt || "News article image"}
-            className="w-full rounded-2xl shadow-md"
+            className="w-full rounded-[calc(var(--radius)+0.5rem)] shadow-xl"
           />
           {(value?.credit || value?.caption) && (
-            <figcaption className="text-sm text-muted-foreground italic mt-2 px-2">
+            <figcaption className="mt-3 px-1 text-sm italic leading-6 text-muted-foreground">
               {value.caption && <span>{value.caption}</span>}
               {value.caption && value.credit && <span> • </span>}
               {value.credit && <span>📷 {value.credit}</span>}
@@ -277,32 +345,65 @@ const portableTextComponents: PortableTextComponents = {
   },
   block: {
     normal: ({ children }) => (
-      <p className="mb-4 leading-7 text-base">{children}</p>
+      <p className="mb-6 font-serif text-xl leading-9 text-foreground sm:text-[1.35rem] sm:leading-10">
+        {children}
+      </p>
     ),
-    h1: ({ children }) => (
-      <h1 className="text-3xl font-bold mt-8 mb-4 leading-tight">{children}</h1>
-    ),
-    h2: ({ children }) => (
-      <h2 className="text-2xl font-bold mt-6 mb-3 leading-tight">{children}</h2>
-    ),
-    h3: ({ children }) => (
-      <h3 className="text-xl font-bold mt-5 mb-3 leading-tight">{children}</h3>
-    ),
+    h1: ({ children }) => {
+      const text = getPlainText(children);
+      const id = slugifyHeading(text);
+      return (
+        <h1
+          id={id || undefined}
+          className="mb-5 mt-12 scroll-mt-28 text-balance font-serif text-4xl font-semibold leading-tight tracking-tight text-foreground sm:text-5xl"
+        >
+          {children}
+        </h1>
+      );
+    },
+    h2: ({ children }) => {
+      const text = getPlainText(children);
+      const id = slugifyHeading(text);
+      return (
+        <h2
+          id={id || undefined}
+          className="mb-4 mt-12 scroll-mt-28 text-balance font-serif text-3xl font-semibold leading-tight tracking-tight text-foreground sm:text-4xl"
+        >
+          {children}
+        </h2>
+      );
+    },
+    h3: ({ children }) => {
+      const text = getPlainText(children);
+      const id = slugifyHeading(text);
+      return (
+        <h3
+          id={id || undefined}
+          className="mb-3 mt-10 scroll-mt-28 font-serif text-2xl font-semibold leading-tight text-foreground sm:text-3xl"
+        >
+          {children}
+        </h3>
+      );
+    },
     h4: ({ children }) => (
-      <h4 className="text-lg font-bold mt-4 mb-2 leading-tight">{children}</h4>
+      <h4 className="mb-3 mt-8 text-sm font-semibold uppercase tracking-[0.22em] text-muted-foreground">
+        {children}
+      </h4>
     ),
     blockquote: ({ children }) => (
-      <blockquote className="border-l-4 border-primary pl-4 italic my-4 text-muted-foreground py-2">
+      <blockquote className="my-8 border-l-2 border-secondary pl-5 font-serif text-2xl italic leading-10 text-muted-foreground">
         {children}
       </blockquote>
     ),
   },
   list: {
     bullet: ({ children }) => (
-      <ul className="list-disc list-inside space-y-2 my-4 ml-4">{children}</ul>
+      <ul className="my-6 ml-6 list-disc space-y-3 font-serif text-xl leading-8 text-foreground">
+        {children}
+      </ul>
     ),
     number: ({ children }) => (
-      <ol className="list-decimal list-inside space-y-2 my-4 ml-4">
+      <ol className="my-6 ml-6 list-decimal space-y-3 font-serif text-xl leading-8 text-foreground">
         {children}
       </ol>
     ),
@@ -324,7 +425,7 @@ const portableTextComponents: PortableTextComponents = {
         href={value?.href}
         target={value?.blank ? "_blank" : "_self"}
         rel={value?.blank ? "noopener noreferrer" : ""}
-        className="text-primary hover:underline"
+        className="text-primary underline decoration-secondary/60 underline-offset-4 transition-colors hover:text-secondary"
       >
         {children}
       </a>
@@ -640,7 +741,26 @@ export default async function NewsArticlePage({
     notFound();
   }
 
-  const relatedGalleries = await fetchPhotoGalleriesByPostId(post._id);
+  const reactionIdentity: ArticleReactionIdentity = {
+    source: "sanity",
+    sourceId: post._id,
+    slug: post.slug,
+    title: post.title,
+  };
+  const [relatedGalleries, initialReactionState, adjacentPosts] =
+    await Promise.all([
+      fetchPhotoGalleriesByPostId(post._id),
+      fetchArticleReactionTotals(reactionIdentity),
+      fetchAdjacentPosts(post.publishedAt),
+    ]);
+
+  const tocItems = extractTableOfContents(post.content);
+  const readingTimeMinutes = calculateReadingTime(post.content, post.excerpt);
+  const primaryAuthor =
+    post.authors && post.authors.length > 0 ? post.authors[0] : null;
+  const authorAvatarUrl = primaryAuthor?.headshot
+    ? buildImageUrl(primaryAuthor.headshot, 120, 120)
+    : null;
 
   const heroImage = buildImageUrl(post.featuredImage);
   const heroMedia = heroImage ?? "/hero-images/maincampus.png";
@@ -652,13 +772,14 @@ export default async function NewsArticlePage({
     formatPostKindLabel(post.postKind) ||
     formatCategoryLabel(post.category);
   const authorName =
-    post.authors && post.authors.length > 0
-      ? post.authors
-          .filter(Boolean)
-          .map((author) => author.preferredName || author.fullName)
-          .filter(Boolean)
-          .join(", ")
-      : post.author || "Editorial Team";
+    primaryAuthor?.preferredName ||
+    primaryAuthor?.fullName ||
+    post.author ||
+    "Editorial Team";
+  const authorSubtitle =
+    primaryAuthor?.titles?.[0] ||
+    primaryAuthor?.roleType ||
+    "Campus Dispatch";
   const summaryText =
     post.seo?.metaDescription ??
     post.excerpt ??
@@ -720,142 +841,119 @@ export default async function NewsArticlePage({
       ) : null}
       <CollegeHeader settings={siteSettings} />
 
-      {/* Hero Image Section - Full Width with top margin */}
-      <section className="w-full h-[50vh] sm:h-[60vh] lg:h-[70vh] overflow-hidden bg-background mt-28 sm:mt-32 lg:mt-40">
-        <div className="relative w-full h-full">
-          <img
-            src={heroMedia}
-            alt={post.featuredImage?.alt || post.title}
-            className="w-full h-full object-cover"
-          />
-          <div className="absolute inset-0 bg-gradient-to-t from-background via-background/40 to-transparent" />
-        </div>
-      </section>
-
-      {/* Article Header Section - Separate with margin top */}
-      <div className="w-full bg-background py-12 sm:py-16 lg:py-20 mt-12 sm:mt-16">
-        <div className="w-full max-w-[900px] mx-auto px-4 sm:px-6 lg:px-8 flex flex-col gap-10">
-          {/* Article Header */}
-          <header className="border-b border-border/50 pb-10 w-full">
-            <div className="w-full space-y-6">
-              {/* Breadcrumb Navigation */}
-              <nav className="flex items-center gap-2 text-sm text-muted-foreground">
-                <Link
-                  href="/"
-                  className="hover:text-foreground transition-colors"
-                >
-                  Home
-                </Link>
-                <span className="text-muted-foreground/50">/</span>
-                <Link
-                  href="/news"
-                  className="hover:text-foreground transition-colors"
-                >
-                  News
-                </Link>
-                <span className="text-muted-foreground/50">/</span>
-                <span className="text-foreground truncate max-w-[200px]">
-                  {post.title}
-                </span>
-              </nav>
-
-              <div className="flex items-center gap-3">
-                <span className="text-xs font-medium tracking-[0.2em] uppercase text-muted-foreground">
-                  {categoryLabel}
-                </span>
-                <span className="w-1 h-1 rounded-full bg-muted-foreground/30" />
-                <span className="text-xs text-muted-foreground">
-                  {publishedDate}
-                </span>
-              </div>
-
-              <h1 className="text-3xl sm:text-4xl lg:text-5xl font-serif leading-[1.15] tracking-tight text-foreground">
+      <main className="bg-background pt-28 sm:pt-32 lg:pt-36">
+        <section className="px-5 pb-16 sm:px-6 sm:pb-20 lg:pb-28">
+          <header className="mx-auto max-w-[760px] pb-8">
+            <nav className="mb-8 flex items-center gap-2 text-sm text-muted-foreground">
+              <Link
+                href="/"
+                className="hover:text-foreground transition-colors"
+              >
+                Home
+              </Link>
+              <span className="text-muted-foreground/40">/</span>
+              <Link
+                href="/news"
+                className="hover:text-foreground transition-colors"
+              >
+                News
+              </Link>
+              <span className="text-muted-foreground/40">/</span>
+              <span className="truncate max-w-[240px] text-foreground font-medium">
                 {post.title}
-              </h1>
+              </span>
+            </nav>
 
-              <p className="text-lg sm:text-xl text-muted-foreground leading-relaxed max-w-2xl">
+            <div className="flex flex-wrap items-center gap-3">
+              <Link
+                href={`/news?category=${encodeURIComponent(categoryLabel.toLowerCase())}`}
+                className="text-xs font-semibold uppercase tracking-[0.24em] text-secondary transition-colors hover:text-primary"
+              >
+                {categoryLabel}
+              </Link>
+              <span className="h-1 w-1 rounded-full bg-border" />
+              <time className="text-xs text-muted-foreground" dateTime={post.publishedAt}>
+                {publishedDate}
+              </time>
+              {post.updatedAt && post.updatedAt !== post.publishedAt ? (
+                <>
+                  <span className="h-1 w-1 rounded-full bg-border" />
+                  <span className="text-xs text-muted-foreground">
+                    Updated {dateFormatter.format(new Date(post.updatedAt))}
+                  </span>
+                </>
+              ) : null}
+            </div>
+
+            <h1 className="mt-4 text-balance font-serif text-4xl font-semibold leading-[1.06] tracking-tight text-foreground sm:text-5xl lg:text-6xl">
+              {post.title}
+            </h1>
+
+            {summaryText ? (
+              <p className="mt-6 font-serif text-xl leading-relaxed text-muted-foreground sm:text-2xl sm:leading-[1.5]">
                 {summaryText}
               </p>
+            ) : null}
 
-              {post.authors && post.authors.length > 0 ? (
-                <HoverCard>
-                  <HoverCardTrigger asChild>
-                    <button className="flex items-center gap-2 text-sm text-muted-foreground pt-2 hover:text-foreground transition-colors cursor-pointer">
-                      <User className="w-4 h-4" />
-                      <span className="underline decoration-dotted">
-                        {post.authors[0].preferredName ||
-                          post.authors[0].fullName}
-                      </span>
-                    </button>
-                  </HoverCardTrigger>
-                  <HoverCardContent align="start" className="w-80">
-                    <div className="flex gap-4">
-                      {post.authors[0].headshot?.asset?.url && (
-                        <img
-                          src={post.authors[0].headshot.asset.url}
-                          alt={post.authors[0].fullName}
-                          className="w-16 h-16 rounded-full object-cover"
-                        />
-                      )}
-                      <div className="flex-1 space-y-1">
-                        <h4 className="text-sm font-semibold">
-                          {post.authors[0].preferredName ||
-                            post.authors[0].fullName}
-                        </h4>
-                        {post.authors[0].titles &&
-                          post.authors[0].titles.length > 0 && (
-                            <p className="text-xs text-muted-foreground">
-                              {post.authors[0].titles[0]}
-                            </p>
-                          )}
-                        {post.authors[0].roleType && (
-                          <p className="text-xs text-muted-foreground capitalize">
-                            {post.authors[0].roleType}
-                          </p>
-                        )}
-                        {post.authors[0].contactInfo?.website && (
-                          <a
-                            href={post.authors[0].contactInfo.website}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="text-xs text-primary hover:underline flex items-center gap-1"
-                          >
-                            View Profile <ExternalLink className="w-3 h-3" />
-                          </a>
-                        )}
-                      </div>
-                    </div>
-                  </HoverCardContent>
-                </HoverCard>
+            {/* Author Byline */}
+            <div className="mt-8 flex items-center gap-3.5">
+              {authorAvatarUrl ? (
+                <img
+                  src={authorAvatarUrl}
+                  alt={authorName}
+                  className="size-11 rounded-full border border-border object-cover shadow-sm"
+                />
               ) : (
-                <div className="flex items-center gap-2 text-sm text-muted-foreground pt-2">
-                  <User className="w-4 h-4" />
-                  <span>{authorName}</span>
+                <div className="flex size-11 items-center justify-center rounded-full border border-border bg-secondary/15 text-foreground">
+                  <User className="size-5 text-muted-foreground" aria-hidden="true" />
                 </div>
               )}
+              <div>
+                <p className="font-serif text-base font-semibold leading-tight text-foreground">
+                  {authorName}
+                </p>
+                <p className="text-xs text-muted-foreground">
+                  {authorSubtitle}
+                </p>
+              </div>
             </div>
+
+            {/* Quick Share Actions Bar */}
+            <ArticleShareActions
+              url={canonicalUrl}
+              title={post.title}
+              summary={summaryText}
+              readingTimeMinutes={readingTimeMinutes}
+              className="mt-8"
+            />
           </header>
 
-          <div className="w-full flex flex-col gap-8">
+          <figure className="mx-auto max-w-[960px] overflow-hidden rounded-[calc(var(--radius)+0.75rem)] border border-border bg-card shadow-xl">
+            <img
+              src={heroMedia}
+              alt={post.featuredImage?.alt || post.title}
+              className="aspect-[16/10] w-full object-cover"
+            />
+            {post.featuredImage?.caption || post.featuredImage?.credit ? (
+              <figcaption className="border-t border-border bg-card px-5 py-3 text-sm italic leading-6 text-muted-foreground">
+                {post.featuredImage.caption ? <span>{post.featuredImage.caption}</span> : null}
+                {post.featuredImage.caption && post.featuredImage.credit ? <span> · </span> : null}
+                {post.featuredImage.credit ? <span>📷 {post.featuredImage.credit}</span> : null}
+              </figcaption>
+            ) : null}
+          </figure>
+
+          <div className="mx-auto mt-12 flex w-full max-w-[760px] flex-col gap-10 sm:mt-16">
+            {/* Table of Contents */}
+            {tocItems.length > 1 ? (
+              <ArticleTableOfContents items={tocItems} />
+            ) : null}
+
             {post.video
               ? renderMuxVideoFigure(post.video, post.title, post.videoCredit)
               : null}
 
-            {tags.length > 0 && (
-              <div className="flex flex-wrap gap-2 text-xs font-medium text-[#4A403B]">
-                {tags.map((tag) => (
-                  <span
-                    key={tag}
-                    className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full border border-[rgba(55,50,47,0.18)] bg-[#FCFAF7]"
-                  >
-                    <Hash className="w-3 h-3" />
-                    {tag}
-                  </span>
-                ))}
-              </div>
-            )}
-
-            <article className="w-full text-[#433C38]">
+            <article className="w-full text-foreground">
               {Array.isArray(post.content) && post.content.length > 0 ? (
                 <div className="[&>figure]:break-inside-avoid">
                   <PortableText
@@ -870,6 +968,11 @@ export default async function NewsArticlePage({
               )}
             </article>
 
+            <ArticleReactions
+              identity={reactionIdentity}
+              initialState={initialReactionState}
+            />
+
             {post.eventHighlights ? (
               <EventHighlights
                 highlights={post.eventHighlights}
@@ -877,8 +980,27 @@ export default async function NewsArticlePage({
               />
             ) : null}
 
-            <div className="border-t border-[rgba(55,50,47,0.12)] pt-6 flex flex-col gap-4">
-              <h3 className="text-sm font-semibold text-[#6B635D] uppercase tracking-[0.3em]">
+            {tags.length > 0 ? (
+              <div className="flex flex-wrap items-center gap-2 border-t border-border pt-6 text-xs font-medium text-foreground">
+                <span className="mr-1 text-muted-foreground">Topics:</span>
+                {tags.map((tag) => (
+                  <span
+                    key={tag}
+                    className="inline-flex items-center gap-1 rounded-full border border-border bg-card px-3 py-1 text-xs text-muted-foreground transition-colors hover:border-primary hover:text-foreground"
+                  >
+                    <Hash className="size-3" />
+                    {tag}
+                  </span>
+                ))}
+              </div>
+            ) : null}
+
+            <ArticleAuthorCard author={primaryAuthor} fallbackName={authorName} />
+
+            <ArticleReadMore adjacent={adjacentPosts} />
+
+            <div className="border-t border-border pt-6 flex flex-col gap-4">
+              <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-[0.3em]">
                 Share this story
               </h3>
               <div className="flex flex-wrap gap-3">
@@ -889,7 +1011,7 @@ export default async function NewsArticlePage({
                     target="_blank"
                     rel="noreferrer"
                     title={share.title}
-                    className="inline-flex items-center gap-2 px-4 py-2 rounded-full border border-[rgba(55,50,47,0.2)] text-sm font-semibold text-[#37322F] hover:bg-[#37322F] hover:text-white transition-colors"
+                    className="inline-flex items-center gap-2 rounded-full border border-border px-4 py-2 text-sm font-semibold text-foreground transition-colors hover:bg-primary hover:text-primary-foreground"
                   >
                     {share.label}
                     <span aria-hidden>↗</span>
@@ -899,16 +1021,16 @@ export default async function NewsArticlePage({
             </div>
 
             {relatedGalleries.length > 0 ? (
-              <section className="rounded-[28px] border border-[rgba(55,50,47,0.12)] bg-[#FCFAF7] p-5 sm:p-7">
+              <section className="rounded-[calc(var(--radius)+1.4rem)] border border-border bg-card p-5 sm:p-7">
                 <div className="flex flex-col gap-6">
                   <div className="flex flex-col gap-2">
-                    <span className="text-xs font-semibold uppercase tracking-[0.28em] text-[#6B635D]">
+                    <span className="text-xs font-semibold uppercase tracking-[0.28em] text-muted-foreground">
                       Related Gallery
                     </span>
-                    <h2 className="text-2xl font-serif text-[#37322F]">
+                    <h2 className="text-2xl font-serif text-foreground">
                       Photo references for this article
                     </h2>
-                    <p className="max-w-2xl text-sm leading-6 text-[#6B635D]">
+                    <p className="max-w-2xl text-sm leading-6 text-muted-foreground">
                       If this article or event has linked albums, you can open
                       them below to browse the photos and media captured for it.
                     </p>
@@ -929,7 +1051,7 @@ export default async function NewsArticlePage({
                         <Link
                           key={gallery._id}
                           href={`/gallery/${gallery.slug.current}`}
-                          className="group overflow-hidden rounded-[24px] border border-[rgba(55,50,47,0.12)] bg-white transition-transform duration-300 hover:-translate-y-1"
+                          className="group overflow-hidden rounded-[calc(var(--radius)+1rem)] border border-border bg-background transition-transform duration-300 hover:-translate-y-1"
                         >
                           <div className="relative aspect-[16/10] overflow-hidden bg-stone-100">
                             {coverUrl ? (
@@ -970,11 +1092,11 @@ export default async function NewsArticlePage({
                           </div>
 
                           <div className="flex flex-col gap-4 p-5">
-                            <p className="text-sm leading-6 text-[#6B635D]">
+                            <p className="text-sm leading-6 text-muted-foreground">
                               {gallery.summary ||
                                 "Open this gallery to browse the media captured for this event."}
                             </p>
-                            <div className="text-xs font-semibold uppercase tracking-[0.24em] text-[#6B635D]">
+                            <div className="text-xs font-semibold uppercase tracking-[0.24em] text-muted-foreground">
                               View photo album
                             </div>
                           </div>
@@ -986,8 +1108,8 @@ export default async function NewsArticlePage({
               </section>
             ) : null}
           </div>
-        </div>
-      </div>
+        </section>
+      </main>
 
       <FooterSection settings={siteSettings} />
     </>
@@ -995,7 +1117,7 @@ export default async function NewsArticlePage({
 }
 
 // Facebook Post Page Component
-function FacebookPostPage({
+async function FacebookPostPage({
   post,
   settings,
   slug,
@@ -1016,6 +1138,14 @@ function FacebookPostPage({
   const canonicalUrl = getNewsPostUrl(baseUrl, slug);
   const fbShareText = `${post.message?.slice(0, 100) || "Facebook Post"} - From Data Center College of the Philippines #DCCP`;
   const fbShareEmail = `Check this out from Data Center College:\n\n${post.message || "A post from Data Center College"}\n\n${canonicalUrl}`;
+  const reactionIdentity: ArticleReactionIdentity = {
+    source: "facebook",
+    sourceId: post.id,
+    slug,
+    title: post.message?.slice(0, 100) || "Facebook Post",
+  };
+  const initialReactionState: ArticleReactionState =
+    await fetchArticleReactionTotals(reactionIdentity);
 
   const shareLinks = [
     {
@@ -1045,111 +1175,118 @@ function FacebookPostPage({
     },
   ];
 
+  const readingTimeMinutes = Math.max(
+    1,
+    Math.ceil((post.message || "").split(/\s+/).filter(Boolean).length / 180),
+  );
+
   return (
     <>
       <CollegeHeader settings={settings} />
 
-      {/* Hero Image Section */}
-      <div className="relative w-full h-[50vh] sm:h-[60vh] lg:h-[70vh] overflow-hidden mt-16 sm:mt-20">
-        {post.image ? (
-          <img
-            src={post.image}
-            alt={post.message?.slice(0, 60) || "Facebook post"}
-            className="w-full h-full object-cover"
-          />
-        ) : (
-          <div className="w-full h-full bg-gradient-to-br from-[#1877f2] to-[#0d5bbf] flex items-center justify-center">
-            <Facebook className="w-24 h-24 text-white/30" />
-          </div>
-        )}
-        <div className="absolute inset-0 bg-gradient-to-t from-background via-background/40 to-transparent" />
+      <main className="bg-background pt-28 sm:pt-32 lg:pt-36">
+        <section className="px-5 pb-16 sm:px-6 sm:pb-20 lg:pb-28">
+          <header className="mx-auto max-w-[760px] pb-8">
+            <nav className="mb-8 flex items-center gap-2 text-sm text-muted-foreground">
+              <Link
+                href="/"
+                className="hover:text-foreground transition-colors"
+              >
+                Home
+              </Link>
+              <span className="text-muted-foreground/40">/</span>
+              <Link
+                href="/news"
+                className="hover:text-foreground transition-colors"
+              >
+                News
+              </Link>
+              <span className="text-muted-foreground/40">/</span>
+              <span className="truncate max-w-[240px] text-foreground font-medium">
+                {post.message?.slice(0, 50) || "Facebook Post"}
+              </span>
+            </nav>
 
-        {/* Facebook Badge */}
-        <div className="absolute top-4 right-4 sm:top-6 sm:right-6">
-          <div className="px-4 py-2 bg-[#1877f2] text-white text-xs font-bold uppercase tracking-wider rounded-full flex items-center gap-2 shadow-lg">
-            <Facebook className="w-4 h-4" />
-            Facebook
-          </div>
-        </div>
-      </div>
+            <div className="flex flex-wrap items-center gap-3">
+              <span className="text-xs font-semibold uppercase tracking-[0.24em] text-secondary">
+                {categoryLabel}
+              </span>
+              <span className="h-1 w-1 rounded-full bg-border" />
+              <time className="text-xs text-muted-foreground" dateTime={post.createdAt}>
+                {publishedDate}
+              </time>
+            </div>
 
-      <div className="w-full px-2 sm:px-4 md:px-8 lg:px-12 py-10">
-        <div className="w-full max-w-[1000px] mx-auto flex flex-col gap-10">
-          {/* Article Header */}
-          <header className="border-b border-border/50 pb-10">
-            <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
-              {/* Breadcrumb Navigation */}
-              <nav className="mb-8 flex items-center gap-2 text-sm text-muted-foreground">
-                <Link
-                  href="/"
-                  className="hover:text-foreground transition-colors"
-                >
-                  Home
-                </Link>
-                <span className="text-muted-foreground/50">/</span>
-                <Link
-                  href="/news"
-                  className="hover:text-foreground transition-colors"
-                >
-                  News
-                </Link>
-                <span className="text-muted-foreground/50">/</span>
-                <span className="text-foreground truncate max-w-[200px]">
-                  {post.message?.slice(0, 50) || "Facebook Post"}
-                </span>
-              </nav>
+            <h1 className="mt-4 text-balance font-serif text-4xl font-semibold leading-[1.06] tracking-tight text-foreground sm:text-5xl lg:text-6xl">
+              {post.message
+                ? post.message.slice(0, 100) +
+                  (post.message.length > 100 ? "..." : "")
+                : "Facebook Post"}
+            </h1>
 
-              <div className="space-y-6">
-                <div className="flex items-center gap-3">
-                  <span className="text-xs font-medium tracking-[0.2em] uppercase text-muted-foreground">
-                    {categoryLabel}
-                  </span>
-                  <span className="w-1 h-1 rounded-full bg-muted-foreground/30" />
-                  <span className="text-xs text-muted-foreground">
-                    {publishedDate}
-                  </span>
-                </div>
-
-                <h1 className="text-3xl sm:text-4xl lg:text-5xl font-serif leading-[1.15] tracking-tight text-foreground">
-                  {post.message
-                    ? post.message.slice(0, 100) +
-                      (post.message.length > 100 ? "..." : "")
-                    : "Facebook Post"}
-                </h1>
-
-                <div className="flex items-center gap-2 text-sm text-muted-foreground pt-2">
-                  <Facebook className="w-4 h-4 text-[#1877f2]" />
-                  <span>{authorName}</span>
-                </div>
-
-                {/* Shared From Info */}
-                {post.isShared && post.sharedFrom?.name && (
-                  <div className="flex items-center gap-3 p-4 bg-[#f7f5f3] rounded-lg border border-[rgba(26,58,82,0.12)]">
-                    <Share2 className="w-5 h-5 text-[#1877f2]" />
-                    <div>
-                      <p className="text-sm font-medium text-[#1a3a52]">
-                        Shared from{" "}
-                        <span className="text-[#1877f2]">
-                          {post.sharedFrom.name}
-                        </span>
-                      </p>
-                      {post.originalPost?.author && (
-                        <p className="text-xs text-[#605A57] mt-1">
-                          Original by {post.originalPost.author.name}
-                        </p>
-                      )}
-                    </div>
-                  </div>
-                )}
+            <div className="mt-8 flex items-center gap-3">
+              <div className="flex size-11 items-center justify-center rounded-full border border-border bg-secondary/15 text-foreground">
+                <Facebook className="size-5 text-primary" aria-hidden="true" />
+              </div>
+              <div>
+                <p className="font-serif text-base font-semibold leading-tight text-foreground">
+                  {authorName}
+                </p>
+                <p className="text-xs text-muted-foreground">
+                  Campus Social Post
+                </p>
               </div>
             </div>
+
+            {/* Shared From Info */}
+            {post.isShared && post.sharedFrom?.name && (
+              <div className="mt-6 flex items-center gap-3 rounded-[calc(var(--radius)+0.5rem)] border border-border bg-card p-4">
+                <Share2 className="w-5 h-5 text-primary" />
+                <div>
+                  <p className="text-sm font-medium text-foreground">
+                    Shared from{" "}
+                    <span className="text-primary">
+                      {post.sharedFrom.name}
+                    </span>
+                  </p>
+                  {post.originalPost?.author && (
+                    <p className="mt-1 text-xs text-muted-foreground">
+                      Original by {post.originalPost.author.name}
+                    </p>
+                  )}
+                </div>
+              </div>
+            )}
+
+            <ArticleShareActions
+              url={canonicalUrl}
+              title={post.message?.slice(0, 100) || "Facebook Post"}
+              readingTimeMinutes={readingTimeMinutes}
+              className="mt-8"
+            />
           </header>
 
-          <div className="w-full max-w-[820px] mx-auto flex flex-col gap-8">
+          <figure className="mx-auto max-w-[960px] overflow-hidden rounded-[calc(var(--radius)+0.75rem)] border border-border bg-card shadow-xl">
+            {post.image ? (
+              <img
+                src={post.image}
+                alt={post.message?.slice(0, 60) || "Facebook post"}
+                className="aspect-[3/2] w-full object-cover"
+              />
+            ) : (
+              <div className="flex aspect-[3/2] w-full items-center justify-center bg-primary/10">
+                <Facebook className="w-24 h-24 text-primary/30" />
+              </div>
+            )}
+          </figure>
+
+          <div className="mx-auto mt-12 flex w-full max-w-[760px] flex-col gap-10 sm:mt-16">
             {/* Post Content */}
-            <article className="prose prose-neutral prose-lg max-w-none text-[#433C38]">
+            <article className="text-foreground">
               {post.message ? (
-                <p className="whitespace-pre-wrap">{post.message}</p>
+                <p className="whitespace-pre-wrap font-serif text-xl leading-9 text-foreground sm:text-[1.35rem] sm:leading-10">
+                  {post.message}
+                </p>
               ) : (
                 <p className="text-muted-foreground italic">
                   This post doesn't have text content.
@@ -1159,9 +1296,9 @@ function FacebookPostPage({
 
             {/* Original Post (for shared posts) */}
             {post.isShared && post.originalPost && (
-              <div className="border border-[rgba(26,58,82,0.12)] rounded-lg overflow-hidden bg-[#f7f5f3]">
-                <div className="p-4 bg-[#1a3a52]/5 border-b border-[rgba(26,58,82,0.12)]">
-                  <p className="text-sm font-medium text-[#1a3a52] flex items-center gap-2">
+              <div className="overflow-hidden rounded-[calc(var(--radius)+0.75rem)] border border-border bg-card">
+                <div className="border-b border-border bg-primary/5 p-4">
+                  <p className="flex items-center gap-2 text-sm font-medium text-foreground">
                     <Share2 className="w-4 h-4" />
                     Original Post
                   </p>
@@ -1175,7 +1312,7 @@ function FacebookPostPage({
                 )}
                 {post.originalPost.message && (
                   <div className="p-4">
-                    <p className="text-sm text-[#433C38] line-clamp-4">
+                    <p className="line-clamp-4 text-sm leading-6 text-muted-foreground">
                       {post.originalPost.message}
                     </p>
                   </div>
@@ -1184,23 +1321,28 @@ function FacebookPostPage({
             )}
 
             {/* Engagement Stats */}
-            <div className="flex items-center gap-6 py-4 border-y border-[rgba(55,50,47,0.12)]">
-              <span className="text-sm text-[#605A57]">
-                <strong className="text-[#1a3a52]">{post.likes}</strong> likes
+            <div className="flex items-center gap-6 border-y border-border py-4">
+              <span className="text-sm text-muted-foreground">
+                <strong className="text-foreground">{post.likes}</strong> likes
               </span>
               {post.comments > 0 && (
-                <span className="text-sm text-[#605A57]">
-                  <strong className="text-[#1a3a52]">{post.comments}</strong>{" "}
+                <span className="text-sm text-muted-foreground">
+                  <strong className="text-foreground">{post.comments}</strong>{" "}
                   comments
                 </span>
               )}
               {post.shares > 0 && (
-                <span className="text-sm text-[#605A57]">
-                  <strong className="text-[#1a3a52]">{post.shares}</strong>{" "}
+                <span className="text-sm text-muted-foreground">
+                  <strong className="text-foreground">{post.shares}</strong>{" "}
                   shares
                 </span>
               )}
             </div>
+
+            <ArticleReactions
+              identity={reactionIdentity}
+              initialState={initialReactionState}
+            />
 
             {/* View on Facebook Button */}
             {post.permalink && (
@@ -1209,7 +1351,7 @@ function FacebookPostPage({
                   href={post.permalink}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="inline-flex items-center gap-2 px-6 py-3 bg-[#1877f2] text-white text-sm font-semibold rounded-full hover:bg-[#1877f2]/90 transition-colors"
+                  className="inline-flex items-center gap-2 rounded-full bg-primary px-6 py-3 text-sm font-semibold text-primary-foreground transition-colors hover:bg-primary/90"
                 >
                   <Facebook className="w-4 h-4" />
                   View on Facebook
@@ -1219,8 +1361,8 @@ function FacebookPostPage({
             )}
 
             {/* Share Links */}
-            <div className="border-t border-[rgba(55,50,47,0.12)] pt-6 flex flex-col gap-4">
-              <h3 className="text-sm font-semibold text-[#6B635D] uppercase tracking-[0.3em]">
+            <div className="border-t border-border pt-6 flex flex-col gap-4">
+              <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-[0.3em]">
                 Share this story
               </h3>
               <div className="flex flex-wrap gap-3">
@@ -1231,7 +1373,7 @@ function FacebookPostPage({
                     target="_blank"
                     rel="noreferrer"
                     title={share.title}
-                    className="inline-flex items-center gap-2 px-4 py-2 rounded-full border border-[rgba(55,50,47,0.2)] text-sm font-semibold text-[#37322F] hover:bg-[#37322F] hover:text-white transition-colors"
+                    className="inline-flex items-center gap-2 rounded-full border border-border px-4 py-2 text-sm font-semibold text-foreground transition-colors hover:bg-primary hover:text-primary-foreground"
                   >
                     {share.label}
                     <span aria-hidden>↗</span>
@@ -1240,8 +1382,8 @@ function FacebookPostPage({
               </div>
             </div>
           </div>
-        </div>
-      </div>
+        </section>
+      </main>
 
       <FooterSection settings={settings} />
     </>
