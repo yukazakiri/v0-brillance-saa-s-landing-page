@@ -135,6 +135,25 @@ const POST_PROJECTION = groq`{
   channels,
   activationWindow,
   cta,
+  eventHighlights {
+    heading,
+    description,
+    photos[] {
+      _key,
+      alt,
+      caption,
+      credit,
+      externalUrl,
+      asset->{
+        _id,
+        url,
+        metadata {
+          dimensions,
+          lqip
+        }
+      }
+    }
+  },
   seo {
     metaTitle,
     metaDescription,
@@ -256,6 +275,7 @@ function mapPostToArticle(post: SanityPost): Article {
       getMuxThumbnailUrl(post.video),
     featured: Boolean(post.featured),
     tags: post.tags ?? [],
+    eventHighlights: post.eventHighlights,
     seo: {
       title: post.seo?.metaTitle,
       description: post.seo?.metaDescription,

@@ -40,6 +40,16 @@ export interface SanityMuxVideo {
   };
 }
 
+export interface SanityHighlightPhoto extends SanityImage {
+  _key?: string;
+}
+
+export interface SanityEventHighlights {
+  heading?: string;
+  description?: string;
+  photos?: SanityHighlightPhoto[];
+}
+
 // Sanity document types
 export interface SanityPost {
   _id: string;
@@ -50,8 +60,9 @@ export interface SanityPost {
   slug: string;
   excerpt?: string;
   content?: any[]; // Portable text blocks with resolved image assets
+  eventHighlights?: SanityEventHighlights;
   postKind?: "news" | "story" | "announcement" | "alert";
-  contentFocus?: "news" | "research" | "student-life" | "athletics" | "press";
+  contentFocus?: "news" | "research" | "student-life" | "athletics" | "press" | "event";
   priority?: "normal" | "high" | "critical";
   category?: string; // Legacy field
   tags?: string[];
@@ -153,6 +164,7 @@ export interface Article {
   featured: boolean;
   content?: string;
   tags?: string[];
+  eventHighlights?: SanityEventHighlights;
   seo?: {
     title?: string;
     description?: string;

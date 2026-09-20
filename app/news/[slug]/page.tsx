@@ -22,6 +22,7 @@ import {
 } from "@/components/ui/preview-card";
 
 import CollegeHeader from "@/components/college-header";
+import { EventHighlights } from "@/components/news/event-highlights";
 import FooterSection from "@/components/footer-section";
 import { ImageWithSkeleton } from "@/components/ui/image-with-skeleton";
 import { MuxVideoPlayer } from "@/components/ui/mux-video-player";
@@ -868,6 +869,13 @@ export default async function NewsArticlePage({
                 </p>
               )}
             </article>
+
+            {post.eventHighlights ? (
+              <EventHighlights
+                highlights={post.eventHighlights}
+                articleTitle={post.title}
+              />
+            ) : null}
 
             <div className="border-t border-[rgba(55,50,47,0.12)] pt-6 flex flex-col gap-4">
               <h3 className="text-sm font-semibold text-[#6B635D] uppercase tracking-[0.3em]">
