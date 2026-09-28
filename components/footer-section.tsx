@@ -44,7 +44,7 @@ const navigationGroups = [
     title: "College",
     links: [
       { label: "About us", href: "/about" },
-      { label: "Academics", href: "/academics" },
+      { label: "Courses", href: "/courses" },
       { label: "News & updates", href: "/news" },
       { label: "Faculty", href: "/faculty" },
     ],

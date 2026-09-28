@@ -199,7 +199,7 @@ export default function CollegeHeader({ settings }: CollegeHeaderProps) {
             <nav className="hidden lg:flex items-center gap-6 xl:gap-8">
               {[
                 { href: "/about", label: "About" },
-                { href: "/academics", label: "Academics" },
+                { href: "/courses", label: "Courses" },
                 { href: "/news", label: "News and Announcements" },
               ].map((link) => (
                 <ViewTransitionLink

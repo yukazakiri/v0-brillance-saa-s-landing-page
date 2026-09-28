@@ -419,6 +419,11 @@ export interface SanityCourse {
   programType?: string;
   qualificationLevel?: string;
   tesdaRegistrationNumber?: string;
+  badge?: string;
+  featured?: boolean;
+  orderRank?: number;
+  intakeSchedule?: string;
+  targetAudience?: string[];
 }
 
 export interface Course {
@@ -434,6 +439,35 @@ export interface Course {
   highlights: string[];
   credential?: string;
   scholarshipsAvailable?: boolean;
+  tuition?: string;
+  tuitionRange?: string;
+  deliveryMode?: string;
+  badge?: string;
+  featured?: boolean;
+  careerPaths?: string[];
+  targetAudience?: string[];
+  outcomes?: string[];
+  intakeSchedule?: string;
+  majors?: string[];
+  level?: string;
+  degreeType?: string;
+  learningOutcomes?: string[];
+  curriculumStructure?: Array<{
+    term?: string;
+    description?: string;
+    subjects?: string[];
+  }>;
+  admissionsRequirements?: string[];
+  applicationDeadlines?: string[];
+  admissionsContact?: {
+    name?: string;
+    email?: string;
+    phone?: string;
+  };
+  cta?: {
+    label?: string;
+    url?: string;
+  };
 }
 
 // Student Portal Page types

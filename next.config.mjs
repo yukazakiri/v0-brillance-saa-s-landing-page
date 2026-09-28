@@ -9,6 +9,15 @@ const nextConfig = {
   experimental: {
     viewTransition: true,
   },
+  async redirects() {
+    return [
+      {
+        source: '/academics',
+        destination: '/courses',
+        permanent: true,
+      },
+    ]
+  },
 }
 
 export default nextConfig

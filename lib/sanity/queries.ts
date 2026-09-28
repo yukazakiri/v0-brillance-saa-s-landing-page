@@ -464,8 +464,8 @@ export async function fetchSettings(): Promise<Settings | null> {
 
 // Courses Query
 const COURSES_QUERY = groq`
-  *[_type == "course" && status == "active"]
-  | order(offeringCategory asc, title asc)
+  *[_type in ["course", "program"] && status == "active"]
+  | order(coalesce(orderRank, 999) asc, offeringCategory asc, title asc)
   {
     _id,
     _type,
@@ -486,22 +486,36 @@ const COURSES_QUERY = groq`
       externalUrl
     },
     offeringCategory,
-    description,
-    summary,
-    careerPaths,
-    status,
+    degreeType,
     credential,
+    badge,
+    featured,
+    majors,
+    deliveryMode,
     duration,
     durationYears,
+    level,
+    description,
+    summary,
+    highlights,
+    learningOutcomes,
+    curriculumStructure,
+    careerPaths,
+    targetAudience,
+    outcomes,
+    code,
     creditHours,
     trainingHours,
+    tuition,
     tuitionRange,
+    financialAidHighlight,
     scholarshipsAvailable,
-    enrollmentCap,
-    programType,
-    qualificationLevel,
-    tesdaRegistrationNumber,
-    competencies
+    intakeSchedule,
+    admissionsRequirements,
+    applicationDeadlines,
+    admissionsContact,
+    cta,
+    status
   }
 `;
 
@@ -526,25 +540,19 @@ function formatDuration(durationYears?: number, category?: string): string {
 function mapCourseToLocalCourse(course: SanityCourse): Course {
   const highlights: string[] = [];
 
-  // Use careerPaths as highlights if available
-  if (course.careerPaths && course.careerPaths.length > 0) {
+  if (course.highlights && course.highlights.length > 0) {
+    highlights.push(...course.highlights);
+  } else if (course.careerPaths && course.careerPaths.length > 0) {
     highlights.push(...course.careerPaths.slice(0, 3));
-  }
-
-  // Use competencies as highlights if careerPaths not available
-  if (
-    highlights.length === 0 &&
-    course.competencies &&
-    course.competencies.length > 0
-  ) {
+  } else if (course.competencies && course.competencies.length > 0) {
     highlights.push(...course.competencies.slice(0, 3));
   }
 
   return {
     id: course._id,
-    slug: course.slug.current,
+    slug: course.slug?.current || course._id,
     title: course.title,
-    category: course.offeringCategory,
+    category: (course.offeringCategory as any) || "ched",
     description: course.description ?? course.summary,
     heroImage: course.heroImage,
     duration:
@@ -554,7 +562,25 @@ function mapCourseToLocalCourse(course: SanityCourse): Course {
     trainingHours: course.trainingHours,
     highlights,
     credential: course.credential,
-    scholarshipsAvailable: course.scholarshipsAvailable,
+    scholarshipsAvailable: course.scholarshipsAvailable ?? true,
+    tuition: course.tuition,
+    tuitionRange: course.tuitionRange,
+    deliveryMode: course.deliveryMode,
+    badge: course.badge,
+    featured: course.featured,
+    careerPaths: course.careerPaths,
+    targetAudience: course.targetAudience,
+    outcomes: course.outcomes,
+    intakeSchedule: course.intakeSchedule,
+    majors: course.majors,
+    level: course.level,
+    degreeType: course.degreeType,
+    learningOutcomes: course.learningOutcomes,
+    curriculumStructure: course.curriculumStructure,
+    admissionsRequirements: course.admissionsRequirements,
+    applicationDeadlines: course.applicationDeadlines,
+    admissionsContact: course.admissionsContact,
+    cta: course.cta,
   };
 }
 
@@ -654,7 +680,7 @@ export async function fetchCoursesByCategory(
 }
 
 const COURSE_BY_SLUG_QUERY = groq`
-  *[_type == "course" && slug.current == $slug][0]
+  *[_type in ["course", "program"] && slug.current == $slug][0]
   {
     _id,
     _type,
@@ -677,6 +703,8 @@ const COURSE_BY_SLUG_QUERY = groq`
     offeringCategory,
     degreeType,
     credential,
+    badge,
+    featured,
     majors,
     tesdaQualification,
     tesdaCompetencyLevel,
@@ -690,6 +718,9 @@ const COURSE_BY_SLUG_QUERY = groq`
     highlights,
     learningOutcomes,
     curriculumStructure,
+    careerPaths,
+    targetAudience,
+    outcomes,
     "relatedOfferings": relatedOfferings[]->{ _id, title, slug },
     code,
     creditHours,
@@ -702,10 +733,12 @@ const COURSE_BY_SLUG_QUERY = groq`
     admissionsRequirements,
     applicationDeadlines,
     tuition,
+    tuitionRange,
     financialAidHighlight,
+    scholarshipsAvailable,
+    intakeSchedule,
     admissionsContact,
     cta,
-    outcomes,
     seo {
       metaTitle,
       metaDescription,
@@ -727,7 +760,7 @@ const COURSE_BY_SLUG_QUERY = groq`
 `;
 
 const COURSE_SLUGS_QUERY = groq`
-  *[_type == "course" && status == "active" && defined(slug.current)]{
+  *[_type in ["course", "program"] && status == "active" && defined(slug.current)]{
     "slug": slug.current
   }
 `;

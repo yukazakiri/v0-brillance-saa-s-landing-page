@@ -26,8 +26,7 @@ interface ViewTransitionContextValue {
 const ROUTE_RANK: Record<string, number> = {
   "/": 0,
   "/about": 1,
-  "/academics": 2,
-  "/courses": 2.5,
+  "/courses": 2,
   "/news": 3,
   "/faculty": 4,
   "/parents": 5,

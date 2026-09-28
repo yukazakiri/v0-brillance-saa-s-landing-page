@@ -26,7 +26,7 @@ export default function MobileMenu({ isOpen, onClose }: MobileMenuProps) {
   const navLinks = [
     { href: "/", label: "Home" },
     { href: "/about", label: "About" },
-    { href: "/academics", label: "Academics" },
+    { href: "/courses", label: "Courses" },
     { href: "/#admissions", label: "Admissions" },
     { href: "/news", label: "News" },
     { href: "/#campus-life", label: "Campus" },
