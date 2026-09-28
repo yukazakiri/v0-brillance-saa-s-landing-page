@@ -384,19 +384,6 @@ export default function CourseCatalog({ courses, initialCategory, contact }: Cou
                       </div>
                     </div>
                   )}
-
-                  {course.tuition && (
-                    <div className="rounded-xl border border-secondary/30 bg-secondary/15 px-3.5 py-2.5 flex items-center justify-between gap-3 text-xs">
-                      <div>
-                        <span className="block text-[10px] font-medium uppercase tracking-wider text-muted-foreground">Estimated Fee</span>
-                        <span className="font-semibold text-foreground">{course.tuition}</span>
-                      </div>
-                      <span className="inline-flex items-center gap-1 text-[11px] font-medium text-emerald-600 dark:text-emerald-400">
-                        <CheckCircle2 className="size-3.5" />
-                        Subsidies Available
-                      </span>
-                    </div>
-                  )}
                 </div>
 
                 <div className="pt-6 mt-4 border-t border-border/70 flex items-center justify-between gap-3">
@@ -433,11 +420,6 @@ export default function CourseCatalog({ courses, initialCategory, contact }: Cou
                 <p className="line-clamp-2 text-sm text-muted-foreground">
                   {course.description || "Practical degree and technical certificate path designed for direct workforce integration."}
                 </p>
-                {course.tuition && (
-                  <div className="text-xs text-muted-foreground">
-                    Tuition: <strong className="text-foreground">{course.tuition}</strong> (Scholarships & Grants Honored)
-                  </div>
-                )}
               </div>
 
               <div className="flex items-center gap-3 shrink-0">

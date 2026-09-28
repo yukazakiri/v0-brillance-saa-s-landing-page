@@ -12,13 +12,11 @@ import {
   Calendar,
   CheckCircle2,
   Clock,
-  CreditCard,
   Download,
   GraduationCap,
   Mail,
   MapPin,
   Phone,
-  ShieldCheck,
   Sparkles,
 } from "lucide-react"
 
@@ -289,9 +287,6 @@ export default async function CourseDetailPage({
                 Careers & Outcomes
               </a>
             )}
-            <a href="#tuition" className="rounded-md px-3 py-1.5 hover:bg-muted hover:text-foreground transition-colors shrink-0">
-              Tuition & Subsidies
-            </a>
             {course.admissionsRequirements && course.admissionsRequirements.length > 0 && (
               <a href="#requirements" className="rounded-md px-3 py-1.5 hover:bg-muted hover:text-foreground transition-colors shrink-0">
                 Requirements
@@ -509,71 +504,6 @@ export default async function CourseDetailPage({
               </div>
             </section>
           )}
-
-          <section id="tuition" className="scroll-mt-36 border-t border-border pt-12 md:pt-16">
-            <div className="rounded-3xl border border-border bg-muted/20 p-6 sm:p-10 md:p-12">
-              <div className="grid gap-8 lg:grid-cols-[1fr_380px] lg:gap-12 items-center">
-                <div>
-                  <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-500/10 border border-emerald-500/20 px-3 py-1 text-xs font-semibold text-emerald-700 dark:text-emerald-300 mb-3">
-                    <ShieldCheck className="size-4" />
-                    Transparent Tuition & Financial Aid
-                  </span>
-                  <h2 className="font-serif text-3xl font-bold tracking-tight text-foreground sm:text-4xl">
-                    Clear tuition with accessible subsidies
-                  </h2>
-                  <p className="mt-3 text-sm sm:text-base text-muted-foreground leading-relaxed">
-                    Data Center College participates in government financial assistance programs including CHED UniFAST, Tertiary Education Subsidy (TES), and DepEd PEAC ESC vouchers to ensure education is within reach.
-                  </p>
-
-                  {course.financialAidHighlight && (
-                    <div className="mt-6 rounded-2xl border border-border bg-background p-5 text-sm text-foreground/90">
-                      <strong className="block text-xs uppercase tracking-wider text-primary mb-1">
-                        Scholarship Highlight
-                      </strong>
-                      {course.financialAidHighlight}
-                    </div>
-                  )}
-                </div>
-
-                <div className="rounded-2xl border border-border bg-card p-6 sm:p-8 shadow-sm flex flex-col gap-5">
-                  <div>
-                    <span className="text-xs uppercase tracking-wider font-semibold text-muted-foreground">
-                      Tuition & Training Cost
-                    </span>
-                    <div className="mt-1 font-serif text-3xl sm:text-4xl font-bold text-foreground">
-                      {course.tuition || "Contact Admissions"}
-                    </div>
-                    <span className="text-xs text-muted-foreground mt-1 block">
-                      Installment payment plans available
-                    </span>
-                  </div>
-
-                  <div className="border-t border-border pt-4 flex flex-col gap-2.5 text-xs">
-                    {admissionsPhone && (
-                      <div className="flex items-center justify-between">
-                        <span className="text-muted-foreground">Inquiries:</span>
-                        <a href={`tel:${admissionsPhone}`} className="font-semibold text-primary hover:underline">
-                          {admissionsPhone}
-                        </a>
-                      </div>
-                    )}
-                    {admissionsEmail && (
-                      <div className="flex items-center justify-between">
-                        <span className="text-muted-foreground">Admissions Desk:</span>
-                        <a href={`mailto:${admissionsEmail}`} className="font-semibold text-primary hover:underline">
-                          {admissionsEmail}
-                        </a>
-                      </div>
-                    )}
-                  </div>
-
-                  <Button asChild size="lg" className="w-full">
-                    <Link href={applyHref}>Apply for Enrollment</Link>
-                  </Button>
-                </div>
-              </div>
-            </div>
-          </section>
 
           {course.admissionsRequirements && course.admissionsRequirements.length > 0 && (
             <section id="requirements" className="scroll-mt-36 border-t border-border pt-12 md:pt-16">
