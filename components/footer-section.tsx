@@ -53,6 +53,7 @@ const navigationGroups = [
     title: "Support",
     links: [
       { label: "Apply for admission", href: "/apply" },
+      { label: "Contact us", href: "/contact" },
       { label: "Frequently asked questions", href: "/#faq" },
       { label: "Student portal", href: "/portal" },
     ],

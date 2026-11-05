@@ -14,6 +14,7 @@ import FacultyStaffSection from "@/components/faculty-staff-section";
 import AboutSection from "@/components/about-section";
 import CollegeHeader from "@/components/college-header";
 import CollegeHero from "@/components/college-hero";
+import ContactSection from "@/components/contact-section";
 import CoursesAndProgramsSection from "@/components/courses-programs-section";
 import FAQSection from "@/components/faq-section";
 import FooterSection from "@/components/footer-section";
@@ -65,6 +66,7 @@ export default async function LandingPage() {
       {/*<FacultyStaffSection />*/}
       <div id="faq-journey" className="w-full">
         <FAQSection />
+        <ContactSection settings={siteSettings} />
         <CTASection settings={siteSettings} />
         <FooterSection settings={siteSettings} />
       </div>
