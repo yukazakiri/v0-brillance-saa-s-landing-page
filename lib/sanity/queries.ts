@@ -2,6 +2,11 @@ import { groq } from "next-sanity";
 
 import { client } from "./client";
 import { getImageUrl } from "./image";
+import {
+  getAllDefaultCourses,
+  getDefaultCourseSlugs,
+  getDefaultSanityCourseBySlug,
+} from "@/lib/data/academic-catalog";
 import type {
   AdjacentPosts,
   AdjacentPostSummary,
@@ -585,98 +590,31 @@ function mapCourseToLocalCourse(course: SanityCourse): Course {
 }
 
 export async function fetchCourses(): Promise<Course[]> {
+  const defaultCourses = getAllDefaultCourses();
   try {
     const courses = await client.fetch<SanityCourse[]>(COURSES_QUERY);
-    return (courses || []).map(mapCourseToLocalCourse);
+    if (!courses || courses.length === 0) {
+      return defaultCourses;
+    }
+    const localCourses = courses.map(mapCourseToLocalCourse);
+    const merged = [...localCourses];
+    for (const dCourse of defaultCourses) {
+      if (!merged.some((m) => m.slug === dCourse.slug || m.id === dCourse.id)) {
+        merged.push(dCourse);
+      }
+    }
+    return merged;
   } catch (error) {
     console.error("Error fetching courses:", error);
-    return [];
+    return defaultCourses;
   }
 }
 
 export async function fetchCoursesByCategory(
-  category: "ched" | "tesda" | "shs",
+  category: "ched" | "tesda" | "shs" | "short",
 ): Promise<Course[]> {
-  try {
-    const query = groq`
-      *[_type == "course" && status == "active" && offeringCategory == $category]
-      | order(title asc)
-      {
-        _id,
-        _type,
-        _createdAt,
-        _updatedAt,
-        title,
-        slug,
-        heroImage {
-          asset->{
-            _id,
-            url,
-            metadata {
-              dimensions,
-              lqip
-            }
-          },
-          alt,
-          externalUrl
-        },
-        offeringCategory,
-        degreeType,
-        credential,
-        majors,
-        tesdaQualification,
-        tesdaCompetencyLevel,
-        trainingHours,
-        "department": department->{ _id, title },
-        deliveryMode,
-        duration,
-        level,
-        summary,
-        overview,
-        highlights,
-        learningOutcomes,
-        curriculumStructure,
-        "relatedOfferings": relatedOfferings[]->{ _id, title, slug },
-        code,
-        creditHours,
-        semesterAvailability,
-        "prerequisites": prerequisites[]->{ _id, title, slug },
-        prerequisiteNotes,
-        "corequisites": corequisites[]->{ _id, title, slug },
-        "instructors": instructors[]->{ _id, name },
-        syllabus,
-        admissionsRequirements,
-        applicationDeadlines,
-        tuition,
-        financialAidHighlight,
-        admissionsContact,
-        cta,
-        outcomes,
-        seo {
-          metaTitle,
-          metaDescription,
-          shareImage {
-            asset->{
-              _id,
-              url,
-              metadata {
-                dimensions,
-                lqip
-              }
-            },
-            alt,
-            externalUrl
-          }
-        },
-        status
-      }
-    `;
-    const courses = await client.fetch<SanityCourse[]>(query, { category });
-    return (courses || []).map(mapCourseToLocalCourse);
-  } catch (error) {
-    console.error(`Error fetching ${category} courses:`, error);
-    return [];
-  }
+  const all = await fetchCourses();
+  return all.filter((c) => c.category === category);
 }
 
 const COURSE_BY_SLUG_QUERY = groq`
@@ -770,22 +708,27 @@ export async function fetchCourseBySlug(
 ): Promise<SanityCourse | null> {
   if (!slug) return null;
   try {
-    return await client.fetch<SanityCourse | null>(COURSE_BY_SLUG_QUERY, {
+    const result = await client.fetch<SanityCourse | null>(COURSE_BY_SLUG_QUERY, {
       slug,
     });
+    if (result) return result;
+    return getDefaultSanityCourseBySlug(slug);
   } catch (error) {
     console.error("Error fetching course by slug:", error);
-    return null;
+    return getDefaultSanityCourseBySlug(slug);
   }
 }
 
 export async function fetchCourseSlugs(): Promise<string[]> {
+  const defaultSlugs = getDefaultCourseSlugs();
   try {
     const results = await client.fetch<{ slug: string }[]>(COURSE_SLUGS_QUERY);
-    return (results || []).map((result) => result.slug);
+    const sanitySlugs = (results || []).map((result) => result.slug).filter(Boolean);
+    const set = new Set([...sanitySlugs, ...defaultSlugs]);
+    return Array.from(set);
   } catch (error) {
     console.error("Error fetching course slugs:", error);
-    return []; // Return empty array to allow build to proceed
+    return defaultSlugs;
   }
 }
 

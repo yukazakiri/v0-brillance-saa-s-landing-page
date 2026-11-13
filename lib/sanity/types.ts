@@ -13,6 +13,7 @@ export interface SanityImageAsset {
 }
 
 export interface SanityImage {
+  _type?: string;
   asset?: SanityImageAsset;
   alt?: string;
   caption?: string;
@@ -282,6 +283,7 @@ export interface InstitutionProfile {
   overview?: string;
   vision?: string;
   mission?: string;
+  address?: string;
   chedPrograms?: Array<{
     name: string;
     majors?: string[];
@@ -351,6 +353,7 @@ export interface SanityCourse {
   curriculumStructure?: Array<{
     term?: string;
     description?: string;
+    subjects?: string[];
   }>;
   relatedOfferings?: Array<{
     _id: string;
@@ -450,7 +453,8 @@ export interface Course {
   intakeSchedule?: string;
   majors?: string[];
   level?: string;
-  degreeType?: string;
+  degreeType?: "bachelor" | "master" | "doctorate" | "certificate";
+  financialAidHighlight?: string;
   learningOutcomes?: string[];
   curriculumStructure?: Array<{
     term?: string;
