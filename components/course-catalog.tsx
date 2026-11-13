@@ -124,6 +124,7 @@ export default function CourseCatalog({ courses, initialCategory, contact }: Cou
   const [selectedForComparison, setSelectedForComparison] = useState<string[]>([])
   const [comparisonModalOpen, setComparisonModalOpen] = useState(false)
   const [quickViewCourse, setQuickViewCourse] = useState<Course | null>(null)
+  const [showPathfinder, setShowPathfinder] = useState(false)
 
   const normalizedQuery = query.trim().toLowerCase()
 
@@ -253,108 +254,85 @@ export default function CourseCatalog({ courses, initialCategory, contact }: Cou
     category !== "all" || quickFilter !== "all" || Boolean(normalizedQuery) || sortBy !== "featured"
 
   return (
-    <div className="w-full flex flex-col gap-10">
-      {/* 30-Second Program Pathfinder Banner & Quiz */}
-      <CoursePathfinder
-        onApplyPathfinder={handleApplyPathfinder}
-        onResetPathfinder={resetFilters}
-      />
+    <div className="w-full flex flex-col gap-8">
+      {/* Optional minimal guidance toggle */}
+      <div className="flex items-center justify-between text-xs text-muted-foreground border-b border-border/40 pb-3">
+        <span>Looking for a tailored path?</span>
+        <button
+          type="button"
+          onClick={() => setShowPathfinder(!showPathfinder)}
+          className="text-foreground font-medium hover:underline underline-offset-4"
+        >
+          {showPathfinder ? "Hide Pathfinder" : "Try 30-second Program Finder →"}
+        </button>
+      </div>
 
-      {/* Main Filter & Explorer Hub — Magazine Publication Header */}
-      <div className="w-full border-b border-border pb-8 flex flex-col gap-6">
-        {/* Top line: Heading and Minimalist Search Bar */}
-        <div className="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-6">
-          <div className="flex flex-col gap-2">
-            <div className="flex items-center gap-2">
-              <span className="font-mono text-xs uppercase tracking-widest text-secondary font-semibold">
-                Section 02 // Program Directory
-              </span>
-              <span className="text-border">·</span>
-              <span className="font-mono text-xs uppercase text-muted-foreground">
-                Baguio City Campus
-              </span>
-            </div>
-            <h2 id="program-directory-heading" className="font-serif text-3xl sm:text-4xl md:text-5xl font-bold tracking-tight text-foreground">
-              The Academic Curriculum Index
-            </h2>
-            <p className="text-sm sm:text-base text-muted-foreground max-w-2xl font-sans">
-              Showing <span className="font-semibold text-foreground">{filteredCourses.length}</span> of{" "}
-              <span className="font-semibold text-foreground">{courses.length}</span> accredited disciplines and qualifications in Northern Luzon.
-            </p>
+      {showPathfinder && (
+        <CoursePathfinder
+          onApplyPathfinder={handleApplyPathfinder}
+          onResetPathfinder={resetFilters}
+        />
+      )}
+
+      {/* Minimalist Filter Bar */}
+      <div className="w-full flex flex-col gap-6 border-b border-border/60 pb-8">
+        {/* Top: Category Tabs & Search */}
+        <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+          {/* Department Clean Tabs */}
+          <div className="flex flex-wrap items-center gap-1 sm:gap-2">
+            {categories.map((c) => {
+              const isSelected = category === c.key
+              return (
+                <button
+                  key={c.key}
+                  type="button"
+                  onClick={() => setCategory(c.key)}
+                  className={cn(
+                    "px-3 py-1.5 text-xs sm:text-sm transition-colors rounded-full",
+                    isSelected
+                      ? "bg-foreground text-background font-medium"
+                      : "text-muted-foreground hover:text-foreground hover:bg-muted/50"
+                  )}
+                >
+                  <span>{c.label}</span>
+                  <span className="ml-1.5 opacity-60 text-[11px] font-mono">
+                    {c.count}
+                  </span>
+                </button>
+              )
+            })}
           </div>
 
-          {/* Minimalist Editorial Search input */}
-          <div className="relative w-full lg:w-[380px] shrink-0">
+          {/* Minimal Search Line */}
+          <div className="relative w-full lg:w-72">
             <Search
               aria-hidden="true"
-              className="absolute left-3.5 top-1/2 -translate-y-1/2 size-4 text-muted-foreground pointer-events-none"
+              className="absolute left-0 top-1/2 -translate-y-1/2 size-3.5 text-muted-foreground pointer-events-none"
             />
             <input
               type="search"
               value={query}
               onChange={(e) => setQuery(e.target.value)}
-              placeholder="Search by degree title, skill, or career role…"
+              placeholder="Search programs…"
               aria-label="Search programs"
-              className="w-full h-11 border-b-2 border-border bg-transparent pl-10 pr-10 text-sm text-foreground placeholder:text-muted-foreground/70 outline-none focus:border-primary transition-colors"
+              className="w-full h-9 pl-6 pr-6 bg-transparent border-b border-border text-xs sm:text-sm text-foreground placeholder:text-muted-foreground/60 outline-none focus:border-foreground transition-colors"
             />
             {query.trim().length > 0 && (
               <button
                 type="button"
                 onClick={() => setQuery("")}
-                className="absolute right-2 top-1/2 -translate-y-1/2 inline-flex size-6 items-center justify-center text-muted-foreground hover:text-foreground transition-colors"
+                className="absolute right-0 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
                 aria-label="Clear search"
               >
-                <X className="size-4" />
+                <X className="size-3.5" />
               </button>
             )}
           </div>
         </div>
 
-        {/* Department Switcher — Styled like Magazine Sections */}
-        <div className="flex flex-wrap items-center gap-x-6 gap-y-2 border-t border-border pt-4">
-          <span className="font-mono text-[11px] uppercase tracking-wider text-muted-foreground font-semibold mr-1">
-            Department:
-          </span>
-          {categories.map((c) => {
-            const isSelected = category === c.key
-            return (
-              <button
-                key={c.key}
-                type="button"
-                onClick={() => setCategory(c.key)}
-                className={cn(
-                  "relative py-1.5 text-xs sm:text-sm font-medium transition-colors flex items-center gap-1.5",
-                  isSelected
-                    ? "text-primary font-bold"
-                    : "text-muted-foreground hover:text-foreground"
-                )}
-              >
-                <span>{c.label}</span>
-                <span
-                  className={cn(
-                    "font-mono text-[10px] px-1.5 py-0.2 rounded-none",
-                    isSelected
-                      ? "bg-primary text-primary-foreground font-bold"
-                      : "bg-muted text-muted-foreground"
-                  )}
-                >
-                  {c.count}
-                </span>
-                {isSelected && (
-                  <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-primary" />
-                )}
-              </button>
-            )
-          })}
-        </div>
-
-        {/* Quick Filter Tags & View Controls Row */}
-        <div className="flex flex-wrap items-center justify-between gap-4 border-t border-border/70 pt-4">
-          {/* Quick-filter Chips */}
+        {/* Secondary: Quick Filter & Sort */}
+        <div className="flex flex-wrap items-center justify-between gap-3 text-xs text-muted-foreground pt-1">
           <div className="flex flex-wrap items-center gap-1.5">
-            <span className="font-mono text-[11px] uppercase tracking-wider text-muted-foreground font-semibold mr-1 hidden sm:inline">
-              Filter:
-            </span>
             {QUICK_FILTERS.map((qf) => {
               const isSelected = quickFilter === qf.key
               return (
@@ -363,83 +341,39 @@ export default function CourseCatalog({ courses, initialCategory, contact }: Cou
                   type="button"
                   onClick={() => setQuickFilter(qf.key)}
                   className={cn(
-                    "inline-flex items-center gap-1.5 border px-3 py-1 text-xs font-mono uppercase tracking-wide transition-all",
+                    "px-2.5 py-1 text-xs transition-colors rounded-md",
                     isSelected
-                      ? "border-secondary bg-secondary text-secondary-foreground font-bold"
-                      : "border-border/80 bg-background text-muted-foreground hover:border-foreground/40 hover:text-foreground"
+                      ? "bg-muted text-foreground font-medium"
+                      : "hover:text-foreground"
                   )}
                 >
-                  {qf.icon && <qf.icon className="size-3" />}
-                  <span>{qf.label}</span>
+                  {qf.label}
                 </button>
               )
             })}
           </div>
 
-          {/* Controls: Sort, View, Reset */}
-          <div className="flex flex-wrap items-center gap-4 ml-auto">
-            {/* Sort Selector */}
-            <div className="flex items-center gap-1.5">
-              <span className="font-mono text-[11px] uppercase tracking-wider text-muted-foreground font-medium hidden md:inline">
-                Sort:
-              </span>
-              <select
-                value={sortBy}
-                onChange={(e) => setSortBy(e.target.value as SortKey)}
-                aria-label="Sort programs"
-                className="h-9 border border-border bg-background px-3 text-xs font-mono uppercase text-foreground outline-none focus-visible:border-primary"
-              >
-                <option value="featured">Featured / In-Demand</option>
-                <option value="duration-asc">Duration (Short to Long)</option>
-                <option value="duration-desc">Duration (Long to Short)</option>
-                <option value="name">Alphabetical (A to Z)</option>
-              </select>
-            </div>
-
-            {/* View Mode Toggle: Editorial vs Ledger */}
-            <div className="flex items-center border border-border bg-background">
-              <button
-                type="button"
-                onClick={() => setViewMode("editorial")}
-                aria-label="Editorial story layout"
-                title="Editorial Story Spreads"
-                className={cn(
-                  "inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-mono uppercase tracking-wide transition-colors",
-                  viewMode === "editorial"
-                    ? "bg-foreground text-background font-bold"
-                    : "text-muted-foreground hover:text-foreground"
-                )}
-              >
-                <LayoutGrid className="size-3.5" />
-                <span className="hidden sm:inline">Editorial</span>
-              </button>
-              <button
-                type="button"
-                onClick={() => setViewMode("ledger")}
-                aria-label="Academic ledger table view"
-                title="Curriculum Ledger"
-                className={cn(
-                  "inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-mono uppercase tracking-wide transition-colors",
-                  viewMode === "ledger"
-                    ? "bg-foreground text-background font-bold"
-                    : "text-muted-foreground hover:text-foreground"
-                )}
-              >
-                <TableIcon className="size-3.5" />
-                <span className="hidden sm:inline">Ledger</span>
-              </button>
-            </div>
+          <div className="flex items-center gap-4 ml-auto">
+            <select
+              value={sortBy}
+              onChange={(e) => setSortBy(e.target.value as SortKey)}
+              aria-label="Sort programs"
+              className="bg-transparent text-xs text-muted-foreground hover:text-foreground outline-none cursor-pointer"
+            >
+              <option value="featured">Featured</option>
+              <option value="duration-asc">Shortest duration</option>
+              <option value="duration-desc">Longest duration</option>
+              <option value="name">Alphabetical</option>
+            </select>
 
             {hasActiveFilters && (
-              <Button
+              <button
                 type="button"
-                variant="ghost"
-                size="sm"
                 onClick={resetFilters}
-                className="h-9 text-xs font-mono uppercase text-muted-foreground hover:text-foreground"
+                className="text-xs text-muted-foreground hover:text-foreground underline underline-offset-4"
               >
-                Reset Filters
-              </Button>
+                Reset
+              </button>
             )}
           </div>
         </div>
@@ -447,303 +381,128 @@ export default function CourseCatalog({ courses, initialCategory, contact }: Cou
 
       {/* Courses Display */}
       {filteredCourses.length === 0 ? (
-        <div className="w-full border border-dashed border-border p-12 text-center">
-          <div className="mx-auto flex size-14 items-center justify-center bg-muted text-muted-foreground mb-4">
-            <BookOpen className="size-7" />
-          </div>
-          <h3 className="font-serif text-2xl font-bold text-foreground">No matching disciplines found</h3>
-          <p className="mt-2 text-sm text-muted-foreground max-w-[48ch] mx-auto leading-relaxed">
-            We couldn't find any courses matching your specific search or filters. Try adjusting your keywords or clearing the active filters.
-          </p>
-          <div className="mt-6 flex flex-wrap justify-center gap-3">
-            <Button type="button" variant="default" onClick={resetFilters} className="rounded-none">
-              Clear All Filters
-            </Button>
-            {contact?.email && (
-              <Button type="button" variant="outline" asChild className="rounded-none">
-                <a href={`mailto:${contact.email}`}>Ask Admissions Help Desk</a>
-              </Button>
-            )}
-          </div>
+        <div className="w-full py-16 text-center">
+          <p className="text-sm text-muted-foreground">No matching programs found.</p>
+          <button
+            type="button"
+            onClick={resetFilters}
+            className="mt-3 text-xs font-medium text-foreground underline underline-offset-4"
+          >
+            Clear filters
+          </button>
         </div>
-      ) : viewMode === "editorial" ? (
+      ) : (
         /* ========================================================================= */
-        /* EDITORIAL STORY SPREADS LAYOUT (Magazine Feature Rows)                     */
+        /* MINIMALIST COURSE LIST                                                    */
         /* ========================================================================= */
-        <div className="flex flex-col">
+        <div className="divide-y divide-border/60">
           {filteredCourses.map((course, idx) => {
             const meta = course.category ? CATEGORY_META[course.category] : null
-            const studyUnits = course.creditHours ? `${course.creditHours} Units` : course.trainingHours ?? "Standard Load"
-            const imageUrl = getImageUrl(course.heroImage, 900, 600)
+            const imageUrl = getImageUrl(course.heroImage, 600, 380)
             const imageAlt = getImageAlt(course.heroImage, course.title)
             const isCompared = selectedForComparison.includes(course.id)
+
+            // 1-sentence clean summary (limit text)
+            const cleanSummary =
+              course.summary ||
+              (course.description ? course.description.split(".")[0] + "." : "")
+
+            const roles = (course.careerPaths || course.outcomes || []).slice(0, 2)
 
             return (
               <article
                 key={course.id}
                 className={cn(
-                  "group relative border-t border-border/80 py-10 sm:py-14 transition-colors",
-                  isCompared && "bg-primary/[0.03]"
+                  "py-8 sm:py-10 transition-colors group",
+                  isCompared && "bg-muted/20"
                 )}
               >
-                {/* Article Header Bar: Number, Category, and Badges */}
-                <div className="flex flex-wrap items-center justify-between gap-3 mb-4">
-                  <div className="flex items-center gap-3">
-                    <span className="font-mono text-sm sm:text-base font-bold text-secondary">
-                      № {String(idx + 1).padStart(2, "0")}
-                    </span>
-                    <span className="text-border">/</span>
-                    <span className="font-mono text-xs uppercase tracking-widest text-muted-foreground font-semibold">
-                      {meta?.badge || course.credential || "ACCREDITED"}
-                    </span>
-                    {course.badge && (
-                      <span className="inline-flex items-center gap-1 bg-amber-500/15 text-amber-800 dark:text-amber-300 font-mono text-[10px] uppercase font-bold px-2 py-0.5 border border-amber-500/30">
-                        <Sparkles className="size-3" />
-                        {course.badge}
+                <div className="grid grid-cols-1 md:grid-cols-12 gap-6 items-start">
+                  {/* Left: Minimal Index & Info (9 cols) */}
+                  <div className="md:col-span-8 lg:col-span-9 flex flex-col gap-3">
+                    {/* Meta line */}
+                    <div className="flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
+                      <span className="font-mono text-xs font-semibold text-foreground/80">
+                        {String(idx + 1).padStart(2, "0")}
                       </span>
-                    )}
-                  </div>
+                      <span>·</span>
+                      <span className="uppercase tracking-wider text-[11px] font-medium">
+                        {meta?.label || course.category}
+                      </span>
+                      <span>·</span>
+                      <span>{course.duration}</span>
+                      {course.scholarshipsAvailable && (
+                        <>
+                          <span>·</span>
+                          <span className="text-emerald-600 dark:text-emerald-400 font-medium">
+                            Vouchers Accepted
+                          </span>
+                        </>
+                      )}
+                    </div>
 
-                  <div className="flex items-center gap-3 text-xs font-mono uppercase text-muted-foreground">
-                    <span>{course.duration}</span>
-                    <span>·</span>
-                    <span>{studyUnits}</span>
-                    {course.scholarshipsAvailable && (
-                      <>
-                        <span>·</span>
-                        <span className="text-emerald-600 dark:text-emerald-400 font-bold inline-flex items-center gap-1">
-                          <CheckCircle2 className="size-3" />
-                          Vouchers OK
-                        </span>
-                      </>
-                    )}
-                  </div>
-                </div>
+                    {/* Title */}
+                    <Link href={`/courses/${course.slug}`}>
+                      <h2 className="font-serif text-2xl sm:text-3xl font-normal text-foreground group-hover:underline underline-offset-4 transition-all">
+                        {course.title}
+                      </h2>
+                    </Link>
 
-                {/* Main Asymmetrical Magazine Spread */}
-                <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-start">
-                  {/* Left Column: Title, Narrative, Highlights, Actions (7 cols) */}
-                  <div className="lg:col-span-7 flex flex-col gap-5">
-                    <div>
-                      <Link href={`/courses/${course.slug}`}>
-                        <h3 className="font-serif text-2xl sm:text-3xl lg:text-4xl font-bold tracking-tight text-foreground group-hover:text-primary transition-colors leading-[1.12]">
-                          {course.title}
-                        </h3>
-                      </Link>
-                      <p className="mt-3 text-sm sm:text-base leading-relaxed text-muted-foreground font-sans">
-                        {course.description || "Practical, career-oriented curriculum with hands-on labs and supervised industry practicums."}
+                    {/* 1-Sentence Concise Summary */}
+                    {cleanSummary && (
+                      <p className="text-sm text-muted-foreground font-light leading-relaxed max-w-2xl">
+                        {cleanSummary}
                       </p>
-                    </div>
+                    )}
 
-                    {/* Key Competency Breakdown */}
-                    {course.highlights && course.highlights.length > 0 && (
-                      <div className="border-t border-border/60 pt-4 flex flex-col gap-2">
-                        <span className="font-mono text-[11px] uppercase tracking-wider text-muted-foreground font-semibold">
-                          Curricular Focus & Lab Practice:
-                        </span>
-                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs text-foreground/90">
-                          {course.highlights.slice(0, 4).map((hl, i) => (
-                            <div key={i} className="flex items-start gap-2">
-                              <span className="font-mono text-[10px] text-secondary font-bold shrink-0 mt-0.5">
-                                0{i + 1}
-                              </span>
-                              <span className="leading-snug">{hl}</span>
-                            </div>
-                          ))}
+                    {/* Minimal Inline Career Tags & Actions */}
+                    <div className="flex flex-wrap items-center gap-4 pt-2 text-xs">
+                      {roles.length > 0 && (
+                        <div className="text-muted-foreground/80 text-[11px] hidden sm:flex items-center gap-1.5">
+                          <span className="text-muted-foreground/60">Careers:</span>
+                          <span>{roles.join(" · ")}</span>
                         </div>
-                      </div>
-                    )}
+                      )}
 
-                    {/* Target Career Roles */}
-                    {((course.careerPaths && course.careerPaths.length > 0) || (course.outcomes && course.outcomes.length > 0)) && (
-                      <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-xs">
-                        <span className="font-mono text-[11px] uppercase tracking-wider text-muted-foreground font-semibold">
-                          Target Roles:
-                        </span>
-                        {((course.careerPaths && course.careerPaths.length > 0 ? course.careerPaths : course.outcomes) || [])
-                          .slice(0, 4)
-                          .map((role, i, arr) => (
-                            <span key={`${role}-${i}`} className="text-foreground font-medium">
-                              {role}
-                              {i < arr.length - 1 && <span className="text-muted-foreground/60 ml-2">/</span>}
-                            </span>
-                          ))}
-                      </div>
-                    )}
-
-                    {/* Action Bar */}
-                    <div className="flex flex-wrap items-center gap-3 pt-2">
-                      <Button asChild size="default" className="rounded-none px-5 font-semibold text-xs gap-2">
-                        <Link href={`/courses/${course.slug}`}>
-                          <span>Read Full Dossier</span>
-                          <ArrowRight className="size-3.5" />
+                      <div className="flex items-center gap-4 ml-auto sm:ml-0">
+                        <Link
+                          href={`/courses/${course.slug}`}
+                          className="inline-flex items-center gap-1 font-medium text-foreground hover:underline underline-offset-4"
+                        >
+                          <span>View program</span>
+                          <ArrowRight className="size-3 transition-transform group-hover:translate-x-0.5" />
                         </Link>
-                      </Button>
 
-                      <Button
-                        type="button"
-                        variant="outline"
-                        size="default"
-                        onClick={() => setQuickViewCourse(course)}
-                        aria-label={`Quick preview for ${course.title}`}
-                        className="rounded-none border-border px-4 text-xs font-semibold gap-1.5"
-                      >
-                        <Eye className="size-3.5" />
-                        <span>Preview Syllabus</span>
-                      </Button>
-
-                      <button
-                        type="button"
-                        onClick={() => toggleComparison(course.id)}
-                        className={cn(
-                          "inline-flex items-center gap-1.5 px-3 py-2 text-xs font-mono uppercase tracking-wider border transition-colors",
-                          isCompared
-                            ? "border-primary bg-primary text-primary-foreground font-bold"
-                            : "border-border text-muted-foreground hover:border-foreground/50 hover:text-foreground"
-                        )}
-                        title="Add to comparison table"
-                      >
-                        <Scale className="size-3.5" />
-                        <span>{isCompared ? "In Matrix [✓]" : "Compare"}</span>
-                      </button>
+                        <button
+                          type="button"
+                          onClick={() => toggleComparison(course.id)}
+                          className={cn(
+                            "text-xs transition-colors",
+                            isCompared
+                              ? "text-primary font-medium"
+                              : "text-muted-foreground/70 hover:text-foreground"
+                          )}
+                        >
+                          {isCompared ? "Selected [✓]" : "+ Compare"}
+                        </button>
+                      </div>
                     </div>
                   </div>
 
-                  {/* Right Column: Editorial Photography & Dossier Box (5 cols) */}
-                  <div className="lg:col-span-5 flex flex-col">
-                    <div className="relative aspect-[16/10] sm:aspect-[4/3] w-full overflow-hidden border border-border bg-muted">
+                  {/* Right: Clean Minimal Thumbnail (3 cols) */}
+                  <div className="md:col-span-4 lg:col-span-3">
+                    <Link href={`/courses/${course.slug}`} className="block overflow-hidden rounded-md bg-muted aspect-[16/10]">
                       <img
                         src={imageUrl}
                         alt={imageAlt}
-                        className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-103"
+                        className="h-full w-full object-cover transition-opacity duration-300 hover:opacity-90"
                       />
-                      <div className="absolute inset-0 bg-gradient-to-t from-background/80 via-transparent to-transparent opacity-60" />
-                      
-                      <div className="absolute bottom-2.5 left-3 right-3 flex items-center justify-between text-[11px] font-mono uppercase text-white drop-shadow-md">
-                        <span>Baguio Campus Facility</span>
-                        <span>{course.deliveryMode || "On Campus"}</span>
-                      </div>
-                    </div>
-
-                    {/* Fast Facts Dossier Box below image */}
-                    <div className="grid grid-cols-3 divide-x divide-border border-x border-b border-border bg-muted/20 py-2.5 px-2 text-center text-xs">
-                      <div>
-                        <span className="font-mono text-[10px] uppercase text-muted-foreground block">Duration</span>
-                        <span className="font-semibold text-foreground truncate block">{course.duration}</span>
-                      </div>
-                      <div>
-                        <span className="font-mono text-[10px] uppercase text-muted-foreground block">Study Load</span>
-                        <span className="font-semibold text-foreground truncate block">{studyUnits}</span>
-                      </div>
-                      <div>
-                        <span className="font-mono text-[10px] uppercase text-muted-foreground block">Aid / Voucher</span>
-                        <span className="font-semibold text-emerald-600 dark:text-emerald-400 truncate block">
-                          {course.scholarshipsAvailable ? "Subsidized" : "Direct Pay"}
-                        </span>
-                      </div>
-                    </div>
+                    </Link>
                   </div>
                 </div>
               </article>
             )
           })}
-        </div>
-      ) : (
-        /* ========================================================================= */
-        /* ACADEMIC LEDGER TABLE VIEW (Publication Index Format)                     */
-        /* ========================================================================= */
-        <div className="w-full border border-border overflow-hidden">
-          <div className="overflow-x-auto">
-            <table className="w-full text-left text-xs">
-              <thead className="border-b border-border bg-muted/60 font-mono text-[10px] uppercase tracking-wider text-muted-foreground">
-                <tr>
-                  <th className="py-3.5 px-4 w-12 text-center">№</th>
-                  <th className="py-3.5 px-4 min-w-[280px]">Discipline / Program</th>
-                  <th className="py-3.5 px-4">Department</th>
-                  <th className="py-3.5 px-4">Credential</th>
-                  <th className="py-3.5 px-4">Duration</th>
-                  <th className="py-3.5 px-4">Voucher Status</th>
-                  <th className="py-3.5 px-4 text-right">Actions</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-border">
-                {filteredCourses.map((course, idx) => {
-                  const meta = course.category ? CATEGORY_META[course.category] : null
-                  const isCompared = selectedForComparison.includes(course.id)
-
-                  return (
-                    <tr key={course.id} className="hover:bg-muted/30 transition-colors">
-                      <td className="py-3.5 px-4 font-mono text-center text-muted-foreground">
-                        {String(idx + 1).padStart(2, "0")}
-                      </td>
-                      <td className="py-3.5 px-4">
-                        <Link
-                          href={`/courses/${course.slug}`}
-                          className="font-serif text-sm font-bold text-foreground hover:text-primary transition-colors block"
-                        >
-                          {course.title}
-                        </Link>
-                        {course.highlights?.[0] && (
-                          <span className="text-[11px] text-muted-foreground line-clamp-1 mt-0.5 font-sans">
-                            {course.highlights[0]}
-                          </span>
-                        )}
-                      </td>
-                      <td className="py-3.5 px-4 font-mono text-[11px] text-muted-foreground uppercase">
-                        {meta?.label || course.category}
-                      </td>
-                      <td className="py-3.5 px-4 font-mono font-medium text-foreground">
-                        {course.credential || "—"}
-                      </td>
-                      <td className="py-3.5 px-4 font-mono text-muted-foreground">
-                        {course.duration}
-                      </td>
-                      <td className="py-3.5 px-4">
-                        {course.scholarshipsAvailable ? (
-                          <span className="inline-flex items-center gap-1 font-mono text-[11px] font-semibold text-emerald-700 dark:text-emerald-400">
-                            <CheckCircle2 className="size-3" />
-                            PEAC / Voucher
-                          </span>
-                        ) : (
-                          <span className="font-mono text-muted-foreground">—</span>
-                        )}
-                      </td>
-                      <td className="py-3.5 px-4 text-right">
-                        <div className="flex items-center justify-end gap-2">
-                          <button
-                            type="button"
-                            onClick={() => toggleComparison(course.id)}
-                            className={cn(
-                              "font-mono text-[10px] uppercase px-2 py-1 border transition-colors",
-                              isCompared
-                                ? "border-primary bg-primary text-primary-foreground font-bold"
-                                : "border-border text-muted-foreground hover:text-foreground"
-                            )}
-                          >
-                            {isCompared ? "In Matrix" : "+ Compare"}
-                          </button>
-                          <button
-                            type="button"
-                            onClick={() => setQuickViewCourse(course)}
-                            className="size-7 inline-flex items-center justify-center border border-border text-muted-foreground hover:bg-muted hover:text-foreground transition-colors"
-                            title="Quick preview"
-                            aria-label={`Preview ${course.title}`}
-                          >
-                            <Eye className="size-3.5" />
-                          </button>
-                          <Button size="sm" asChild className="rounded-none h-7 px-3 text-xs font-mono uppercase">
-                            <Link href={`/courses/${course.slug}`}>
-                              <span>Dossier</span>
-                            </Link>
-                          </Button>
-                        </div>
-                      </td>
-                    </tr>
-                  )
-                })}
-              </tbody>
-            </table>
-          </div>
         </div>
       )}
 
