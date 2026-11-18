@@ -37,6 +37,7 @@ import CourseComparisonModal from "@/components/course-comparison-modal"
 import CoursePathfinder, { type PathfinderFilters } from "@/components/course-pathfinder"
 import { hasCourseFinancialAidInfo } from "@/lib/sanity/course-formatters"
 import { hasSubjectArea } from "@/lib/sanity/subject-areas"
+import { compareCourseDurations, isFastTrackDuration } from "@/lib/course-duration"
 
 type CourseCatalogProps = {
   courses: Course[]
@@ -77,23 +78,6 @@ function normalizeCategory(value?: string): CategoryKey {
   const v = value.toLowerCase()
   if (v === "ched" || v === "shs" || v === "tesda" || v === "short") return v
   return "all"
-}
-
-function parseDurationInMonths(durationStr: string): number {
-  const s = durationStr.toLowerCase()
-  if (s.includes("4 year")) return 48
-  if (s.includes("2 year")) return 24
-  if (s.includes("1 year")) return 12
-  const monthMatch = s.match(/(\d+)\s*month/)
-  if (monthMatch) return parseInt(monthMatch[1], 10)
-  const weekMatch = s.match(/(\d+)\s*week/)
-  if (weekMatch) return (parseInt(weekMatch[1], 10) * 12) / 52
-  const hoursMatch = s.match(/(\d+)\s*hour/)
-  if (hoursMatch) {
-    const hours = parseInt(hoursMatch[1], 10)
-    return Math.max(1, Math.round(hours / 100))
-  }
-  return Number.POSITIVE_INFINITY
 }
 
 export default function CourseCatalog({ courses, initialCategory, contact }: CourseCatalogProps) {
@@ -142,8 +126,7 @@ export default function CourseCatalog({ courses, initialCategory, contact }: Cou
       // Quick filter
       if (quickFilter === "scholarship" && !hasCourseFinancialAidInfo(course)) return false
       if (quickFilter === "fast-track") {
-        const months = parseDurationInMonths(course.duration)
-        if (months >= 12) return false
+        if (!isFastTrackDuration(course.duration)) return false
       }
       if (isSubjectArea(quickFilter)) {
         if (!hasSubjectArea(course, quickFilter)) return false
@@ -178,17 +161,7 @@ export default function CourseCatalog({ courses, initialCategory, contact }: Cou
         return a.title.localeCompare(b.title)
       }
       if (sortBy === "duration-asc" || sortBy === "duration-desc") {
-        const aMonths = parseDurationInMonths(a.duration)
-        const bMonths = parseDurationInMonths(b.duration)
-        const direction = sortBy === "duration-asc" ? 1 : -1
-
-        if (!Number.isFinite(aMonths) && !Number.isFinite(bMonths)) {
-          return a.title.localeCompare(b.title)
-        }
-        if (!Number.isFinite(aMonths)) return 1
-        if (!Number.isFinite(bMonths)) return -1
-
-        return (aMonths - bMonths) * direction
+        return compareCourseDurations(a, b, sortBy === "duration-asc" ? "asc" : "desc")
       }
       // Featured / default
       if (a.featured && !b.featured) return -1
