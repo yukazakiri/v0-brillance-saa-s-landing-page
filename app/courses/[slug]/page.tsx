@@ -182,6 +182,21 @@ export default async function CourseDetailPage({
               </p>
             )}
 
+            {course.majors && course.majors.length > 0 && (
+              <section aria-labelledby="course-majors">
+                <h2 id="course-majors" className="text-xs uppercase tracking-wider text-muted-foreground">
+                  {course.majors.length === 1 ? "Major" : "Majors"}
+                </h2>
+                <ul className="mt-2 flex flex-wrap gap-2">
+                  {course.majors.map((major) => (
+                    <li key={major} className="border border-border/80 px-3 py-1 rounded-full text-sm">
+                      {major}
+                    </li>
+                  ))}
+                </ul>
+              </section>
+            )}
+
             {/* Actions */}
             <div className="flex flex-wrap items-center gap-4 pt-2">
               <Button asChild size="default" className="rounded-full px-6 text-xs font-medium">

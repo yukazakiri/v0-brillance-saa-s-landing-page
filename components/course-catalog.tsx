@@ -420,6 +420,15 @@ export default function CourseCatalog({ courses, initialCategory, contact }: Cou
                       </p>
                     )}
 
+                    {course.majors && course.majors.length > 0 && (
+                      <p className="text-xs text-muted-foreground">
+                        <span className="font-medium text-foreground">
+                          {course.majors.length === 1 ? "Major:" : "Majors:"}
+                        </span>{" "}
+                        {course.majors.join(" · ")}
+                      </p>
+                    )}
+
                     {/* Minimal Inline Career Tags & Actions */}
                     <div className="flex flex-wrap items-center gap-4 pt-2 text-xs">
                       {roles.length > 0 && (
