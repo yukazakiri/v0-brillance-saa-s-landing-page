@@ -335,6 +335,8 @@ export interface SanityCourse {
   offeringCategory: "ched" | "tesda" | "short" | "shs";
   degreeType?: "bachelor" | "master" | "doctorate" | "certificate";
   credential?: string;
+  badge?: string;
+  featured?: boolean;
   majors?: string[];
   tesdaQualification?: string;
   tesdaCompetencyLevel?: string;
@@ -350,6 +352,8 @@ export interface SanityCourse {
   overview?: any[]; // Portable text
   highlights?: string[];
   learningOutcomes?: string[];
+  careerPaths?: string[];
+  targetAudience?: string[];
   curriculumStructure?: Array<{
     term?: string;
     description?: string;
@@ -364,6 +368,7 @@ export interface SanityCourse {
   }>;
   code?: string;
   creditHours?: number;
+  orderRank?: number;
   semesterAvailability?: string[];
   prerequisites?: Array<{
     _id: string;
@@ -394,6 +399,8 @@ export interface SanityCourse {
   applicationDeadlines?: string[];
   tuition?: string;
   financialAidHighlight?: string;
+  scholarshipsAvailable?: boolean;
+  intakeSchedule?: string;
   admissionsContact?: {
     name?: string;
     email?: string;
@@ -410,23 +417,6 @@ export interface SanityCourse {
     shareImage?: SanityImage;
   };
   status?: "active" | "inactive" | "archived";
-
-  // Properties referenced in mapCourseToLocalCourse that were missing
-  description?: string;
-  durationYears?: number;
-  careerPaths?: string[];
-  competencies?: string[];
-  scholarshipsAvailable?: boolean;
-  tuitionRange?: string;
-  enrollmentCap?: number;
-  programType?: string;
-  qualificationLevel?: string;
-  tesdaRegistrationNumber?: string;
-  badge?: string;
-  featured?: boolean;
-  orderRank?: number;
-  intakeSchedule?: string;
-  targetAudience?: string[];
 }
 
 export interface Course {
@@ -434,7 +424,7 @@ export interface Course {
   slug: string;
   title: string;
   category: "ched" | "tesda" | "short" | "shs";
-  description?: string;
+  summary?: string;
   heroImage?: SanityImage;
   duration: string;
   creditHours?: number;
@@ -443,7 +433,6 @@ export interface Course {
   credential?: string;
   scholarshipsAvailable?: boolean;
   tuition?: string;
-  tuitionRange?: string;
   deliveryMode?: string;
   badge?: string;
   featured?: boolean;

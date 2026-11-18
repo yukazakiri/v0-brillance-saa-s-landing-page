@@ -13,39 +13,46 @@ import {
 
 import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
+import type { Course } from "@/lib/sanity/types"
 
 export type PathfinderFilters = {
-  category?: "all" | "ched" | "tesda" | "shs" | "short"
+  category?: "all" | Course["category"]
   query?: string
 }
 
 type CoursePathfinderProps = {
+  availableCategories: Course["category"][]
   onApplyPathfinder: (filters: PathfinderFilters) => void
   onResetPathfinder: () => void
 }
 
 const EDUCATION_LEVELS = [
-  { id: "grade10", label: "Grade 10 Completer", hint: "Looking for Senior High School", category: "shs" as const },
-  { id: "shs_grad", label: "Senior High Graduate", hint: "Looking for College Degree or Tech-Voc", category: "ched" as const },
-  { id: "transferee", label: "College Transferee / 2nd Courser", hint: "Credit transfer & degrees", category: "ched" as const },
-  { id: "professional", label: "Working Adult / Career Shifter", hint: "Fast NC certificates or short courses", category: "tesda" as const },
+  { id: "grade10", label: "Grade 10 completer", hint: "Explore senior high programs", category: "shs" as const },
+  { id: "shs_grad", label: "High school graduate", hint: "Explore college programs", category: "ched" as const },
+  { id: "transferee", label: "College student or transferee", hint: "Explore college programs", category: "ched" as const },
+  { id: "professional", label: "Working adult or career shifter", hint: "Explore technical-vocational programs", category: "tesda" as const },
+  { id: "short_course", label: "Looking for a short course", hint: "Explore short-course programs", category: "short" as const },
 ]
 
 const INTEREST_FIELDS = [
-  { id: "tech", label: "Tech, Software & Networking", query: "technology" },
-  { id: "business", label: "Business, Finance & Management", query: "business" },
-  { id: "hospitality", label: "Culinary Arts, Hotel & Baking", query: "hospitality" },
-  { id: "design", label: "Creative Design & Digital Media", query: "design" },
+  { id: "tech", label: "Technology & computing", query: "technology" },
+  { id: "business", label: "Business & finance", query: "business" },
+  { id: "hospitality", label: "Hospitality & food service", query: "hospitality" },
+  { id: "health", label: "Health & care services", query: "health" },
 ]
 
 const TIMELINE_GOALS = [
-  { id: "degree", label: "4-Year Bachelor Degree", category: "ched" as const },
-  { id: "tesda", label: "TESDA NC II / III Certificate (< 1 Year)", category: "tesda" as const },
-  { id: "shs", label: "DepEd Voucher Senior High Track", category: "shs" as const },
-  { id: "short", label: "Modular Weekend Skills Certificate", category: "short" as const },
+  { id: "ched", label: "CHED degree program", category: "ched" as const },
+  { id: "tesda", label: "TESDA technical-vocational program", category: "tesda" as const },
+  { id: "shs", label: "Senior high school program", category: "shs" as const },
+  { id: "short", label: "Short course", category: "short" as const },
 ]
 
-export default function CoursePathfinder({ onApplyPathfinder, onResetPathfinder }: CoursePathfinderProps) {
+export default function CoursePathfinder({
+  availableCategories,
+  onApplyPathfinder,
+  onResetPathfinder,
+}: CoursePathfinderProps) {
   const [isOpen, setIsOpen] = useState(false)
   const [step, setStep] = useState<1 | 2 | 3>(1)
   const [selectedEducation, setSelectedEducation] = useState<string>("")
@@ -53,16 +60,16 @@ export default function CoursePathfinder({ onApplyPathfinder, onResetPathfinder 
   const [selectedGoal, setSelectedGoal] = useState<string>("")
 
   const handleFinish = () => {
-    let targetCategory: "all" | "ched" | "tesda" | "shs" | "short" = "all"
+    let targetCategory: "all" | Course["category"] = "all"
     let targetQuery = ""
 
     const eduObj = EDUCATION_LEVELS.find((e) => e.id === selectedEducation)
     const goalObj = TIMELINE_GOALS.find((g) => g.id === selectedGoal)
     const interestObj = INTEREST_FIELDS.find((i) => i.id === selectedInterest)
 
-    if (goalObj) {
+    if (goalObj && availableCategories.includes(goalObj.category)) {
       targetCategory = goalObj.category
-    } else if (eduObj) {
+    } else if (eduObj && availableCategories.includes(eduObj.category)) {
       targetCategory = eduObj.category
     }
 
@@ -103,7 +110,7 @@ export default function CoursePathfinder({ onApplyPathfinder, onResetPathfinder 
               Unsure which academic discipline fits your horizon?
             </h3>
             <p className="text-xs text-muted-foreground font-sans">
-              Answer 3 brief questions to filter recommended college degrees, TESDA certifications, or senior high strands.
+              Answer three brief questions to narrow the current program catalog.
             </p>
           </div>
         </div>
@@ -165,7 +172,7 @@ export default function CoursePathfinder({ onApplyPathfinder, onResetPathfinder 
       {/* Step 1: Education Level */}
       {step === 1 && (
         <div className="grid gap-3 sm:grid-cols-2">
-          {EDUCATION_LEVELS.map((edu, i) => (
+          {EDUCATION_LEVELS.filter((edu) => availableCategories.includes(edu.category)).map((edu, i) => (
             <button
               key={edu.id}
               type="button"
@@ -226,7 +233,7 @@ export default function CoursePathfinder({ onApplyPathfinder, onResetPathfinder 
       {/* Step 3: Goal & Timeline */}
       {step === 3 && (
         <div className="grid gap-3 sm:grid-cols-2">
-          {TIMELINE_GOALS.map((goal, i) => (
+          {TIMELINE_GOALS.filter((goal) => availableCategories.includes(goal.category)).map((goal, i) => (
             <button
               key={goal.id}
               type="button"

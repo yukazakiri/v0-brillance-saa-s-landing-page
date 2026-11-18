@@ -3,7 +3,6 @@
 import Link from "next/link"
 import {
   ArrowRight,
-  Award,
   BookOpen,
   Briefcase,
   CheckCircle2,
@@ -16,6 +15,10 @@ import {
 
 import type { Course } from "@/lib/sanity/types"
 import { getImageAlt, getImageUrl } from "@/lib/sanity/image"
+import {
+  formatCourseDeliveryMode,
+  hasCourseFinancialAidInfo,
+} from "@/lib/sanity/course-formatters"
 import { cn } from "@/lib/utils"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
@@ -35,25 +38,25 @@ type CourseQuickViewModalProps = {
 
 const CATEGORY_COLORS: Record<string, { badge: string; text: string; bg: string; border: string }> = {
   ched: {
-    badge: "CHED Accredited Degree",
+    badge: "CHED degree",
     text: "text-blue-700 dark:text-blue-300",
     bg: "bg-blue-500/10",
     border: "border-blue-500/20",
   },
   tesda: {
-    badge: "TESDA Registered TVET",
+    badge: "TESDA qualification",
     text: "text-emerald-700 dark:text-emerald-300",
     bg: "bg-emerald-500/10",
     border: "border-emerald-500/20",
   },
   shs: {
-    badge: "DepEd Senior High Track",
+    badge: "Senior High",
     text: "text-purple-700 dark:text-purple-300",
     bg: "bg-purple-500/10",
     border: "border-purple-500/20",
   },
   short: {
-    badge: "Short Certificate Course",
+    badge: "Short course",
     text: "text-amber-700 dark:text-amber-300",
     bg: "bg-amber-500/10",
     border: "border-amber-500/20",
@@ -66,7 +69,10 @@ export default function CourseQuickViewModal({ course, isOpen, onClose }: Course
   const catMeta = CATEGORY_COLORS[course.category] || CATEGORY_COLORS.ched
   const imageUrl = getImageUrl(course.heroImage, 1000, 500)
   const imageAlt = getImageAlt(course.heroImage, course.title)
-  const studyLoad = course.creditHours ? `${course.creditHours} Total Units` : course.trainingHours ?? "Standard Load"
+  const studyLoad = course.creditHours ? `${course.creditHours} Total Units` : course.trainingHours ?? "Not listed"
+  const description = course.summary
+  const applyHref = course.cta?.url || "/apply"
+  const applyLabel = course.cta?.label || "Apply for Program"
 
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
@@ -92,10 +98,10 @@ export default function CourseQuickViewModal({ course, isOpen, onClose }: Course
                     {course.credential}
                   </Badge>
                 )}
-                {course.scholarshipsAvailable && (
+                {hasCourseFinancialAidInfo(course) && (
                   <span className="inline-flex items-center gap-1 rounded-full bg-emerald-500/15 backdrop-blur-md px-2.5 py-0.5 text-xs font-semibold text-emerald-800 dark:text-emerald-300">
                     <Sparkles className="size-3" />
-                    Scholarship / Voucher Eligible
+                    Financial aid info
                   </span>
                 )}
               </div>
@@ -116,13 +122,13 @@ export default function CourseQuickViewModal({ course, isOpen, onClose }: Course
                 {course.title}
               </DialogTitle>
               <DialogDescription className="sr-only">
-                {course.description || `Overview and details for ${course.title} at Data Center College Baguio`}
+                {description || course.title}
               </DialogDescription>
             </div>
           </div>
 
           {/* Quick Metrics Bar */}
-          <div className="grid grid-cols-2 sm:grid-cols-4 divide-x divide-y sm:divide-y-0 divide-border border-b border-border bg-muted/40 text-xs">
+          <div className="grid grid-cols-2 sm:grid-cols-3 divide-x divide-y sm:divide-y-0 divide-border border-b border-border bg-muted/40 text-xs">
             <div className="p-3.5 flex flex-col gap-0.5">
               <span className="flex items-center gap-1 text-[10px] uppercase tracking-wider text-muted-foreground font-medium">
                 <Clock className="size-3 text-primary" />
@@ -142,14 +148,7 @@ export default function CourseQuickViewModal({ course, isOpen, onClose }: Course
                 <MapPin className="size-3 text-primary" />
                 Delivery
               </span>
-              <span className="font-semibold text-foreground truncate">{course.deliveryMode || "On Campus"}</span>
-            </div>
-            <div className="p-3.5 flex flex-col gap-0.5">
-              <span className="flex items-center gap-1 text-[10px] uppercase tracking-wider text-muted-foreground font-medium">
-                <Award className="size-3 text-primary" />
-                Campus
-              </span>
-              <span className="font-semibold text-foreground truncate">Baguio City Main</span>
+              <span className="font-semibold text-foreground truncate">{formatCourseDeliveryMode(course.deliveryMode)}</span>
             </div>
           </div>
 
@@ -160,9 +159,11 @@ export default function CourseQuickViewModal({ course, isOpen, onClose }: Course
               <h3 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-2">
                 Overview
               </h3>
-              <p className="text-sm sm:text-base leading-relaxed text-foreground/90">
-                {course.description || "Career-aligned hands-on curriculum with practical laboratory instruction and industry practicum."}
-              </p>
+              {description && (
+                <p className="text-sm sm:text-base leading-relaxed text-foreground/90">
+                  {description}
+                </p>
+              )}
             </div>
 
             {/* Highlights */}
@@ -204,13 +205,13 @@ export default function CourseQuickViewModal({ course, isOpen, onClose }: Course
             )}
 
             {/* Tuition & Financial Aid info */}
-            {course.tuition && (
+            {(course.tuition || course.financialAidHighlight) && (
               <div className="rounded-xl border border-primary/20 bg-primary/5 p-4 text-xs">
                 <span className="font-semibold text-primary block mb-1">
                   Tuition & Financial Assistance:
                 </span>
                 <p className="text-muted-foreground leading-relaxed">
-                  {course.tuition}
+                  {[course.tuition, course.financialAidHighlight].filter(Boolean).join(" ")}
                 </p>
               </div>
             )}
@@ -226,8 +227,8 @@ export default function CourseQuickViewModal({ course, isOpen, onClose }: Course
 
               <div className="flex items-center gap-2 w-full sm:w-auto">
                 <Button asChild className="w-full sm:w-auto">
-                  <Link href="/apply">
-                    <span>Apply for Program</span>
+                  <Link href={applyHref}>
+                    <span>{applyLabel}</span>
                     <ArrowRight className="size-4 ml-1.5" />
                   </Link>
                 </Button>

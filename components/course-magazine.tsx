@@ -72,7 +72,7 @@ export default function CourseMagazine({
 
       return [
         course.title,
-        course.description ?? "",
+        course.summary ?? "",
         course.credential ?? "",
         course.duration,
         ...(course.highlights ?? []),
@@ -183,7 +183,7 @@ export default function CourseMagazine({
                     <div className="overflow-hidden">
                       <div className="grid gap-5 pt-5 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-end md:pt-6">
                         <p className="max-w-[62ch] text-sm leading-relaxed text-muted-foreground sm:text-base">
-                          {course.description ??
+                          {course.summary ??
                             "Speak with admissions for a concise overview of this program."}
                         </p>
                         <dl className="grid grid-cols-2 gap-x-7 gap-y-2 border-l-0 border-border text-sm sm:border-l sm:pl-6">

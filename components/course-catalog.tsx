@@ -35,6 +35,7 @@ import { Button } from "@/components/ui/button"
 import CourseQuickViewModal from "@/components/course-quick-view-modal"
 import CourseComparisonModal from "@/components/course-comparison-modal"
 import CoursePathfinder, { type PathfinderFilters } from "@/components/course-pathfinder"
+import { hasCourseFinancialAidInfo } from "@/lib/sanity/course-formatters"
 
 type CourseCatalogProps = {
   courses: Course[]
@@ -50,43 +51,16 @@ type QuickFilterKey = "all" | "scholarship" | "tech" | "business" | "hospitality
 type SortKey = "featured" | "duration-asc" | "duration-desc" | "name"
 type ViewMode = "editorial" | "ledger"
 
-const CATEGORY_META: Record<
-  Exclude<CategoryKey, "all">,
-  { label: string; badge: string; description: string; color: string; dotColor: string }
-> = {
-  ched: {
-    label: "College Degrees",
-    badge: "CHED Accredited",
-    description: "4-year bachelor degree programs leading to professional careers and certifications.",
-    color: "bg-blue-500/10 text-blue-700 dark:text-blue-300 border-blue-500/20",
-    dotColor: "bg-blue-500",
-  },
-  tesda: {
-    label: "TESDA Tech-Voc",
-    badge: "TESDA Registered",
-    description: "Competency-based technical and vocational training with National Certification (NC II / NC III).",
-    color: "bg-emerald-500/10 text-emerald-700 dark:text-emerald-300 border-emerald-500/20",
-    dotColor: "bg-emerald-500",
-  },
-  shs: {
-    label: "Senior High School",
-    badge: "DepEd Voucher",
-    description: "Grades 11-12 academic and technical-vocational tracks with 100% DepEd PEAC voucher subsidies.",
-    color: "bg-purple-500/10 text-purple-700 dark:text-purple-300 border-purple-500/20",
-    dotColor: "bg-purple-500",
-  },
-  short: {
-    label: "Short Courses",
-    badge: "Modular Training",
-    description: "Fast-track skills certificates for working professionals and career shifters.",
-    color: "bg-amber-500/10 text-amber-700 dark:text-amber-300 border-amber-500/20",
-    dotColor: "bg-amber-500",
-  },
+const CATEGORY_META: Record<Exclude<CategoryKey, "all">, string> = {
+  ched: "College Degrees",
+  tesda: "TESDA Tech-Voc",
+  shs: "Senior High",
+  short: "Short Courses",
 }
 
 const QUICK_FILTERS: Array<{ key: QuickFilterKey; label: string; icon?: any }> = [
   { key: "all", label: "All Pathways" },
-  { key: "scholarship", label: "Voucher / Aid Eligible", icon: Sparkles },
+  { key: "scholarship", label: "Financial aid info", icon: Sparkles },
   { key: "tech", label: "Tech & Computing" },
   { key: "business", label: "Business & Management" },
   { key: "hospitality", label: "Hospitality & Culinary" },
@@ -107,16 +81,24 @@ function parseDurationInMonths(durationStr: string): number {
   if (s.includes("1 year")) return 12
   const monthMatch = s.match(/(\d+)\s*month/)
   if (monthMatch) return parseInt(monthMatch[1], 10)
+  const weekMatch = s.match(/(\d+)\s*week/)
+  if (weekMatch) return (parseInt(weekMatch[1], 10) * 12) / 52
   const hoursMatch = s.match(/(\d+)\s*hour/)
   if (hoursMatch) {
     const hours = parseInt(hoursMatch[1], 10)
     return Math.max(1, Math.round(hours / 100))
   }
-  return 12
+  return Number.POSITIVE_INFINITY
 }
 
 export default function CourseCatalog({ courses, initialCategory, contact }: CourseCatalogProps) {
-  const [category, setCategory] = useState<CategoryKey>(normalizeCategory(initialCategory))
+  const requestedCategory = normalizeCategory(initialCategory)
+  const [category, setCategory] = useState<CategoryKey>(
+    requestedCategory === "all" ||
+      courses.some((course) => course.category === requestedCategory)
+      ? requestedCategory
+      : "all",
+  )
   const [quickFilter, setQuickFilter] = useState<QuickFilterKey>("all")
   const [query, setQuery] = useState("")
   const [sortBy, setSortBy] = useState<SortKey>("featured")
@@ -153,26 +135,26 @@ export default function CourseCatalog({ courses, initialCategory, contact }: Cou
       if (category !== "all" && course.category !== category) return false
 
       // Quick filter
-      if (quickFilter === "scholarship" && !course.scholarshipsAvailable) return false
+      if (quickFilter === "scholarship" && !hasCourseFinancialAidInfo(course)) return false
       if (quickFilter === "fast-track") {
         const months = parseDurationInMonths(course.duration)
-        if (months > 12) return false
+        if (months >= 12) return false
       }
       if (quickFilter === "tech") {
         const isTech = /tech|computing|programming|network|system|design|graphic/i.test(
-          `${course.title} ${course.description} ${course.credential}`
+          `${course.title} ${course.summary} ${course.credential} ${course.learningOutcomes?.join(" ")}`
         )
         if (!isTech) return false
       }
       if (quickFilter === "business") {
         const isBusiness = /business|finance|account|abm|management/i.test(
-          `${course.title} ${course.description} ${course.credential}`
+          `${course.title} ${course.summary} ${course.credential} ${course.learningOutcomes?.join(" ")}`
         )
         if (!isBusiness) return false
       }
       if (quickFilter === "hospitality") {
         const isHosp = /hotel|restaurant|hospitality|culinary|cookery|baking|pastry|beverage|food/i.test(
-          `${course.title} ${course.description} ${course.credential}`
+          `${course.title} ${course.summary} ${course.credential} ${course.learningOutcomes?.join(" ")}`
         )
         if (!isHosp) return false
       }
@@ -182,11 +164,14 @@ export default function CourseCatalog({ courses, initialCategory, contact }: Cou
 
       const haystack = [
         course.title,
-        course.description ?? "",
+        course.summary ?? "",
         course.credential ?? "",
         course.duration ?? "",
         course.tuition ?? "",
+        course.financialAidHighlight ?? "",
+        course.trainingHours ?? "",
         ...(course.highlights ?? []),
+        ...(course.learningOutcomes ?? []),
         ...(course.careerPaths ?? []),
         ...(course.outcomes ?? []),
         ...(course.majors ?? []),
@@ -202,11 +187,18 @@ export default function CourseCatalog({ courses, initialCategory, contact }: Cou
       if (sortBy === "name") {
         return a.title.localeCompare(b.title)
       }
-      if (sortBy === "duration-asc") {
-        return parseDurationInMonths(a.duration) - parseDurationInMonths(b.duration)
-      }
-      if (sortBy === "duration-desc") {
-        return parseDurationInMonths(b.duration) - parseDurationInMonths(a.duration)
+      if (sortBy === "duration-asc" || sortBy === "duration-desc") {
+        const aMonths = parseDurationInMonths(a.duration)
+        const bMonths = parseDurationInMonths(b.duration)
+        const direction = sortBy === "duration-asc" ? 1 : -1
+
+        if (!Number.isFinite(aMonths) && !Number.isFinite(bMonths)) {
+          return a.title.localeCompare(b.title)
+        }
+        if (!Number.isFinite(aMonths)) return 1
+        if (!Number.isFinite(bMonths)) return -1
+
+        return (aMonths - bMonths) * direction
       }
       // Featured / default
       if (a.featured && !b.featured) return -1
@@ -255,20 +247,24 @@ export default function CourseCatalog({ courses, initialCategory, contact }: Cou
 
   return (
     <div className="w-full flex flex-col gap-8">
-      {/* Optional minimal guidance toggle */}
-      <div className="flex items-center justify-between text-xs text-muted-foreground border-b border-border/40 pb-3">
-        <span>Looking for a tailored path?</span>
-        <button
-          type="button"
-          onClick={() => setShowPathfinder(!showPathfinder)}
-          className="text-foreground font-medium hover:underline underline-offset-4"
-        >
-          {showPathfinder ? "Hide Pathfinder" : "Try 30-second Program Finder →"}
-        </button>
-      </div>
+      {courses.length > 0 && (
+        <div className="flex items-center justify-between text-xs text-muted-foreground border-b border-border/40 pb-3">
+          <span>Looking for a tailored path?</span>
+          <button
+            type="button"
+            onClick={() => setShowPathfinder(!showPathfinder)}
+            className="text-foreground font-medium hover:underline underline-offset-4"
+          >
+            {showPathfinder ? "Hide Pathfinder" : "Try 30-second Program Finder →"}
+          </button>
+        </div>
+      )}
 
-      {showPathfinder && (
+      {showPathfinder && courses.length > 0 && (
         <CoursePathfinder
+          availableCategories={Array.from(
+            new Set(courses.map((course) => course.category)),
+          )}
           onApplyPathfinder={handleApplyPathfinder}
           onResetPathfinder={resetFilters}
         />
@@ -382,14 +378,20 @@ export default function CourseCatalog({ courses, initialCategory, contact }: Cou
       {/* Courses Display */}
       {filteredCourses.length === 0 ? (
         <div className="w-full py-16 text-center">
-          <p className="text-sm text-muted-foreground">No matching programs found.</p>
-          <button
-            type="button"
-            onClick={resetFilters}
-            className="mt-3 text-xs font-medium text-foreground underline underline-offset-4"
-          >
-            Clear filters
-          </button>
+          <p className="text-sm text-muted-foreground">
+            {courses.length === 0
+              ? "Academic offerings are temporarily unavailable."
+              : "No matching programs found."}
+          </p>
+          {courses.length > 0 && (
+            <button
+              type="button"
+              onClick={resetFilters}
+              className="mt-3 text-xs font-medium text-foreground underline underline-offset-4"
+            >
+              Clear filters
+            </button>
+          )}
         </div>
       ) : (
         /* ========================================================================= */
@@ -403,9 +405,7 @@ export default function CourseCatalog({ courses, initialCategory, contact }: Cou
             const isCompared = selectedForComparison.includes(course.id)
 
             // 1-sentence clean summary (limit text)
-            const cleanSummary =
-              course.summary ||
-              (course.description ? course.description.split(".")[0] + "." : "")
+            const cleanSummary = course.summary
 
             const roles = (course.careerPaths || course.outcomes || []).slice(0, 2)
 
@@ -427,15 +427,15 @@ export default function CourseCatalog({ courses, initialCategory, contact }: Cou
                       </span>
                       <span>·</span>
                       <span className="uppercase tracking-wider text-[11px] font-medium">
-                        {meta?.label || course.category}
+                        {meta || course.category}
                       </span>
                       <span>·</span>
                       <span>{course.duration}</span>
-                      {course.scholarshipsAvailable && (
+                      {hasCourseFinancialAidInfo(course) && (
                         <>
                           <span>·</span>
                           <span className="text-emerald-600 dark:text-emerald-400 font-medium">
-                            Vouchers Accepted
+                            Financial aid info
                           </span>
                         </>
                       )}
@@ -574,7 +574,7 @@ export default function CourseCatalog({ courses, initialCategory, contact }: Cou
           </span>
           <h3 className="font-serif text-2xl sm:text-3xl font-bold text-foreground">Need help choosing your path?</h3>
           <p className="mt-2 text-sm sm:text-base text-muted-foreground leading-relaxed">
-            Our DCCP Baguio guidance team provides one-on-one degree counseling, credit evaluation for college transferees, and DepEd PEAC voucher assistance.
+            Contact admissions for program guidance, requirements, and next steps.
           </p>
         </div>
 

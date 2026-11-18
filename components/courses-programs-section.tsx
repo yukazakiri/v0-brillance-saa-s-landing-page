@@ -4,10 +4,6 @@ import { useMemo } from "react";
 import Link from "next/link";
 import {
   ArrowRight,
-  Award,
-  BookOpen,
-  Briefcase,
-  CheckCircle2,
   Clock,
   GraduationCap,
   Sparkles,
@@ -19,6 +15,7 @@ import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import type { Course } from "@/lib/sanity/types";
 import { getImageAlt, getImageUrl } from "@/lib/sanity/image";
+import { formatCourseDeliveryMode } from "@/lib/sanity/course-formatters";
 import { cn } from "@/lib/utils";
 
 type CoursesAndProgramsSectionProps = {
@@ -42,34 +39,30 @@ const CATEGORY_DETAILS: Array<Omit<ProgramCategory, "programs">> = [
   {
     id: "ched",
     label: "College Degrees",
-    badge: "CHED Accredited",
-    heading: "Build your future with a government-recognized bachelor degree.",
-    description:
-      "Four-year college pathways in Information Technology, Business Administration, and Hospitality Management with intensive hands-on labs and 480+ hours of supervised industry immersion.",
+    badge: "CHED",
+    heading: "College degree programs",
+    description: "Explore current degree offerings from DCCP Baguio City.",
   },
   {
     id: "tesda",
     label: "TESDA Tech-Voc",
-    badge: "National Certificates",
-    heading: "Turn practical skill into direct job qualification.",
-    description:
-      "Competency-based technical and vocational training with TESDA National Certificate (NC II / NC III) assessments in computer servicing, graphic design, food service, and artisan baking.",
+    badge: "TESDA",
+    heading: "Technical-vocational programs",
+    description: "Explore current TESDA offerings from DCCP Baguio City.",
   },
   {
     id: "shs",
     label: "Senior High",
-    badge: "100% DepEd Voucher",
-    heading: "Start strong with subsidized Senior High tracks.",
-    description:
-      "Grades 11–12 TVL and Academic tracks fully eligible for the DepEd PEAC ESC Voucher Scheme, providing zero or minimal tuition top-up for public school graduates.",
+    badge: "Senior High",
+    heading: "Senior high school programs",
+    description: "Explore current senior high offerings from DCCP Baguio City.",
   },
   {
     id: "short",
     label: "Short Courses",
-    badge: "Modular Skills",
-    heading: "Upgrade your capabilities in less time.",
-    description:
-      "Focused 60-hour modular certifications in digital office tools, spreadsheets, and cloud workspaces designed for working adults and remote professionals.",
+    badge: "Short courses",
+    heading: "Short courses",
+    description: "Explore current short-course offerings from DCCP Baguio City.",
   },
 ];
 
@@ -78,7 +71,7 @@ function ProgramCard({ program }: { program: Course }) {
   const imageAlt = getImageAlt(program.heroImage, program.title);
   const studyLoad = program.creditHours
     ? `${program.creditHours} Units`
-    : program.trainingHours ?? "Standard Load";
+    : program.trainingHours ?? "Not listed";
 
   return (
     <article className="group relative flex flex-col justify-between rounded-2xl border border-border bg-card overflow-hidden shadow-xs transition-all duration-300 hover:-translate-y-1 hover:border-primary/40 hover:shadow-lg">
@@ -121,11 +114,11 @@ function ProgramCard({ program }: { program: Course }) {
             </h4>
           </Link>
 
-          <p className="line-clamp-2 text-xs text-muted-foreground leading-relaxed">
-            {program.description ||
-              program.highlights?.[0] ||
-              "In-depth career-focused curriculum with hands-on labs and supervised regional industry practicums."}
-          </p>
+          {program.summary && (
+            <p className="line-clamp-2 text-xs text-muted-foreground leading-relaxed">
+              {program.summary}
+            </p>
+          )}
 
           {/* Key Metric Facts */}
           <div className="grid grid-cols-2 gap-2 border-y border-border/60 py-2 text-[11px] text-muted-foreground">
@@ -135,7 +128,7 @@ function ProgramCard({ program }: { program: Course }) {
             </div>
             <div className="flex flex-col">
               <span className="text-[10px] uppercase text-muted-foreground/80 font-medium">Delivery</span>
-              <span className="font-semibold text-foreground truncate">{program.deliveryMode || "On Campus"}</span>
+              <span className="font-semibold text-foreground truncate">{formatCourseDeliveryMode(program.deliveryMode)}</span>
             </div>
           </div>
 
@@ -209,7 +202,7 @@ export default function CoursesAndProgramsSection({
                   Academic Offerings & Programs
                 </h2>
                 <p className="mt-1 text-sm text-muted-foreground max-w-[55ch]">
-                  Select a pathway to explore accredited degrees, technical-vocational credentials, and subsidized senior high tracks.
+                  Browse current degree, senior high, TESDA, and short-course offerings.
                 </p>
               </div>
 

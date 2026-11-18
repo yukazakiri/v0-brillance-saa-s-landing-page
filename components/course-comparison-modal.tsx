@@ -15,6 +15,10 @@ import {
 } from "lucide-react"
 
 import type { Course } from "@/lib/sanity/types"
+import {
+  formatCourseDeliveryMode,
+  hasCourseFinancialAidInfo,
+} from "@/lib/sanity/course-formatters"
 import { cn } from "@/lib/utils"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
@@ -37,7 +41,7 @@ type CourseComparisonModalProps = {
 const CATEGORY_NAMES: Record<string, string> = {
   ched: "College Degree (CHED)",
   tesda: "Tech-Voc (TESDA)",
-  shs: "Senior High (DepEd)",
+  shs: "Senior High",
   short: "Short Course",
 }
 
@@ -142,7 +146,7 @@ export default function CourseComparisonModal({
                 {courses.map((course) => (
                   <div key={course.id} className="font-mono font-medium text-foreground">
                     <Badge variant="outline" className="text-[11px] font-semibold">
-                      {course.credential || "Accredited Program"}
+                      {course.credential || "Not listed"}
                     </Badge>
                   </div>
                 ))}
@@ -171,7 +175,7 @@ export default function CourseComparisonModal({
                   <div key={course.id} className="text-foreground">
                     {course.creditHours
                       ? `${course.creditHours} Total Units`
-                      : course.trainingHours ?? "Standard Load"}
+                      : course.trainingHours ?? "Not listed"}
                   </div>
                 ))}
               </div>
@@ -181,7 +185,7 @@ export default function CourseComparisonModal({
                 <div className="font-semibold text-muted-foreground">Delivery</div>
                 {courses.map((course) => (
                   <div key={course.id} className="text-foreground font-medium">
-                    {course.deliveryMode || "On Campus"}
+                    {formatCourseDeliveryMode(course.deliveryMode)}
                   </div>
                 ))}
               </div>
@@ -194,13 +198,15 @@ export default function CourseComparisonModal({
                 </div>
                 {courses.map((course) => (
                   <div key={course.id} className="text-muted-foreground text-[11px] leading-relaxed">
-                    {course.scholarshipsAvailable ? (
+                    {hasCourseFinancialAidInfo(course) ? (
                       <span className="inline-flex items-center gap-1 font-semibold text-emerald-700 dark:text-emerald-400 mb-1 block">
                         <CheckCircle2 className="size-3" />
-                        Eligible for Subsidy / Grant
+                        Financial aid information available
                       </span>
                     ) : null}
-                    {course.tuition || "Contact admissions for tuition details."}
+                    {[course.financialAidHighlight, course.tuition]
+                      .filter(Boolean)
+                      .join(" ") || "Contact admissions for tuition details."}
                   </div>
                 ))}
               </div>
@@ -249,8 +255,8 @@ export default function CourseComparisonModal({
                 {courses.map((course) => (
                   <div key={course.id} className="flex flex-col gap-2">
                     <Button asChild size="sm" className="w-full">
-                      <Link href="/apply">
-                        Apply Now
+                      <Link href={course.cta?.url || "/apply"}>
+                        {course.cta?.label || "Apply Now"}
                       </Link>
                     </Button>
                   </div>

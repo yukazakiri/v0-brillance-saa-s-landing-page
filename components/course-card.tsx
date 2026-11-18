@@ -3,6 +3,7 @@ import { ArrowRight, Clock, Sparkles } from "lucide-react"
 
 import type { Course } from "@/lib/sanity/types"
 import { getImageAlt, getImageUrl } from "@/lib/sanity/image"
+import { hasCourseFinancialAidInfo } from "@/lib/sanity/course-formatters"
 import { cn } from "@/lib/utils"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
@@ -68,8 +69,8 @@ export default function CourseCard({
           <CardContent className="mt-auto px-5 pb-5 pt-0 sm:px-6 sm:pb-6">
             {course.highlights?.[0] ? (
               <p className="line-clamp-2 text-xs sm:text-sm leading-relaxed text-muted-foreground">{course.highlights[0]}</p>
-            ) : course.description ? (
-              <p className="line-clamp-2 text-xs sm:text-sm leading-relaxed text-muted-foreground">{course.description}</p>
+            ) : course.summary ? (
+              <p className="line-clamp-2 text-xs sm:text-sm leading-relaxed text-muted-foreground">{course.summary}</p>
             ) : (
               <p className="text-xs sm:text-sm leading-relaxed text-muted-foreground">View program details and requirements.</p>
             )}
@@ -106,10 +107,10 @@ export default function CourseCard({
             <span className={cn("inline-flex items-center rounded-full border px-2.5 py-0.5 text-[10px] font-mono font-semibold uppercase tracking-wider backdrop-blur-md bg-background/80", catStyle)}>
               {course.credential || "Program"}
             </span>
-            {course.scholarshipsAvailable && (
+            {hasCourseFinancialAidInfo(course) && (
               <span className="inline-flex items-center gap-1 rounded-full border border-emerald-500/30 bg-background/80 px-2 py-0.5 text-[10px] font-medium text-emerald-700 dark:text-emerald-400 backdrop-blur-md">
                 <Sparkles className="size-2.5" />
-                Voucher / Aid
+                Financial aid info
               </span>
             )}
             {priorityTag && (
@@ -128,9 +129,9 @@ export default function CourseCard({
               {course.title}
             </Link>
           </h3>
-          {course.description && (
+          {course.summary && (
             <p className="text-xs sm:text-sm text-muted-foreground leading-relaxed line-clamp-3">
-              {course.description}
+              {course.summary}
             </p>
           )}
         </div>

@@ -2,11 +2,6 @@ import { groq } from "next-sanity";
 
 import { client } from "./client";
 import { getImageUrl } from "./image";
-import {
-  getAllDefaultCourses,
-  getDefaultCourseSlugs,
-  getDefaultSanityCourseBySlug,
-} from "@/lib/data/academic-catalog";
 import type {
   AdjacentPosts,
   AdjacentPostSummary,
@@ -469,7 +464,7 @@ export async function fetchSettings(): Promise<Settings | null> {
 
 // Courses Query
 const COURSES_QUERY = groq`
-  *[_type in ["course", "program"] && status == "active"]
+  *[_type == "course" && status == "active"]
   | order(coalesce(orderRank, 999) asc, offeringCategory asc, title asc)
   {
     _id,
@@ -498,9 +493,7 @@ const COURSES_QUERY = groq`
     majors,
     deliveryMode,
     duration,
-    durationYears,
     level,
-    description,
     summary,
     highlights,
     learningOutcomes,
@@ -512,7 +505,6 @@ const COURSES_QUERY = groq`
     creditHours,
     trainingHours,
     tuition,
-    tuitionRange,
     financialAidHighlight,
     scholarshipsAvailable,
     intakeSchedule,
@@ -524,52 +516,22 @@ const COURSES_QUERY = groq`
   }
 `;
 
-function formatDuration(durationYears?: number, category?: string): string {
-  if (durationYears) {
-    if (durationYears >= 1) {
-      return `${durationYears} Year${durationYears > 1 ? "s" : ""}`;
-    }
-    // Convert to months if less than a year
-    const months = Math.round(durationYears * 12);
-    return `${months} Month${months > 1 ? "s" : ""}`;
-  }
-
-  // Default fallbacks based on category
-  if (category === "ched") return "4 Years";
-  if (category === "tesda") return "6-9 Months";
-  if (category === "shs") return "2 Years";
-
-  return "Contact for details";
-}
-
-function mapCourseToLocalCourse(course: SanityCourse): Course {
-  const highlights: string[] = [];
-
-  if (course.highlights && course.highlights.length > 0) {
-    highlights.push(...course.highlights);
-  } else if (course.careerPaths && course.careerPaths.length > 0) {
-    highlights.push(...course.careerPaths.slice(0, 3));
-  } else if (course.competencies && course.competencies.length > 0) {
-    highlights.push(...course.competencies.slice(0, 3));
-  }
-
+function mapSanityCourseToCourse(course: SanityCourse): Course {
   return {
     id: course._id,
     slug: course.slug?.current || course._id,
     title: course.title,
-    category: (course.offeringCategory as any) || "ched",
-    description: course.description ?? course.summary,
+    category: course.offeringCategory,
+    summary: course.summary,
     heroImage: course.heroImage,
-    duration:
-      course.duration ??
-      formatDuration(course.durationYears, course.offeringCategory),
+    duration: course.duration ?? "Not listed",
     creditHours: course.creditHours,
     trainingHours: course.trainingHours,
-    highlights,
+    highlights: course.highlights ?? [],
     credential: course.credential,
-    scholarshipsAvailable: course.scholarshipsAvailable ?? true,
+    scholarshipsAvailable: course.scholarshipsAvailable,
+    financialAidHighlight: course.financialAidHighlight,
     tuition: course.tuition,
-    tuitionRange: course.tuitionRange,
     deliveryMode: course.deliveryMode,
     badge: course.badge,
     featured: course.featured,
@@ -590,23 +552,12 @@ function mapCourseToLocalCourse(course: SanityCourse): Course {
 }
 
 export async function fetchCourses(): Promise<Course[]> {
-  const defaultCourses = getAllDefaultCourses();
   try {
     const courses = await client.fetch<SanityCourse[]>(COURSES_QUERY);
-    if (!courses || courses.length === 0) {
-      return defaultCourses;
-    }
-    const localCourses = courses.map(mapCourseToLocalCourse);
-    const merged = [...localCourses];
-    for (const dCourse of defaultCourses) {
-      if (!merged.some((m) => m.slug === dCourse.slug || m.id === dCourse.id)) {
-        merged.push(dCourse);
-      }
-    }
-    return merged;
+    return (courses ?? []).map(mapSanityCourseToCourse);
   } catch (error) {
     console.error("Error fetching courses:", error);
-    return defaultCourses;
+    return [];
   }
 }
 
@@ -618,7 +569,7 @@ export async function fetchCoursesByCategory(
 }
 
 const COURSE_BY_SLUG_QUERY = groq`
-  *[_type in ["course", "program"] && slug.current == $slug][0]
+  *[_type == "course" && status == "active" && slug.current == $slug][0]
   {
     _id,
     _type,
@@ -666,12 +617,11 @@ const COURSE_BY_SLUG_QUERY = groq`
     "prerequisites": prerequisites[]->{ _id, title, slug },
     prerequisiteNotes,
     "corequisites": corequisites[]->{ _id, title, slug },
-    "instructors": instructors[]->{ _id, name },
+    "instructors": instructors[]->{ _id, "name": fullName },
     syllabus,
     admissionsRequirements,
     applicationDeadlines,
     tuition,
-    tuitionRange,
     financialAidHighlight,
     scholarshipsAvailable,
     intakeSchedule,
@@ -698,7 +648,7 @@ const COURSE_BY_SLUG_QUERY = groq`
 `;
 
 const COURSE_SLUGS_QUERY = groq`
-  *[_type in ["course", "program"] && status == "active" && defined(slug.current)]{
+  *[_type == "course" && status == "active" && defined(slug.current)]{
     "slug": slug.current
   }
 `;
@@ -708,27 +658,22 @@ export async function fetchCourseBySlug(
 ): Promise<SanityCourse | null> {
   if (!slug) return null;
   try {
-    const result = await client.fetch<SanityCourse | null>(COURSE_BY_SLUG_QUERY, {
+    return await client.fetch<SanityCourse | null>(COURSE_BY_SLUG_QUERY, {
       slug,
     });
-    if (result) return result;
-    return getDefaultSanityCourseBySlug(slug);
   } catch (error) {
     console.error("Error fetching course by slug:", error);
-    return getDefaultSanityCourseBySlug(slug);
+    return null;
   }
 }
 
 export async function fetchCourseSlugs(): Promise<string[]> {
-  const defaultSlugs = getDefaultCourseSlugs();
   try {
     const results = await client.fetch<{ slug: string }[]>(COURSE_SLUGS_QUERY);
-    const sanitySlugs = (results || []).map((result) => result.slug).filter(Boolean);
-    const set = new Set([...sanitySlugs, ...defaultSlugs]);
-    return Array.from(set);
+    return (results ?? []).map((result) => result.slug).filter(Boolean);
   } catch (error) {
     console.error("Error fetching course slugs:", error);
-    return defaultSlugs;
+    return [];
   }
 }
 

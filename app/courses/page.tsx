@@ -27,7 +27,7 @@ export const revalidate = 60
 export const metadata: Metadata = {
   title: "Academic Prospectus & Curriculum Index | Data Center College Baguio",
   description:
-    "Official academic prospectus of Data Center College of The Philippines Baguio City. Explore accredited college degrees, TESDA technical-vocational diplomas, and senior high school pathways.",
+    "Browse CHED degrees, senior high tracks, TESDA qualifications, and short courses at Data Center College of The Philippines Baguio City.",
 }
 
 export default async function CoursesPage({
@@ -87,7 +87,7 @@ export default async function CoursesPage({
             </h1>
 
             <p className="text-base sm:text-lg text-muted-foreground font-light max-w-xl leading-relaxed">
-              CHED degree tracks, TESDA technical-vocational qualifications, and DepEd-subsidized Senior High pathways.
+              College degrees, senior high tracks, TESDA qualifications, and short courses.
             </p>
           </div>
         </section>

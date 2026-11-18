@@ -25,19 +25,7 @@ const navigationGroups = [
   {
     title: "Academic Offerings",
     links: [
-      {
-        label: "BS Information Technology",
-        href: "/courses/bs-information-technology",
-      },
-      {
-        label: "BS Business Administration",
-        href: "/courses/bs-business-administration-financial-management",
-      },
-      {
-        label: "BS Hotel & Restaurant Mgt.",
-        href: "/courses/bs-hotel-and-restaurant-management",
-      },
-      { label: "View all offerings", href: "/courses", emphasized: true },
+      { label: "Browse current offerings", href: "/courses", emphasized: true },
     ],
   },
   {

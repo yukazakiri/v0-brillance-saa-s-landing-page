@@ -25,6 +25,7 @@ import FooterSection from "@/components/footer-section"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { buildImageUrl } from "@/lib/sanity/image"
+import { formatCourseDeliveryMode } from "@/lib/sanity/course-formatters"
 import {
   fetchCourseBySlug,
   fetchCourseSlugs,
@@ -37,27 +38,19 @@ export const revalidate = 60
 
 const CATEGORY_META: Record<
   string,
-  { label: string; badge: string; color: string }
+  { label: string }
 > = {
   ched: {
     label: "CHED College Degree",
-    badge: "Bachelor Degree",
-    color: "bg-blue-500/10 text-blue-700 dark:text-blue-300 border-blue-500/20",
   },
   tesda: {
     label: "TESDA Technical-Vocational",
-    badge: "National Certificate NC II",
-    color: "bg-emerald-500/10 text-emerald-700 dark:text-emerald-300 border-emerald-500/20",
   },
   shs: {
     label: "Senior High School",
-    badge: "DepEd Track",
-    color: "bg-purple-500/10 text-purple-700 dark:text-purple-300 border-purple-500/20",
   },
   short: {
     label: "Short Course",
-    badge: "Certificate Program",
-    color: "bg-amber-500/10 text-amber-700 dark:text-amber-300 border-amber-500/20",
   },
 }
 
@@ -131,20 +124,19 @@ export default async function CourseDetailPage({
   const categoryInfo =
     CATEGORY_META[course.offeringCategory] ?? {
       label: "Academic Program",
-      badge: "Accredited Offering",
-      color: "bg-primary/10 text-primary border-primary/20",
     }
 
   const duration =
-    course.duration ?? course.trainingHours ?? "Inquire with admissions"
-  const isDegree = Boolean(course.creditHours)
+    course.duration ?? course.trainingHours ?? "Not listed"
+  const isDegree = course.offeringCategory === "ched"
   const studyLoad = isDegree
-    ? `${course.creditHours} Total Units`
-    : course.trainingHours ?? "Standard Load"
+    ? course.creditHours
+      ? `${course.creditHours} Total Units`
+      : "Not listed"
+    : course.trainingHours ?? "Not listed"
 
   const applyHref = course.cta?.url || "/apply"
   const applyLabel = course.cta?.label || "Apply for Admission"
-  const isExternalApplyLink = /^https?:\/\//.test(applyHref)
 
   const syllabusUrl = course.syllabus?.asset?.url
 
@@ -175,7 +167,8 @@ export default async function CourseDetailPage({
             {/* Tag & Title */}
             <div>
               <span className="text-xs uppercase tracking-wider text-muted-foreground font-mono">
-                {categoryInfo.label} · {course.credential}
+                {categoryInfo.label}
+                {course.credential && ` · ${course.credential}`}
               </span>
               <h1 className="mt-2 font-serif text-3xl sm:text-5xl md:text-6xl font-normal tracking-tight text-foreground leading-[1.08]">
                 {course.title}
@@ -240,15 +233,19 @@ export default async function CourseDetailPage({
                 Delivery
               </span>
               <span className="font-medium text-foreground text-sm mt-0.5 block">
-                {course.deliveryMode || "On Campus"}
+                {formatCourseDeliveryMode(course.deliveryMode)}
               </span>
             </div>
             <div>
               <span className="text-muted-foreground uppercase tracking-wider text-[11px] block">
-                Vouchers & Aid
+                Financial Aid
               </span>
               <span className="font-medium text-emerald-600 dark:text-emerald-400 text-sm mt-0.5 block">
-                {course.scholarshipsAvailable ? "Eligible" : "Inquire"}
+                {course.financialAidHighlight
+                  ? "See details below"
+                  : course.scholarshipsAvailable
+                    ? "Available"
+                    : "Inquire"}
               </span>
             </div>
           </div>
@@ -261,17 +258,11 @@ export default async function CourseDetailPage({
             <h2 className="font-serif text-2xl font-normal text-foreground">
               Overview
             </h2>
-            <div className="text-base text-muted-foreground font-light leading-relaxed space-y-4">
-              {course.overview && course.overview.length > 0 ? (
-                <div className="prose prose-neutral max-w-none text-muted-foreground font-light">
-                  <PortableText value={course.overview} />
-                </div>
-              ) : (
-                <p>
-                  {course.description || "Practical, industry-aligned training designed for professional competence."}
-                </p>
-              )}
-            </div>
+            {course.overview && course.overview.length > 0 && (
+              <div className="prose prose-neutral max-w-none text-muted-foreground font-light">
+                <PortableText value={course.overview} />
+              </div>
+            )}
 
             {/* Core Highlights - Minimalist List */}
             {course.highlights && course.highlights.length > 0 && (
@@ -299,12 +290,19 @@ export default async function CourseDetailPage({
                       <span className="font-mono text-xs text-muted-foreground mr-2">0{idx + 1}.</span>
                       <span className="font-medium text-foreground">{stage.term || `Term ${idx + 1}`}</span>
                     </div>
-                    <div className="sm:w-2/3 text-xs text-muted-foreground flex flex-wrap gap-1.5">
-                      {stage.subjects && stage.subjects.map((sub, sIdx) => (
-                        <span key={sIdx} className="bg-muted px-2 py-0.5 rounded text-foreground/80">
-                          {sub}
-                        </span>
-                      ))}
+                    <div className="sm:w-2/3 text-xs text-muted-foreground">
+                      {stage.description && (
+                        <p className="leading-relaxed">{stage.description}</p>
+                      )}
+                      {stage.subjects && stage.subjects.length > 0 && (
+                        <div className="mt-2 flex flex-wrap gap-1.5">
+                          {stage.subjects.map((sub, sIdx) => (
+                            <span key={sIdx} className="bg-muted px-2 py-0.5 rounded text-foreground/80">
+                              {sub}
+                            </span>
+                          ))}
+                        </div>
+                      )}
                     </div>
                   </div>
                 ))}
@@ -349,7 +347,7 @@ export default async function CourseDetailPage({
                 {course.financialAidHighlight && (
                   <div>
                     <span className="font-medium text-foreground uppercase tracking-wider block mb-1">
-                      Voucher & Subsidy
+                      Scholarships & Grants
                     </span>
                     <p className="leading-relaxed">{course.financialAidHighlight}</p>
                   </div>
@@ -379,10 +377,12 @@ export default async function CourseDetailPage({
           <section className="pt-10 border-t border-border/60 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <div>
               <h3 className="font-serif text-xl text-foreground">Ready to begin?</h3>
-              <p className="text-xs text-muted-foreground">Applications for AY 2026–2027 are now open.</p>
+              <p className="text-xs text-muted-foreground">
+                Contact admissions for current intake dates and requirements.
+              </p>
             </div>
             <Button asChild size="default" className="rounded-full px-6 text-xs font-medium shrink-0">
-              <Link href={applyHref}>Apply for Admission</Link>
+              <Link href={applyHref}>{applyLabel}</Link>
             </Button>
           </section>
         </div>
