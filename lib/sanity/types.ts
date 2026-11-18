@@ -321,6 +321,8 @@ export interface Settings {
 }
 
 // Course types - Full schema from Sanity
+export type SubjectArea = "tech" | "business" | "hospitality";
+
 export interface SanityCourse {
   _id: string;
   _type: "course";
@@ -333,6 +335,7 @@ export interface SanityCourse {
   };
   heroImage?: SanityImage;
   offeringCategory: "ched" | "tesda" | "short" | "shs";
+  subjectAreas?: string[] | null;
   degreeType?: "bachelor" | "master" | "doctorate" | "certificate";
   credential?: string;
   badge?: string;
@@ -424,6 +427,7 @@ export interface Course {
   slug: string;
   title: string;
   category: "ched" | "tesda" | "short" | "shs";
+  subjectAreas?: string[] | null;
   summary?: string;
   heroImage?: SanityImage;
   duration: string;

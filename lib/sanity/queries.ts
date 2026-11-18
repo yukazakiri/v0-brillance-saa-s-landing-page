@@ -486,6 +486,7 @@ const COURSES_QUERY = groq`
       externalUrl
     },
     offeringCategory,
+    subjectAreas,
     degreeType,
     credential,
     badge,
@@ -522,6 +523,7 @@ function mapSanityCourseToCourse(course: SanityCourse): Course {
     slug: course.slug?.current || course._id,
     title: course.title,
     category: course.offeringCategory,
+    subjectAreas: course.subjectAreas,
     summary: course.summary,
     heroImage: course.heroImage,
     duration: course.duration ?? "Not listed",
@@ -590,6 +592,7 @@ const COURSE_BY_SLUG_QUERY = groq`
       externalUrl
     },
     offeringCategory,
+    subjectAreas,
     degreeType,
     credential,
     badge,

@@ -27,7 +27,7 @@ import {
   X,
 } from "lucide-react"
 
-import type { Course } from "@/lib/sanity/types"
+import type { Course, SubjectArea } from "@/lib/sanity/types"
 import { getImageAlt, getImageUrl } from "@/lib/sanity/image"
 import { cn } from "@/lib/utils"
 import { Badge } from "@/components/ui/badge"
@@ -36,6 +36,7 @@ import CourseQuickViewModal from "@/components/course-quick-view-modal"
 import CourseComparisonModal from "@/components/course-comparison-modal"
 import CoursePathfinder, { type PathfinderFilters } from "@/components/course-pathfinder"
 import { hasCourseFinancialAidInfo } from "@/lib/sanity/course-formatters"
+import { hasSubjectArea } from "@/lib/sanity/subject-areas"
 
 type CourseCatalogProps = {
   courses: Course[]
@@ -47,7 +48,7 @@ type CourseCatalogProps = {
 }
 
 type CategoryKey = "all" | "ched" | "tesda" | "shs" | "short"
-type QuickFilterKey = "all" | "scholarship" | "tech" | "business" | "hospitality" | "fast-track"
+type QuickFilterKey = "all" | "scholarship" | SubjectArea | "fast-track"
 type SortKey = "featured" | "duration-asc" | "duration-desc" | "name"
 type ViewMode = "editorial" | "ledger"
 
@@ -66,6 +67,10 @@ const QUICK_FILTERS: Array<{ key: QuickFilterKey; label: string; icon?: any }> =
   { key: "hospitality", label: "Hospitality & Culinary" },
   { key: "fast-track", label: "Fast-Track (< 1 Year)" },
 ]
+
+function isSubjectArea(key: QuickFilterKey): key is SubjectArea {
+  return key === "tech" || key === "business" || key === "hospitality"
+}
 
 function normalizeCategory(value?: string): CategoryKey {
   if (!value) return "all"
@@ -140,23 +145,8 @@ export default function CourseCatalog({ courses, initialCategory, contact }: Cou
         const months = parseDurationInMonths(course.duration)
         if (months >= 12) return false
       }
-      if (quickFilter === "tech") {
-        const isTech = /tech|computing|programming|network|system|design|graphic/i.test(
-          `${course.title} ${course.summary} ${course.credential} ${course.learningOutcomes?.join(" ")}`
-        )
-        if (!isTech) return false
-      }
-      if (quickFilter === "business") {
-        const isBusiness = /business|finance|account|abm|management/i.test(
-          `${course.title} ${course.summary} ${course.credential} ${course.learningOutcomes?.join(" ")}`
-        )
-        if (!isBusiness) return false
-      }
-      if (quickFilter === "hospitality") {
-        const isHosp = /hotel|restaurant|hospitality|culinary|cookery|baking|pastry|beverage|food/i.test(
-          `${course.title} ${course.summary} ${course.credential} ${course.learningOutcomes?.join(" ")}`
-        )
-        if (!isHosp) return false
+      if (isSubjectArea(quickFilter)) {
+        if (!hasSubjectArea(course, quickFilter)) return false
       }
 
       // Keyword query
@@ -329,7 +319,9 @@ export default function CourseCatalog({ courses, initialCategory, contact }: Cou
         {/* Secondary: Quick Filter & Sort */}
         <div className="flex flex-wrap items-center justify-between gap-3 text-xs text-muted-foreground pt-1">
           <div className="flex flex-wrap items-center gap-1.5">
-            {QUICK_FILTERS.map((qf) => {
+            {QUICK_FILTERS.filter(({ key }) =>
+              !isSubjectArea(key) || courses.some((course) => hasSubjectArea(course, key)),
+            ).map((qf) => {
               const isSelected = quickFilter === qf.key
               return (
                 <button

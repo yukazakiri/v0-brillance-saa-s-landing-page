@@ -254,28 +254,30 @@ export default async function CourseDetailPage({
         {/* Minimalist Main Content */}
         <div className="mx-auto w-full max-w-[1240px] px-6 sm:px-8 py-12 flex flex-col gap-16 max-w-4xl">
           {/* Overview Section */}
-          <section className="flex flex-col gap-4">
-            <h2 className="font-serif text-2xl font-normal text-foreground">
-              Overview
-            </h2>
-            {course.overview && course.overview.length > 0 && (
-              <div className="prose prose-neutral max-w-none text-muted-foreground font-light">
-                <PortableText value={course.overview} />
-              </div>
-            )}
+          {((course.overview && course.overview.length > 0) || (course.highlights && course.highlights.length > 0)) && (
+            <section className="flex flex-col gap-4">
+              <h2 className="font-serif text-2xl font-normal text-foreground">
+                Overview
+              </h2>
+              {course.overview && course.overview.length > 0 && (
+                <div className="prose prose-neutral max-w-none text-muted-foreground font-light">
+                  <PortableText value={course.overview} />
+                </div>
+              )}
 
-            {/* Core Highlights - Minimalist List */}
-            {course.highlights && course.highlights.length > 0 && (
-              <div className="mt-4 pt-4 border-t border-border/40 grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs text-foreground/80">
-                {course.highlights.map((h, i) => (
-                  <div key={i} className="flex items-start gap-2">
-                    <span className="text-muted-foreground">·</span>
-                    <span>{h}</span>
-                  </div>
-                ))}
-              </div>
-            )}
-          </section>
+              {/* Core Highlights - Minimalist List */}
+              {course.highlights && course.highlights.length > 0 && (
+                <div className="mt-4 pt-4 border-t border-border/40 grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs text-foreground/80">
+                  {course.highlights.map((h, i) => (
+                    <div key={i} className="flex items-start gap-2">
+                      <span className="text-muted-foreground">·</span>
+                      <span>{h}</span>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </section>
+          )}
 
           {/* Curriculum Roadmap - Minimal List */}
           {course.curriculumStructure && course.curriculumStructure.length > 0 && (
