@@ -182,14 +182,14 @@ export default async function CourseDetailPage({
               </p>
             )}
 
-            {course.majors && course.majors.length > 0 && (
-              <section aria-labelledby="course-majors">
-                <h2 id="course-majors" className="text-xs uppercase tracking-wider text-muted-foreground">
-                  {course.majors.length === 1 ? "Major" : "Majors"}
+            {isDegree && course.majors && course.majors.length > 0 && (
+              <section aria-labelledby="course-majors" className="rounded-2xl border border-primary/30 bg-primary/5 p-5 sm:p-6">
+                <h2 id="course-majors" className="font-serif text-xl font-semibold text-foreground">
+                  {course.majors.length === 1 ? "Program major" : "Choose your major"}
                 </h2>
-                <ul className="mt-2 flex flex-wrap gap-2">
+                <ul className="mt-4 grid gap-3 sm:grid-cols-2">
                   {course.majors.map((major) => (
-                    <li key={major} className="border border-border/80 px-3 py-1 rounded-full text-sm">
+                    <li key={major} className="rounded-xl border border-primary/20 bg-background px-4 py-3 text-base font-semibold text-foreground shadow-sm">
                       {major}
                     </li>
                   ))}

@@ -420,9 +420,9 @@ export default function CourseCatalog({ courses, initialCategory, contact }: Cou
                       </p>
                     )}
 
-                    {course.majors && course.majors.length > 0 && (
-                      <p className="text-xs text-muted-foreground">
-                        <span className="font-medium text-foreground">
+                    {course.category === "ched" && course.majors && course.majors.length > 0 && (
+                      <p className="rounded-lg border border-primary/20 bg-primary/5 px-3 py-2 text-sm text-foreground">
+                        <span className="font-semibold">
                           {course.majors.length === 1 ? "Major:" : "Majors:"}
                         </span>{" "}
                         {course.majors.join(" · ")}
